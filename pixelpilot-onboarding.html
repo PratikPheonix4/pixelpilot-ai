@@ -705,7 +705,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a href="#" class="logo">Pixel<span>Pilot</span> AI</a>
+  <a href="index.html" class="logo">Pixel<span>Pilot</span> AI</a>
 
   <div class="steps-nav">
     <!-- Step 1 -->
@@ -750,7 +750,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
     </div>
   </div>
 
-  <button class="skip-btn" onclick="goToStep(5)">Skip setup →</button>
+  <button class="skip-btn" onclick="window.location.href='pixelpilot-projects.html'">Skip setup →</button>
 </div>
 
 <!-- MAIN -->
@@ -1070,7 +1070,7 @@ function updateNav() {
     nextBtn.textContent = '';
     nextBtn.innerHTML = '🚀 Open the Editor';
     nextBtn.classList.add('final');
-    nextBtn.onclick = () => showToast('🎬 Launching your editor...');
+    nextBtn.onclick = () => { window.location.href = 'pixelpilot-projects.html'; };
   } else {
     nextBtn.innerHTML = `Continue <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
     nextBtn.classList.remove('final');
