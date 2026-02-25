@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PixelPilot AI — Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #08080e;
+  --panel: #0f0f18;
+  --panel2: #181824;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.13);
+  --text: #ede9f8;
+  --muted: #504e68;
+  --muted2: #8886a8;
+  --teal: #00e4b4;
+  --orange: #ff5a24;
+  --gold: #f5c030;
+  --purple: #9d7dff;
+  --nav-h: 72px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PHONE SHELL (desktop preview) ── */
+.phone-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #030305;
+  padding: 20px;
+}
+
+.phone-frame {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border-radius: 50px;
+  border: 2px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 8px #0a0a12,
+    0 0 0 10px rgba(255,255,255,0.06),
+    0 40px 120px rgba(0,0,0,0.9),
+    0 0 80px rgba(0,228,180,0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Notch */
+.notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 34px;
+  background: #030305;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.notch-cam { width: 10px; height: 10px; border-radius: 50%; background: #1a1a2a; }
+.notch-sensor { width: 30px; height: 6px; border-radius: 3px; background: #1a1a2a; }
+
+/* Status bar */
+.status-bar {
+  height: 44px;
+  padding: 14px 24px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 50;
+}
+.status-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sig-bar { display: flex; align-items: flex-end; gap: 2px; }
+.sig-bar span {
+  width: 3px;
+  background: var(--text);
+  border-radius: 1px;
+}
+.sig-bar span:nth-child(1) { height: 4px; }
+.sig-bar span:nth-child(2) { height: 7px; }
+.sig-bar span:nth-child(3) { height: 10px; }
+.sig-bar span:nth-child(4) { height: 13px; }
+.battery {
+  width: 22px; height: 11px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: 3px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+.battery::after {
+  content: '';
+  position: absolute;
+  right: -4px; top: 50%; transform: translateY(-50%);
+  width: 2px; height: 5px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 0 1px 1px 0;
+}
+.battery-fill { width: 80%; height: 100%; background: var(--teal); border-radius: 1px; }
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  position: absolute;
+  inset: 44px 0 var(--nav-h) 0;
+}
+.screen.active { display: flex; animation: screen-in 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+@keyframes screen-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Scrollable content */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── HOME SCREEN ── */
+#homeScreen {
+  background: var(--bg);
+}
+
+.home-header {
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.home-greeting { font-size: 12px; color: var(--muted2); font-weight: 500; }
+.home-name { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin-top: 1px; }
+.home-name span { color: var(--teal); }
+
+.notif-btn {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+.notif-btn:active { background: var(--panel2); }
+.notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--orange);
+  border-radius: 50%;
+  border: 1.5px solid var(--bg);
+}
+
+/* Quick actions */
+.quick-row {
+  padding: 4px 20px 16px;
+  display: flex;
+  gap: 10px;
+}
+.quick-action {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.quick-action:active { transform: scale(0.96); }
+.quick-action.primary {
+  background: linear-gradient(135deg, rgba(255,90,36,0.2), rgba(0,228,180,0.1));
+  border-color: rgba(0,228,180,0.25);
+}
+.qa-icon { font-size: 22px; }
+.qa-label { font-size: 11px; font-weight: 700; color: var(--muted2); }
+.quick-action.primary .qa-label { color: var(--teal); }
+
+/* AI Banner */
+.ai-banner {
+  margin: 0 20px 16px;
+  background: linear-gradient(135deg, var(--panel) 0%, rgba(0,228,180,0.06) 100%);
+  border: 1px solid rgba(0,228,180,0.2);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.ai-banner:active { transform: scale(0.98); }
+.ai-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.ai-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,228,180,0.12);
+  border: 1px solid rgba(0,228,180,0.25);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 1px;
+}
+.ai-pill-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.ai-arrow { color: var(--muted2); }
+.ai-banner-text { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+.ai-banner-hint { font-size: 11px; color: var(--muted2); margin-top: 4px; }
+
+/* Section header */
+.section-hdr {
+  padding: 0 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title { font-size: 14px; font-weight: 800; }
+.section-more { font-size: 12px; font-weight: 600; color: var(--teal); cursor: pointer; }
+
+/* Recent projects */
+.projects-scroll {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.project-card:active { transform: scale(0.98); background: var(--panel2); }
+
+.project-thumb {
+  width: 60px; height: 40px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.t1 { background: linear-gradient(135deg, #1a0800, #330d00); }
+.t2 { background: linear-gradient(135deg, #001a14, #003328); }
+.t3 { background: linear-gradient(135deg, #0a001a, #1a0033); }
+.t4 { background: linear-gradient(135deg, #1a1400, #2b2200); }
+
+.project-info { flex: 1; min-width: 0; }
+.project-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-meta { font-size: 11px; color: var(--muted2); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
+
+.project-status {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.status-draft { background: rgba(255,255,255,0.06); color: var(--muted2); }
+.status-export { background: rgba(0,228,180,0.12); color: var(--teal); }
+.status-ai { background: rgba(255,90,36,0.12); color: var(--orange); }
+
+/* ── EDITOR SCREEN ── */
+#editorScreen { background: #000; }
+
+.editor-preview {
+  height: 220px;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.preview-scene {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0d0005, #001a10, #0d0500);
+  animation: scene 8s ease-in-out infinite alternate;
+}
+@keyframes scene {
+  from { background: linear-gradient(135deg, #0d0005, #001a10, #0d0500); }
+  to { background: linear-gradient(135deg, #1a0a00, #00100d, #0d001a); }
+}
+.preview-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.04;
+}
+.preview-grade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,90,36,0.07) 0%, transparent 50%, rgba(0,228,180,0.05) 100%);
+}
+.preview-letterbox {
+  position: absolute;
+  left: 0; right: 0; height: 12%;
+  background: black;
+}
+.preview-letterbox.top { top: 0; }
+.preview-letterbox.bottom { bottom: 0; }
+
+.preview-sub {
+  position: absolute;
+  bottom: 22px; left: 16px; right: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  animation: subtitle 4s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes subtitle { 0%,100%{opacity:0} 20%,80%{opacity:1} }
+
+/* Playback mini */
+.playback-mini {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 10px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 5;
+}
+.pb-progress {
+  flex: 1;
+  height: 3px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+.pb-fill {
+  height: 100%;
+  width: 35%;
+  background: var(--teal);
+  border-radius: 2px;
+}
+.pb-handle {
+  position: absolute;
+  right: 65%;
+  top: 50%; transform: translateY(-50%);
+  width: 12px; height: 12px;
+  background: white;
+  border-radius: 50%;
+  border: 2px solid var(--teal);
+  margin-right: -6px;
+}
+.pb-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+}
+.play-mini {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.play-mini:active { transform: scale(0.9); }
+
+/* Mini timeline */
+.mini-timeline {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tl-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.tl-mini-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.tl-zoom-btn { font-size: 11px; color: var(--teal); font-weight: 700; cursor: pointer; }
+
+.tl-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.tl-track-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tl-track-name { font-size: 9px; color: var(--muted); width: 20px; text-align: right; flex-shrink: 0; }
+.tl-track-bar { flex: 1; height: 16px; background: var(--panel2); border-radius: 3px; position: relative; overflow: hidden; }
+.tl-clip-mini { position: absolute; top: 1px; bottom: 1px; border-radius: 2px; }
+.c1a { left: 2%; width: 38%; background: rgba(255,90,36,0.5); }
+.c1b { left: 42%; width: 28%; background: rgba(255,90,36,0.35); }
+.c1c { left: 72%; width: 22%; background: rgba(255,90,36,0.5); }
+.c2a { left: 8%; width: 22%; background: rgba(0,228,180,0.4); }
+.c2b { left: 45%; width: 30%; background: rgba(0,228,180,0.5); }
+.ca { left: 2%; width: 82%; background: rgba(245,192,48,0.35); }
+
+.tl-playhead-mini {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1.5px;
+  background: white;
+  left: 35%;
+  pointer-events: none;
+}
+
+/* Editor tools strip */
+.tool-strip {
+  padding: 10px 16px;
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.tool-strip::-webkit-scrollbar { display: none; }
+.tool-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--panel);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted2);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.tool-chip:active { transform: scale(0.95); }
+.tool-chip.active { background: rgba(0,228,180,0.1); border-color: rgba(0,228,180,0.3); color: var(--teal); }
+
+/* Clip properties */
+.clip-props {
+  padding: 14px 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+.clip-props::-webkit-scrollbar { display: none; }
+.clip-prop-title { font-size: 12px; font-weight: 800; margin-bottom: 14px; }
+
+.prop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.prop-lbl { font-size: 12px; color: var(--muted2); font-weight: 500; }
+.prop-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prop-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  min-width: 52px;
+  text-align: center;
+}
+.prop-stepper {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: var(--muted2);
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.prop-stepper:active { background: var(--panel); color: var(--text); }
+
+.prop-slider {
+  -webkit-appearance: none;
+  width: 120px; height: 3px;
+  background: var(--panel2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.prop-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: 2px solid var(--bg);
+}
+
+/* ── AI SCREEN ── */
+#aiScreen {
+  background: var(--bg);
+}
+
+.ai-header {
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ai-title-row { }
+.ai-screen-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+.ai-screen-sub { font-size: 11px; color: var(--muted2); margin-top: 1px; display: flex; align-items: center; gap: 5px; }
+.ai-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: blink 1.5s infinite; }
+.ai-model-badge {
+  padding: 4px 10px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted2);
+  letter-spacing: 0.5px;
+}
+
+.ai-chat {
+  flex: 1;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+.ai-chat::-webkit-scrollbar { display: none; }
+
+.chat-msg { display: flex; flex-direction: column; gap: 4px; }
+.chat-msg.user { align-items: flex-end; }
+
+.chat-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 0 4px; }
+.chat-msg.user .chat-label { color: rgba(255,90,36,0.6); }
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 11px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 400;
+}
+.chat-msg.ai .chat-bubble {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-bottom-left-radius: 4px;
+  color: rgba(237,233,248,0.9);
+}
+.chat-msg.user .chat-bubble {
+  background: rgba(255,90,36,0.12);
+  border: 1px solid rgba(255,90,36,0.2);
+  border-bottom-right-radius: 4px;
+}
+
+.chat-actions { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 2px; }
+.chat-action-btn {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,228,180,0.25);
+  background: rgba(0,228,180,0.06);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--teal);
+  cursor: pointer;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  transition: all 0.15s;
+}
+.chat-action-btn:active { background: rgba(0,228,180,0.15); }
+.chat-action-btn.sec { border-color: var(--border); background: transparent; color: var(--muted2); }
+
+/* Quick chips */
+.ai-quick-chips {
+  padding: 8px 16px;
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.ai-quick-chips::-webkit-scrollbar { display: none; }
+.ai-chip {
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--panel);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted2);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.ai-chip:active { transform: scale(0.95); border-color: var(--teal); color: var(--teal); }
+
+/* AI input */
+.ai-input-bar {
+  padding: 10px 16px calc(10px + var(--safe-bottom));
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  background: var(--panel);
+  flex-shrink: 0;
+}
+.ai-textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  min-height: 40px;
+  max-height: 80px;
+  line-height: 1.4;
+}
+.ai-textarea::placeholder { color: var(--muted); }
+.ai-textarea:focus { border-color: rgba(0,228,180,0.4); }
+.ai-send {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  background: var(--teal);
+  border: none;
+  color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.ai-send:active { transform: scale(0.92); }
+
+/* ── PROJECTS SCREEN ── */
+#projectsScreen { background: var(--bg); }
+
+.proj-header {
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.proj-screen-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; }
+.new-proj-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--teal);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--bg);
+  transition: transform 0.15s;
+}
+.new-proj-btn:active { transform: scale(0.92); }
+
+/* Filter tabs */
+.filter-tabs {
+  padding: 0 20px 14px;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.filter-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-tab.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--bg);
+}
+
+/* Project grid */
+.project-grid {
+  padding: 0 20px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.proj-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.proj-card:active { transform: scale(0.97); }
+.proj-card.wide { grid-column: span 2; display: flex; }
+
+.proj-thumb {
+  aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  position: relative;
+}
+.proj-card.wide .proj-thumb { width: 120px; aspect-ratio: unset; flex-shrink: 0; }
+.proj-thumb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.4)); }
+
+.proj-card-info { padding: 10px; flex: 1; }
+.proj-card-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.proj-card-meta { font-size: 10px; color: var(--muted2); }
+.proj-card-status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ── PROFILE SCREEN ── */
+#profileScreen { background: var(--bg); }
+
+.profile-hero {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.profile-av {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--bg);
+  margin-bottom: 12px;
+  box-shadow: 0 0 0 4px rgba(255,90,36,0.2);
+}
+.profile-name { font-size: 18px; font-weight: 800; margin-bottom: 3px; }
+.profile-email { font-size: 12px; color: var(--muted2); margin-bottom: 12px; }
+.profile-plan {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 14px;
+  background: rgba(0,228,180,0.1);
+  border: 1px solid rgba(0,228,180,0.25);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 1px;
+}
+
+/* Usage */
+.usage-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.usage-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.usage-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.usage-lbl { font-size: 12px; color: var(--muted2); }
+.usage-val { font-size: 12px; font-weight: 700; font-family: 'DM Mono', monospace; }
+.usage-bar-wrap { margin-top: 4px; height: 4px; background: var(--panel2); border-radius: 2px; margin-bottom: 12px; }
+.usage-bar-fill { height: 100%; border-radius: 2px; background: var(--teal); }
+
+/* Settings list */
+.settings-list { padding: 8px 20px; }
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.setting-row:active { opacity: 0.6; }
+.setting-icon {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--panel2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.setting-label { flex: 1; font-size: 13px; font-weight: 600; }
+.setting-arrow { color: var(--muted); font-size: 14px; }
+.setting-val { font-size: 12px; color: var(--muted2); margin-right: 6px; }
+
+.toggle-sm {
+  width: 34px; height: 18px;
+  border-radius: 9px;
+  background: var(--teal);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-sm::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  top: 2px; left: 18px;
+  transition: left 0.2s;
+}
+.toggle-sm.off { background: var(--panel2); }
+.toggle-sm.off::after { left: 2px; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  height: var(--nav-h);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 8px;
+  padding-bottom: var(--safe-bottom);
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.nav-item:active { transform: scale(0.92); }
+.nav-icon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.nav-item.active .nav-icon { transform: translateY(-2px); }
+.nav-label { font-size: 10px; font-weight: 700; color: var(--muted); transition: color 0.2s; }
+.nav-item.active .nav-label { color: var(--teal); }
+.nav-indicator {
+  position: absolute;
+  bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--teal);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nav-item.active .nav-indicator { opacity: 1; }
+
+/* Home button (center) */
+.nav-center-btn {
+  position: relative;
+  cursor: pointer;
+}
+.nav-center-inner {
+  width: 48px; height: 48px;
+  border-radius: 16px;
+  background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(255,90,36,0.35);
+  transition: all 0.2s;
+  margin-top: -10px;
+  position: relative;
+}
+.nav-center-inner:active { transform: scale(0.9); }
+.nav-center-label { font-size: 10px; font-weight: 700; color: var(--muted); text-align: center; margin-top: 4px; transition: color 0.2s; }
+.nav-center-btn.active .nav-center-label { color: var(--teal); }
+
+/* Toast */
+.toast {
+  position: absolute;
+  bottom: calc(var(--nav-h) + 12px); left: 16px; right: 16px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 200;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Desktop label */
+.desktop-hint {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: rgba(255,255,255,0.2);
+  font-family: 'DM Mono', monospace;
+  pointer-events: none;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 430px) {
+  .phone-shell { padding: 0; background: var(--bg); min-height: 100dvh; align-items: stretch; }
+  .phone-frame { width: 100%; height: 100dvh; border-radius: 0; border: none; box-shadow: none; }
+  .desktop-hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-shell">
+  <div class="phone-frame">
+    <!-- Notch -->
+    <div class="notch">
+      <div class="notch-cam"></div>
+      <div class="notch-sensor"></div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="status-time" id="statusTime">9:41</div>
+      <div class="status-icons">
+        <div class="sig-bar"><span></span><span></span><span></span><span></span></div>
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="white" opacity="0.8"><path d="M7 2.5C8.7 2.5 10.2 3.2 11.3 4.3L12.7 2.9C11.2 1.4 9.2 0.5 7 0.5C4.8 0.5 2.8 1.4 1.3 2.9L2.7 4.3C3.8 3.2 5.3 2.5 7 2.5Z"/><path d="M7 5.5C8 5.5 8.9 5.9 9.5 6.6L10.9 5.2C9.9 4.2 8.5 3.5 7 3.5C5.5 3.5 4.1 4.2 3.1 5.2L4.5 6.6C5.1 5.9 6 5.5 7 5.5Z"/><circle cx="7" cy="9" r="1.5"/></svg>
+        <div class="battery"><div class="battery-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- ── HOME SCREEN ── -->
+    <div class="screen active" id="homeScreen">
+      <div class="scroll-area">
+        <div class="home-header">
+          <div>
+            <div class="home-greeting">Good morning 👋</div>
+            <div class="home-name">Hey, <span>Alex</span></div>
+          </div>
+          <div class="notif-btn" onclick="showToast('🔔 3 new notifications')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <div class="notif-dot"></div>
+          </div>
+        </div>
+
+        <div class="quick-row">
+          <div class="quick-action primary" onclick="switchScreen('editor')">
+            <div class="qa-icon">🎬</div>
+            <div class="qa-label">New Edit</div>
+          </div>
+          <div class="quick-action" onclick="switchScreen('ai')">
+            <div class="qa-icon">⚡</div>
+            <div class="qa-label">AI Pilot</div>
+          </div>
+          <div class="quick-action" onclick="switchScreen('projects')">
+            <div class="qa-icon">📁</div>
+            <div class="qa-label">Projects</div>
+          </div>
+          <div class="quick-action" onclick="showToast('📤 Export panel')">
+            <div class="qa-icon">📤</div>
+            <div class="qa-label">Export</div>
+          </div>
+        </div>
+
+        <div class="ai-banner" onclick="switchScreen('ai')">
+          <div class="ai-banner-top">
+            <div class="ai-pill"><span class="ai-pill-dot"></span>AI PILOT ACTIVE</div>
+            <div class="ai-arrow">›</div>
+          </div>
+          <div class="ai-banner-text">"Your last edit is 80% done — want me to finish the color grade?"</div>
+          <div class="ai-banner-hint">Tap to open AI chat →</div>
+        </div>
+
+        <div class="section-hdr">
+          <div class="section-title">Recent Projects</div>
+          <div class="section-more" onclick="switchScreen('projects')">See all</div>
+        </div>
+
+        <div class="projects-scroll">
+          <div class="project-card" onclick="switchScreen('editor')">
+            <div class="project-thumb t1">🌅</div>
+            <div class="project-info">
+              <div class="project-name">sunset_campaign_v3.mp4</div>
+              <div class="project-meta">1:12 <span class="meta-dot"></span> 4K <span class="meta-dot"></span> 2h ago</div>
+            </div>
+            <div class="project-status status-ai">AI editing</div>
+          </div>
+          <div class="project-card" onclick="switchScreen('editor')">
+            <div class="project-thumb t2">🏔</div>
+            <div class="project-info">
+              <div class="project-name">drone_footage_final.mp4</div>
+              <div class="project-meta">3:40 <span class="meta-dot"></span> 4K <span class="meta-dot"></span> Yesterday</div>
+            </div>
+            <div class="project-status status-export">Ready</div>
+          </div>
+          <div class="project-card" onclick="switchScreen('editor')">
+            <div class="project-thumb t3">🎙</div>
+            <div class="project-info">
+              <div class="project-name">podcast_ep14_edit.mp4</div>
+              <div class="project-meta">42:18 <span class="meta-dot"></span> 1080p <span class="meta-dot"></span> 3d ago</div>
+            </div>
+            <div class="project-status status-draft">Draft</div>
+          </div>
+          <div class="project-card" onclick="switchScreen('editor')">
+            <div class="project-thumb t4">🎓</div>
+            <div class="project-info">
+              <div class="project-name">tutorial_react_hooks.mp4</div>
+              <div class="project-meta">18:55 <span class="meta-dot"></span> 1080p <span class="meta-dot"></span> 5d ago</div>
+            </div>
+            <div class="project-status status-export">Exported</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EDITOR SCREEN ── -->
+    <div class="screen" id="editorScreen">
+      <!-- Preview -->
+      <div class="editor-preview">
+        <div class="preview-scene"></div>
+        <div class="preview-grain"></div>
+        <div class="preview-grade"></div>
+        <div class="preview-letterbox top"></div>
+        <div class="preview-letterbox bottom"></div>
+        <div class="preview-sub" id="edSub">The light fades at the edge of the world</div>
+        <div class="playback-mini">
+          <button class="play-mini" onclick="toggleMiniPlay(this)">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--bg)"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+          <div class="pb-progress">
+            <div class="pb-fill" id="pbFill"></div>
+            <div class="pb-handle" id="pbHandle"></div>
+          </div>
+          <div class="pb-time" id="pbTime">0:14 / 1:12</div>
+        </div>
+      </div>
+
+      <!-- Timeline mini -->
+      <div class="mini-timeline">
+        <div class="tl-label-row">
+          <div class="tl-mini-label">Timeline</div>
+          <div class="tl-zoom-btn" onclick="showToast('🔍 Expand timeline')">Expand ↗</div>
+        </div>
+        <div class="tl-tracks">
+          <div class="tl-track-mini">
+            <div class="tl-track-name">V1</div>
+            <div class="tl-track-bar">
+              <div class="tl-clip-mini c1a"></div>
+              <div class="tl-clip-mini c1b"></div>
+              <div class="tl-clip-mini c1c"></div>
+              <div class="tl-playhead-mini"></div>
+            </div>
+          </div>
+          <div class="tl-track-mini">
+            <div class="tl-track-name">V2</div>
+            <div class="tl-track-bar">
+              <div class="tl-clip-mini c2a"></div>
+              <div class="tl-clip-mini c2b"></div>
+            </div>
+          </div>
+          <div class="tl-track-mini">
+            <div class="tl-track-name">A</div>
+            <div class="tl-track-bar"><div class="tl-clip-mini ca"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool strip -->
+      <div class="tool-strip">
+        <div class="tool-chip active" onclick="activeTool(this)">✂ Cut</div>
+        <div class="tool-chip" onclick="activeTool(this)">🎨 Color</div>
+        <div class="tool-chip" onclick="activeTool(this)">📝 Captions</div>
+        <div class="tool-chip" onclick="activeTool(this)">🎵 Audio</div>
+        <div class="tool-chip" onclick="activeTool(this)">⚡ Speed</div>
+        <div class="tool-chip" onclick="activeTool(this)">✨ Effects</div>
+        <div class="tool-chip" onclick="activeTool(this)">📱 Reframe</div>
+      </div>
+
+      <!-- Clip props -->
+      <div class="clip-props">
+        <div class="clip-prop-title">sunset_golden.mp4 — Clip 1</div>
+        <div class="prop-row">
+          <div class="prop-lbl">Duration</div>
+          <div class="prop-ctrl">
+            <div class="prop-stepper" onclick="showToast('◀ Trim start')">−</div>
+            <div class="prop-val">0:42</div>
+            <div class="prop-stepper" onclick="showToast('▶ Trim end')">+</div>
+          </div>
+        </div>
+        <div class="prop-row">
+          <div class="prop-lbl">Speed</div>
+          <div class="prop-ctrl">
+            <div class="prop-stepper" onclick="showToast('Speed −10%')">−</div>
+            <div class="prop-val">100%</div>
+            <div class="prop-stepper" onclick="showToast('Speed +10%')">+</div>
+          </div>
+        </div>
+        <div class="prop-row">
+          <div class="prop-lbl">Opacity</div>
+          <div class="prop-ctrl">
+            <input class="prop-slider" type="range" min="0" max="100" value="100">
+          </div>
+        </div>
+        <div class="prop-row">
+          <div class="prop-lbl">Volume</div>
+          <div class="prop-ctrl">
+            <input class="prop-slider" type="range" min="0" max="100" value="80">
+          </div>
+        </div>
+        <div class="prop-row" style="margin-top:6px">
+          <div class="prop-lbl" style="color:var(--teal);font-weight:700">AI actions</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div class="tool-chip" style="border-radius:8px" onclick="showToast('✂ Silences removed!')">✂ Remove silences</div>
+          <div class="tool-chip" style="border-radius:8px" onclick="showToast('🎨 Color grade applied!')">🎨 Auto grade</div>
+          <div class="tool-chip" style="border-radius:8px" onclick="showToast('📝 Captions generated!')">📝 Add captions</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AI SCREEN ── -->
+    <div class="screen" id="aiScreen">
+      <div class="ai-header">
+        <div class="ai-title-row">
+          <div class="ai-screen-title">AI Pilot</div>
+          <div class="ai-screen-sub">
+            <span class="ai-live-dot"></span>
+            Active on sunset_campaign_v3
+          </div>
+        </div>
+        <div class="ai-model-badge">GPT-4V</div>
+      </div>
+
+      <div class="ai-chat" id="aiChatArea">
+        <div class="chat-msg ai">
+          <div class="chat-label">✦ PixelPilot</div>
+          <div class="chat-bubble">Hey Alex! I've analysed your project. You have 4 clips and a 1:12 runtime. The color looks a bit flat — want me to add a cinematic grade?</div>
+          <div class="chat-actions">
+            <div class="chat-action-btn" onclick="doAiAction('Grade applied ✓ — teal-orange LUT on all clips')">Yes, do it</div>
+            <div class="chat-action-btn sec" onclick="showToast('Preview opened')">Preview first</div>
+          </div>
+        </div>
+        <div class="chat-msg user">
+          <div class="chat-label">You</div>
+          <div class="chat-bubble">Remove all silences and add subtitles</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-label">✦ PixelPilot</div>
+          <div class="chat-bubble">Done ✓ Removed 8 silences (saved 43s). Added captions in English — 47 lines, auto-styled to match your brand.</div>
+          <div class="chat-actions">
+            <div class="chat-action-btn" onclick="showToast('✅ Edits saved to timeline')">Keep it</div>
+            <div class="chat-action-btn sec" onclick="showToast('↩ Reverted')">Undo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-quick-chips">
+        <div class="ai-chip" onclick="sendAiMsg('Sync cuts to the beat')">🎵 Beat sync</div>
+        <div class="ai-chip" onclick="sendAiMsg('Reframe for TikTok 9:16')">📱 Reframe</div>
+        <div class="ai-chip" onclick="sendAiMsg('Speed ramp the drone shots')">⚡ Speed ramp</div>
+        <div class="ai-chip" onclick="sendAiMsg('Match color to reference clip')">🎨 Match color</div>
+        <div class="ai-chip" onclick="sendAiMsg('Add smooth transitions')">✨ Transitions</div>
+      </div>
+
+      <div class="ai-input-bar">
+        <textarea class="ai-textarea" id="aiInput" placeholder="Describe what you want…" rows="1"></textarea>
+        <button class="ai-send" onclick="sendAiMsg()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS SCREEN ── -->
+    <div class="screen" id="projectsScreen">
+      <div class="proj-header">
+        <div class="proj-screen-title">Projects</div>
+        <button class="new-proj-btn" onclick="showToast('➕ New project created!')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+
+      <div class="filter-tabs">
+        <div class="filter-tab active" onclick="filterTab(this)">All</div>
+        <div class="filter-tab" onclick="filterTab(this)">Draft</div>
+        <div class="filter-tab" onclick="filterTab(this)">Exported</div>
+        <div class="filter-tab" onclick="filterTab(this)">AI editing</div>
+      </div>
+
+      <div class="scroll-area">
+        <div class="project-grid">
+          <div class="proj-card wide" onclick="switchScreen('editor')">
+            <div class="proj-thumb t1" style="font-size:22px">🌅</div>
+            <div class="proj-card-info">
+              <div class="proj-card-name">sunset_campaign_v3.mp4</div>
+              <div class="proj-card-meta">1:12 · 4K · 2h ago</div>
+              <div class="proj-card-status" style="background:rgba(255,90,36,0.12);color:var(--orange)">AI EDITING</div>
+            </div>
+          </div>
+          <div class="proj-card" onclick="switchScreen('editor')">
+            <div class="proj-thumb t2" style="font-size:22px">🏔</div>
+            <div class="proj-card-info">
+              <div class="proj-card-name">drone_footage.mp4</div>
+              <div class="proj-card-meta">3:40 · 4K</div>
+              <div class="proj-card-status status-export">READY</div>
+            </div>
+          </div>
+          <div class="proj-card" onclick="switchScreen('editor')">
+            <div class="proj-thumb t3" style="font-size:22px">🎙</div>
+            <div class="proj-card-info">
+              <div class="proj-card-name">podcast_ep14.mp4</div>
+              <div class="proj-card-meta">42:18 · 1080p</div>
+              <div class="proj-card-status status-draft">DRAFT</div>
+            </div>
+          </div>
+          <div class="proj-card" onclick="switchScreen('editor')">
+            <div class="proj-thumb t4" style="font-size:22px">🎓</div>
+            <div class="proj-card-info">
+              <div class="proj-card-name">tutorial_hooks.mp4</div>
+              <div class="proj-card-meta">18:55 · 1080p</div>
+              <div class="proj-card-status status-export">EXPORTED</div>
+            </div>
+          </div>
+          <div class="proj-card wide" onclick="showToast('📁 Opening brand_video.mp4')">
+            <div class="proj-thumb" style="width:120px;background:linear-gradient(135deg,#001000,#002800);font-size:22px">🌿</div>
+            <div class="proj-card-info">
+              <div class="proj-card-name">brand_video_final.mp4</div>
+              <div class="proj-card-meta">2:05 · 4K · 1 week ago</div>
+              <div class="proj-card-status status-export">EXPORTED</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROFILE SCREEN ── -->
+    <div class="screen" id="profileScreen">
+      <div class="scroll-area">
+        <div class="profile-hero">
+          <div class="profile-av">JD</div>
+          <div class="profile-name">Alex Rivera</div>
+          <div class="profile-email">alex@studio.co</div>
+          <div class="profile-plan">⭐ Pro Plan</div>
+        </div>
+
+        <div class="usage-section">
+          <div class="usage-title">Usage this month</div>
+          <div class="usage-stat">
+            <div class="usage-lbl">Exports</div>
+            <div class="usage-val" style="color:var(--teal)">∞ unlimited</div>
+          </div>
+          <div class="usage-stat">
+            <div class="usage-lbl">AI minutes used</div>
+            <div class="usage-val">240 / 500 min</div>
+          </div>
+          <div class="usage-bar-wrap"><div class="usage-bar-fill" style="width:48%"></div></div>
+          <div class="usage-stat">
+            <div class="usage-lbl">Storage</div>
+            <div class="usage-val">18.4 / 100 GB</div>
+          </div>
+          <div class="usage-bar-wrap"><div class="usage-bar-fill" style="width:18.4%;background:var(--gold)"></div></div>
+        </div>
+
+        <div class="settings-list">
+          <div class="setting-row" onclick="showToast('👤 Edit profile')">
+            <div class="setting-icon">👤</div>
+            <div class="setting-label">Edit Profile</div>
+            <div class="setting-arrow">›</div>
+          </div>
+          <div class="setting-row" onclick="showToast('💳 Billing & plan')">
+            <div class="setting-icon">💳</div>
+            <div class="setting-label">Billing & Plan</div>
+            <div class="setting-val">Pro</div>
+            <div class="setting-arrow">›</div>
+          </div>
+          <div class="setting-row" onclick="showToast('🎨 Appearance settings')">
+            <div class="setting-icon">🎨</div>
+            <div class="setting-label">Appearance</div>
+            <div class="setting-val">Dark</div>
+            <div class="setting-arrow">›</div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-icon">🔔</div>
+            <div class="setting-label">Notifications</div>
+            <div class="toggle-sm" onclick="this.classList.toggle('off')"></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-icon">⚡</div>
+            <div class="setting-label">Auto-save edits</div>
+            <div class="toggle-sm" onclick="this.classList.toggle('off')"></div>
+          </div>
+          <div class="setting-row" onclick="showToast('📤 Sharing preferences')">
+            <div class="setting-icon">📤</div>
+            <div class="setting-label">Export Defaults</div>
+            <div class="setting-val">4K MP4</div>
+            <div class="setting-arrow">›</div>
+          </div>
+          <div class="setting-row" onclick="showToast('🚪 Signed out')">
+            <div class="setting-icon">🚪</div>
+            <div class="setting-label" style="color:var(--orange)">Sign Out</div>
+            <div class="setting-arrow" style="color:var(--orange)">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BOTTOM NAV ── -->
+    <div class="bottom-nav">
+      <div class="nav-item active" id="nav-home" onclick="switchScreen('home')">
+        <div class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-label">Home</div>
+      </div>
+
+      <div class="nav-item" id="nav-projects" onclick="switchScreen('projects')">
+        <div class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-label">Projects</div>
+      </div>
+
+      <div class="nav-center-btn" id="nav-editor" onclick="switchScreen('editor')">
+        <div class="nav-center-inner">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </div>
+        <div class="nav-center-label">Editor</div>
+      </div>
+
+      <div class="nav-item" id="nav-ai" onclick="switchScreen('ai')">
+        <div class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-label">AI Pilot</div>
+      </div>
+
+      <div class="nav-item" id="nav-profile" onclick="switchScreen('profile')">
+        <div class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-label">Profile</div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<div class="desktop-hint">← Drag to navigate · Click to interact →</div>
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2,'0');
+  const m = now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('statusTime').textContent = h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Screen switching
+const screens = ['home', 'projects', 'editor', 'ai', 'profile'];
+let currentScreen = 'home';
+
+function switchScreen(name) {
+  document.getElementById(currentScreen + 'Screen').classList.remove('active');
+  currentScreen = name;
+  document.getElementById(name + 'Screen').classList.add('active');
+
+  // Update nav
+  document.querySelectorAll('.nav-item, .nav-center-btn').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+}
+
+// Toast
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// Tool strip
+function activeTool(el) {
+  document.querySelectorAll('.tool-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Filter tabs
+function filterTab(el) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  showToast('Showing: ' + el.textContent);
+}
+
+// Playback mini
+let playing = false;
+let pbProgress = 19.5; // %
+let pbTimer;
+function toggleMiniPlay(btn) {
+  playing = !playing;
+  if (playing) {
+    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--bg)"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    pbTimer = setInterval(() => {
+      pbProgress = Math.min(100, pbProgress + 0.5);
+      document.getElementById('pbFill').style.width = pbProgress + '%';
+      document.getElementById('pbHandle').style.left = (pbProgress - 1) + '%';
+      const secs = Math.round(pbProgress / 100 * 72);
+      const m = Math.floor(secs/60), s = secs % 60;
+      document.getElementById('pbTime').textContent = m + ':' + String(s).padStart(2,'0') + ' / 1:12';
+      if (pbProgress >= 100) { playing = false; clearInterval(pbTimer); btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--bg)"><polygon points="5 3 19 12 5 21 5 3"/></svg>'; pbProgress = 0; }
+    }, 100);
+  } else {
+    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--bg)"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    clearInterval(pbTimer);
+  }
+}
+
+// Subtitle rotation
+const subs = [
+  'The light fades at the edge of the world',
+  'Nothing lasts — and that\'s the beauty',
+  'Chasing the last golden hour',
+  'A city that never sleeps, never stops',
+];
+let si = 0;
+setInterval(() => {
+  si = (si + 1) % subs.length;
+  const el = document.getElementById('edSub');
+  if (el) el.textContent = subs[si];
+}, 4000);
+
+// AI responses
+const aiResps = {
+  'beat': 'Beat sync done ✓ — detected 64 BPM in your track. 6 cuts re-timed to hit on downbeats.',
+  'reframe': 'Reframed to 1080×1920 (9:16) — AI subject detection kept you centered in every clip.',
+  'speed': 'Speed ramp applied ✓ — drone shots ease from 100% → 40% → 100% with smooth bezier curves.',
+  'color': 'Color matched ✓ — analysed reference clip. Delta E: 3.8, near-perfect match applied.',
+  'transition': 'Added 6 cross-dissolve transitions (12 frames each). Try "make them snappier" if you want cuts.',
+  'default': 'Done ✓ — changes applied to the timeline. Let me know if you\'d like adjustments.',
+};
+
+function sendAiMsg(text) {
+  const input = document.getElementById('aiInput');
+  const msg = text || input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const chat = document.getElementById('aiChatArea');
+
+  const userDiv = document.createElement('div');
+  userDiv.className = 'chat-msg user';
+  userDiv.innerHTML = `<div class="chat-label">You</div><div class="chat-bubble">${msg}</div>`;
+  chat.appendChild(userDiv);
+  chat.scrollTop = chat.scrollHeight;
+
+  const thinkDiv = document.createElement('div');
+  thinkDiv.className = 'chat-msg ai';
+  thinkDiv.innerHTML = `<div class="chat-label">✦ PixelPilot</div><div class="chat-bubble" style="color:var(--muted2)">Thinking<span id="dots">...</span></div>`;
+  chat.appendChild(thinkDiv);
+  chat.scrollTop = chat.scrollHeight;
+
+  let d = 0;
+  const di = setInterval(() => { d=(d+1)%4; const el=document.getElementById('dots'); if(el) el.textContent='.'.repeat(d+1); }, 300);
+
+  setTimeout(() => {
+    clearInterval(di);
+    chat.removeChild(thinkDiv);
+    const lower = msg.toLowerCase();
+    let resp = aiResps.default;
+    if (lower.includes('beat') || lower.includes('sync')) resp = aiResps.beat;
+    else if (lower.includes('reframe') || lower.includes('tiktok')) resp = aiResps.reframe;
+    else if (lower.includes('speed') || lower.includes('ramp')) resp = aiResps.speed;
+    else if (lower.includes('color') || lower.includes('colour')) resp = aiResps.color;
+    else if (lower.includes('transition')) resp = aiResps.transition;
+
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'chat-msg ai';
+    aiDiv.innerHTML = `<div class="chat-label">✦ PixelPilot</div><div class="chat-bubble">${resp}</div><div class="chat-actions"><div class="chat-action-btn" onclick="showToast('✅ Saved')">Keep it</div><div class="chat-action-btn sec" onclick="showToast('↩ Reverted')">Undo</div></div>`;
+    chat.appendChild(aiDiv);
+    chat.scrollTop = chat.scrollHeight;
+  }, 1300);
+}
+
+function doAiAction(msg) {
+  showToast('✓ ' + msg);
+}
+</script>
+</body>
+</html>

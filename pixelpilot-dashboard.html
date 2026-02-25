@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PixelPilot AI — Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --bg: #08080c;
+  --panel: #0e0e14;
+  --panel2: #13131a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e6f0;
+  --muted: #5a5868;
+  --muted2: #7c7a8a;
+  --teal: #00f5c4;
+  --orange: #ff6b35;
+  --gold: #f0c040;
+  --red: #ff4560;
+  --sidebar-w: 220px;
+  --topbar-h: 52px;
+  --timeline-h: 200px;
+  --ai-panel-w: 300px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: var(--topbar-h);
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: var(--text);
+  white-space: nowrap;
+  margin-right: 8px;
+}
+.logo span { color: var(--teal); }
+
+.topbar-divider { width: 1px; height: 24px; background: var(--border2); }
+
+.project-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.project-badge {
+  font-size: 10px;
+  background: rgba(0,245,196,0.12);
+  color: var(--teal);
+  border: 1px solid rgba(0,245,196,0.25);
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+}
+.tool-btn {
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+}
+.tool-btn:hover { background: var(--panel2); color: var(--text); border-color: var(--border2); }
+.tool-btn.active { background: rgba(0,245,196,0.1); color: var(--teal); border-color: rgba(0,245,196,0.3); }
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.export-btn {
+  background: var(--orange);
+  color: white;
+  border: none;
+  padding: 7px 20px;
+  border-radius: 4px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.2s, transform 0.15s;
+}
+.export-btn:hover { background: var(--gold); color: var(--bg); transform: translateY(-1px); }
+
+.save-status {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: pulse-dot 2s ease infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--bg);
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sidebar-section {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 4px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--panel2); color: var(--text); }
+.nav-item.active { background: rgba(0,245,196,0.08); color: var(--teal); }
+.nav-item svg { flex-shrink: 0; }
+.nav-item .badge {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--panel2);
+  padding: 1px 7px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Media library */
+.media-library {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.media-library::-webkit-scrollbar { width: 4px; }
+.media-library::-webkit-scrollbar-track { background: transparent; }
+.media-library::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.media-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.media-item {
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  position: relative;
+  aspect-ratio: 16/9;
+  background: var(--panel2);
+}
+.media-item:hover { border-color: var(--border2); transform: scale(1.02); }
+.media-item.selected { border-color: var(--teal); }
+
+.media-thumb {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fake video thumbnails */
+.thumb-1 { background: linear-gradient(135deg, #1a0f00, #3d2200); }
+.thumb-2 { background: linear-gradient(135deg, #001a1a, #003333); }
+.thumb-3 { background: linear-gradient(135deg, #0d001a, #1a0033); }
+.thumb-4 { background: linear-gradient(135deg, #1a1a00, #333300); }
+.thumb-5 { background: linear-gradient(135deg, #1a0000, #330000); }
+.thumb-6 { background: linear-gradient(135deg, #001a0d, #003322); }
+
+.media-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.6));
+}
+
+.media-thumb-icon {
+  position: relative; z-index: 1;
+  opacity: 0.4;
+  font-size: 20px;
+}
+
+.media-duration {
+  position: absolute;
+  bottom: 4px; right: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: white;
+  background: rgba(0,0,0,0.7);
+  padding: 1px 4px;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+.media-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted2);
+  padding: 4px 4px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.add-media-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px;
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 5px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.add-media-btn:hover { border-color: var(--teal); color: var(--teal); background: rgba(0,245,196,0.04); }
+
+/* ── CENTER: PREVIEW + TIMELINE ── */
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* PREVIEW */
+.preview {
+  flex: 1;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px);
+}
+
+.video-frame {
+  width: 720px;
+  max-width: 85%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #0d0008, #001a10, #0d0500);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 30px 80px rgba(0,0,0,0.8);
+}
+
+/* Animated cinematic scene */
+.scene-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0d0008 0%, #001a10 50%, #0d0500 100%);
+  animation: scene-shift 8s ease-in-out infinite alternate;
+}
+@keyframes scene-shift {
+  from { background: linear-gradient(135deg, #0d0008 0%, #001a10 50%, #0d0500 100%); }
+  to { background: linear-gradient(135deg, #1a0d00 0%, #000d1a 50%, #0d0018 100%); }
+}
+
+.scene-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(0,245,196,0.06), transparent 70%);
+}
+
+.letterbox-top, .letterbox-bottom {
+  position: absolute;
+  left: 0; right: 0;
+  height: 10%;
+  background: black;
+  z-index: 2;
+}
+.letterbox-top { top: 0; }
+.letterbox-bottom { bottom: 0; }
+
+.frame-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+.frame-subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(10px, 1.5vw, 16px);
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  animation: subtitle-fade 4s ease-in-out infinite;
+}
+@keyframes subtitle-fade { 0%,100%{opacity:0} 20%,80%{opacity:1} }
+
+/* Color grade overlay (teal-orange) */
+.grade-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,107,53,0.08) 0%, transparent 50%, rgba(0,245,196,0.06) 100%);
+  z-index: 4;
+  mix-blend-mode: screen;
+}
+
+/* PLAYBACK CONTROLS */
+.playback-bar {
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.timecode {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--teal);
+  min-width: 90px;
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.pb-btn {
+  width: 30px; height: 30px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 12px;
+}
+.pb-btn:hover { background: var(--panel2); color: var(--text); }
+.pb-play {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: none;
+  color: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s, background 0.2s;
+  font-size: 14px;
+}
+.pb-play:hover { transform: scale(1.08); background: white; }
+.pb-play.playing { background: var(--orange); }
+
+.volume-row { display: flex; align-items: center; gap: 6px; }
+.vol-icon { color: var(--muted); font-size: 13px; }
+.vol-slider {
+  -webkit-appearance: none;
+  width: 70px; height: 3px;
+  background: var(--panel2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--teal);
+  cursor: pointer;
+}
+
+/* TIMELINE */
+.timeline-section {
+  height: var(--timeline-h);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel2);
+}
+
+.tl-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tl-btn {
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tl-btn:hover { border-color: var(--teal); color: var(--teal); }
+.tl-btn.active { background: rgba(0,245,196,0.1); border-color: rgba(0,245,196,0.3); color: var(--teal); }
+
+.tl-zoom {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.tl-zoom button {
+  width: 20px; height: 20px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted2);
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.tl-zoom button:hover { border-color: var(--border2); color: var(--text); }
+
+.timeline-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.track-labels {
+  width: 60px;
+  flex-shrink: 0;
+  background: var(--panel2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.tl-track-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.tl-track-label svg { opacity: 0.5; }
+
+.tracks-area {
+  flex: 1;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.tracks-area::-webkit-scrollbar { height: 4px; }
+.tracks-area::-webkit-scrollbar-track { background: transparent; }
+.tracks-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.tracks-inner {
+  width: 1400px;
+  height: 100%;
+  position: relative;
+}
+
+/* Time ruler */
+.ruler {
+  height: 22px;
+  background: var(--panel2);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.ruler-tick {
+  position: absolute;
+  bottom: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.ruler-tick::before {
+  content: '';
+  width: 1px;
+  height: 6px;
+  background: var(--border2);
+}
+.ruler-tick.major::before { height: 10px; background: var(--muted); }
+
+.tracks-rows {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 22px);
+}
+
+.tl-track {
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tl-clip {
+  position: absolute;
+  height: 75%;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 9px;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: grab;
+  transition: filter 0.15s;
+  border: 1px solid transparent;
+}
+.tl-clip:hover { filter: brightness(1.2); }
+.tl-clip.selected { border-color: white; }
+
+.clip-v1a { left: 20px; width: 280px; background: rgba(255,107,53,0.35); border-color: rgba(255,107,53,0.5); color: var(--orange); }
+.clip-v1b { left: 320px; width: 200px; background: rgba(255,107,53,0.25); border-color: rgba(255,107,53,0.4); color: rgba(255,107,53,0.8); }
+.clip-v1c { left: 540px; width: 340px; background: rgba(255,107,53,0.35); border-color: rgba(255,107,53,0.5); color: var(--orange); }
+.clip-v1d { left: 900px; width: 180px; background: rgba(255,107,53,0.2); border-color: rgba(255,107,53,0.35); color: rgba(255,107,53,0.7); }
+
+.clip-v2a { left: 60px; width: 160px; background: rgba(0,245,196,0.15); border-color: rgba(0,245,196,0.3); color: rgba(0,245,196,0.8); }
+.clip-v2b { left: 340px; width: 240px; background: rgba(0,245,196,0.2); border-color: rgba(0,245,196,0.35); color: var(--teal); }
+.clip-v2c { left: 680px; width: 180px; background: rgba(0,245,196,0.15); border-color: rgba(0,245,196,0.3); color: rgba(0,245,196,0.8); }
+
+.clip-a1 { left: 20px; width: 860px; background: rgba(240,192,64,0.2); border-color: rgba(240,192,64,0.35); color: var(--gold); }
+.clip-a2 { left: 900px; width: 260px; background: rgba(240,192,64,0.15); border-color: rgba(240,192,64,0.3); color: rgba(240,192,64,0.8); }
+
+.clip-cap { left: 20px; width: 1060px; background: rgba(180,160,255,0.15); border-color: rgba(180,160,255,0.3); color: #c4b0ff; }
+
+/* Clip waveform/thumbnail effect */
+.tl-clip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  background: repeating-linear-gradient(90deg, transparent, transparent 6px, currentColor 6px, currentColor 7px);
+}
+.clip-a1::after, .clip-a2::after {
+  background: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cpath d='M0 10 Q5 4 10 10 Q15 16 20 10 Q25 4 30 10 Q35 16 40 10' stroke='rgba(240,192,64,0.4)' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+/* Playhead */
+.playhead-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: white;
+  z-index: 10;
+  pointer-events: none;
+  animation: playhead-move 12s linear infinite;
+}
+.playhead-line::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid white;
+}
+
+@keyframes playhead-move {
+  from { left: 0; }
+  to { left: 100%; }
+}
+
+/* ── AI PANEL ── */
+.ai-panel {
+  width: var(--ai-panel-w);
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.ai-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel2);
+}
+
+.ai-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.ai-status {
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ai-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: pulse-dot 1.5s infinite;
+}
+
+.ai-chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ai-chat::-webkit-scrollbar { width: 3px; }
+.ai-chat::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: msg-in 0.3s ease;
+}
+@keyframes msg-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.msg-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.msg.user .msg-label { color: rgba(255,107,53,0.7); }
+
+.msg-bubble {
+  padding: 10px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+.msg.ai .msg-bubble {
+  background: rgba(0,245,196,0.06);
+  border: 1px solid rgba(0,245,196,0.15);
+  color: rgba(232,230,240,0.85);
+}
+.msg.user .msg-bubble {
+  background: rgba(255,107,53,0.1);
+  border: 1px solid rgba(255,107,53,0.2);
+  color: rgba(232,230,240,0.85);
+}
+
+.msg-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.apply-btn {
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,245,196,0.3);
+  background: rgba(0,245,196,0.08);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--teal);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.apply-btn:hover { background: rgba(0,245,196,0.18); }
+.apply-btn.secondary {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted2);
+}
+.apply-btn.secondary:hover { color: var(--text); }
+
+.ai-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* Quick actions */
+.quick-actions {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+.qa-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+
+.qa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.qa-chip {
+  padding: 4px 9px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.qa-chip:hover { border-color: var(--teal); color: var(--teal); background: rgba(0,245,196,0.05); }
+
+/* AI Input */
+.ai-input-area {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--panel2);
+}
+
+.ai-input-box {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ai-textarea {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 9px 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  resize: none;
+  min-height: 60px;
+  max-height: 100px;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+}
+.ai-textarea::placeholder { color: var(--muted); }
+.ai-textarea:focus { border-color: rgba(0,245,196,0.4); }
+
+.ai-send-btn {
+  width: 36px; height: 36px;
+  background: var(--teal);
+  border: none;
+  border-radius: 5px;
+  color: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s, background 0.2s;
+  flex-shrink: 0;
+}
+.ai-send-btn:hover { transform: scale(1.08); background: white; }
+
+.ai-hint { font-size: 9px; color: var(--muted); margin-top: 6px; }
+
+/* Properties panel at bottom of AI */
+.properties {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+}
+.prop-title { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.prop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.prop-label { font-size: 11px; color: var(--muted2); font-weight: 600; }
+.prop-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 3px 8px;
+  min-width: 64px;
+  text-align: center;
+}
+
+/* Notification toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--panel2);
+  border: 1px solid rgba(0,245,196,0.3);
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Pixel<span>Pilot</span></div>
+  <div class="topbar-divider"></div>
+  <div class="project-name">
+    sunset_campaign_v3.mp4
+    <span class="project-badge">UNSAVED</span>
+  </div>
+
+  <div class="topbar-divider"></div>
+
+  <div class="topbar-tools">
+    <!-- Select -->
+    <button class="tool-btn active" title="Select (V)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-7 1-4 7z"/></svg>
+    </button>
+    <!-- Razor -->
+    <button class="tool-btn" title="Cut (C)" onclick="showToast('✂ Cut tool selected')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+    </button>
+    <!-- Text -->
+    <button class="tool-btn" title="Text (T)" onclick="showToast('T Text tool selected')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+    </button>
+    <!-- Hand -->
+    <button class="tool-btn" title="Pan (H)" onclick="showToast('✋ Pan tool selected')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+    </button>
+  </div>
+
+  <div class="topbar-right">
+    <div class="save-status">
+      <div class="save-dot"></div>
+      Auto-saving
+    </div>
+    <button class="export-btn" onclick="showToast('🚀 Export started — 4K MP4')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+    <div class="avatar">JD</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Workspace</div>
+      <div class="nav-item active">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+        Editor
+      </div>
+      <div class="nav-item" onclick="showToast('📁 Projects panel')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Projects
+        <span class="badge">12</span>
+      </div>
+      <div class="nav-item" onclick="showToast('📤 Exports panel')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Exports
+        <span class="badge">3</span>
+      </div>
+      <div class="nav-item" onclick="showToast('⚙ Settings panel')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Media Library</div>
+    </div>
+
+    <div class="media-library">
+      <div class="media-grid">
+        <div class="media-item selected" onclick="showToast('🎬 sunset_golden.mp4 selected')">
+          <div class="media-thumb thumb-1"><div class="media-thumb-icon">🌅</div></div>
+          <div class="media-duration">0:42</div>
+          <div class="media-name">sunset_golden.mp4</div>
+        </div>
+        <div class="media-item" onclick="showToast('🎬 drone_wide.mp4 selected')">
+          <div class="media-thumb thumb-2"><div class="media-thumb-icon">🏔</div></div>
+          <div class="media-duration">1:18</div>
+          <div class="media-name">drone_wide.mp4</div>
+        </div>
+        <div class="media-item" onclick="showToast('🎬 portrait_closeup.mp4 selected')">
+          <div class="media-thumb thumb-3"><div class="media-thumb-icon">👤</div></div>
+          <div class="media-duration">0:29</div>
+          <div class="media-name">portrait_close.mp4</div>
+        </div>
+        <div class="media-item" onclick="showToast('🎬 cityscape_4k.mp4 selected')">
+          <div class="media-thumb thumb-4"><div class="media-thumb-icon">🌆</div></div>
+          <div class="media-duration">2:05</div>
+          <div class="media-name">cityscape_4k.mp4</div>
+        </div>
+        <div class="media-item" onclick="showToast('🎵 ambient_track.wav selected')">
+          <div class="media-thumb thumb-5" style="align-items:center;justify-content:center;"><div class="media-thumb-icon">🎵</div></div>
+          <div class="media-duration">3:30</div>
+          <div class="media-name">ambient_track.wav</div>
+        </div>
+        <div class="media-item" onclick="showToast('🎬 b_roll_nature.mp4 selected')">
+          <div class="media-thumb thumb-6"><div class="media-thumb-icon">🌿</div></div>
+          <div class="media-duration">1:14</div>
+          <div class="media-name">b_roll_nature.mp4</div>
+        </div>
+      </div>
+      <button class="add-media-btn" onclick="showToast('📂 Open file picker...')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Media
+      </button>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <!-- PREVIEW -->
+    <div class="preview">
+      <div class="preview-bg"></div>
+      <div class="video-frame">
+        <div class="scene-gradient"></div>
+        <div class="scene-overlay"></div>
+        <div class="letterbox-top"></div>
+        <div class="letterbox-bottom"></div>
+        <div class="frame-text">
+          <div class="frame-subtitle" id="subtitleText">The light fades at the edge of the world</div>
+        </div>
+        <div class="grade-overlay"></div>
+      </div>
+    </div>
+
+    <!-- PLAYBACK -->
+    <div class="playback-bar">
+      <div class="timecode" id="timecode">00:00:14:22</div>
+      <div class="playback-controls">
+        <button class="pb-btn" title="Skip back" onclick="skipTime(-5)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+        </button>
+        <button class="pb-btn" title="Frame back" onclick="skipTime(-1)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="pb-play" id="playBtn" onclick="togglePlay()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <button class="pb-btn" title="Frame forward" onclick="skipTime(1)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="pb-btn" title="Skip forward" onclick="skipTime(5)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        </button>
+      </div>
+      <div class="volume-row">
+        <span class="vol-icon">🔊</span>
+        <input class="vol-slider" type="range" min="0" max="100" value="80">
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-section">
+      <div class="timeline-header">
+        <span class="tl-label">Timeline</span>
+        <button class="tl-btn active">Video</button>
+        <button class="tl-btn" onclick="this.classList.toggle('active'); showToast('🎵 Audio view')">Audio</button>
+        <button class="tl-btn" onclick="showToast('✨ Effects view')">FX</button>
+        <div class="tl-zoom">
+          <button onclick="showToast('🔍 Zoom out')">−</button>
+          <span>100%</span>
+          <button onclick="showToast('🔍 Zoom in')">+</button>
+        </div>
+      </div>
+
+      <div class="timeline-body">
+        <div class="track-labels">
+          <div class="tl-track-label">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            V1
+          </div>
+          <div class="tl-track-label">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            V2
+          </div>
+          <div class="tl-track-label">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            A1
+          </div>
+          <div class="tl-track-label">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            CAP
+          </div>
+        </div>
+
+        <div class="tracks-area">
+          <div class="tracks-inner">
+            <!-- Ruler -->
+            <div class="ruler">
+              <div class="ruler-tick major" style="left:0">0s</div>
+              <div class="ruler-tick" style="left:70px">5s</div>
+              <div class="ruler-tick major" style="left:140px">10s</div>
+              <div class="ruler-tick" style="left:210px">15s</div>
+              <div class="ruler-tick major" style="left:280px">20s</div>
+              <div class="ruler-tick" style="left:350px">25s</div>
+              <div class="ruler-tick major" style="left:420px">30s</div>
+              <div class="ruler-tick" style="left:490px">35s</div>
+              <div class="ruler-tick major" style="left:560px">40s</div>
+              <div class="ruler-tick" style="left:630px">45s</div>
+              <div class="ruler-tick major" style="left:700px">50s</div>
+              <div class="ruler-tick" style="left:770px">55s</div>
+              <div class="ruler-tick major" style="left:840px">60s</div>
+              <div class="ruler-tick" style="left:910px">65s</div>
+              <div class="ruler-tick major" style="left:980px">70s</div>
+            </div>
+
+            <div class="tracks-rows">
+              <div class="tl-track">
+                <div class="tl-clip clip-v1a selected" onclick="showToast('🎬 sunset_golden clip selected')">sunset_golden.mp4</div>
+                <div class="tl-clip clip-v1b" onclick="showToast('🎬 drone_wide clip selected')">drone_wide.mp4</div>
+                <div class="tl-clip clip-v1c" onclick="showToast('🎬 cityscape_4k clip selected')">cityscape_4k.mp4</div>
+                <div class="tl-clip clip-v1d" onclick="showToast('🎬 b_roll clip selected')">b_roll</div>
+              </div>
+              <div class="tl-track">
+                <div class="tl-clip clip-v2a" onclick="showToast('🎬 portrait clip selected')">portrait</div>
+                <div class="tl-clip clip-v2b" onclick="showToast('🎬 b_roll_nature clip selected')">b_roll_nature.mp4</div>
+                <div class="tl-clip clip-v2c" onclick="showToast('🎬 overlay clip selected')">overlay</div>
+              </div>
+              <div class="tl-track">
+                <div class="tl-clip clip-a1" onclick="showToast('🎵 ambient_track selected')">ambient_track.wav</div>
+                <div class="tl-clip clip-a2" onclick="showToast('🎵 outro music selected')">outro</div>
+              </div>
+              <div class="tl-track">
+                <div class="tl-clip clip-cap" onclick="showToast('💬 Captions layer selected')">Auto Captions (EN)</div>
+              </div>
+            </div>
+
+            <div class="playhead-line" id="playhead"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI PANEL -->
+  <div class="ai-panel">
+    <div class="ai-header">
+      <div class="ai-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        AI Pilot
+      </div>
+      <div class="ai-status">
+        <div class="ai-status-dot"></div>
+        Ready
+      </div>
+    </div>
+
+    <div class="ai-chat" id="chatArea">
+      <div class="msg ai">
+        <div class="msg-label">✦ PixelPilot</div>
+        <div class="msg-bubble">Hey! I've analyzed your project. You have 4 video tracks and a 1:12 runtime. What would you like me to help with?</div>
+      </div>
+
+      <div class="msg user">
+        <div class="msg-label">You</div>
+        <div class="msg-bubble">Add a cinematic teal-orange color grade to all clips</div>
+      </div>
+
+      <div class="msg ai">
+        <div class="msg-label">✦ PixelPilot</div>
+        <div class="msg-bubble">Done ✓ Applied teal-orange LUT to all 7 clips. Shadows shifted cool, highlights warm. Contrast +12%.</div>
+        <div class="msg-actions">
+          <button class="apply-btn" onclick="showToast('✅ Grade applied to timeline')">Applied</button>
+          <button class="apply-btn secondary" onclick="showToast('↩ Color grade reverted')">Undo</button>
+        </div>
+      </div>
+
+      <div class="ai-divider"></div>
+
+      <div class="msg user">
+        <div class="msg-label">You</div>
+        <div class="msg-bubble">Remove all silences and sync cuts to the beat of the music</div>
+      </div>
+
+      <div class="msg ai" id="lastMsg">
+        <div class="msg-label">✦ PixelPilot</div>
+        <div class="msg-bubble">Removed 8 silences (saved 43s). Detected 64 BPM beats in ambient_track.wav — re-cut 6 transitions to hit on downbeats. Preview updated.</div>
+        <div class="msg-actions">
+          <button class="apply-btn" onclick="showToast('✅ Beat sync confirmed')">Keep edits</button>
+          <button class="apply-btn secondary" onclick="showToast('↩ Reverted to original cuts')">Revert</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="quick-actions">
+      <div class="qa-label">Quick actions</div>
+      <div class="qa-chips">
+        <div class="qa-chip" onclick="addMessage('Add subtitles in all languages')">📝 Subtitles</div>
+        <div class="qa-chip" onclick="addMessage('Match color to reference clip')">🎨 Match color</div>
+        <div class="qa-chip" onclick="addMessage('Speed ramp the drone shots')">⚡ Speed ramp</div>
+        <div class="qa-chip" onclick="addMessage('Reframe for TikTok 9:16')">📱 Reframe</div>
+        <div class="qa-chip" onclick="addMessage('Add smooth transitions between clips')">✨ Transitions</div>
+        <div class="qa-chip" onclick="addMessage('Boost the audio and remove background noise')">🎵 Clean audio</div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="ai-input-area">
+      <div class="ai-input-box">
+        <textarea class="ai-textarea" id="aiInput" placeholder="Describe what you want to do..." rows="2"></textarea>
+        <button class="ai-send-btn" onclick="sendMessage()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="ai-hint">⌘↵ to send · Works on selected clips or full timeline</div>
+    </div>
+
+    <!-- Properties -->
+    <div class="properties">
+      <div class="prop-title">Clip Properties</div>
+      <div class="prop-row">
+        <div class="prop-label">Duration</div>
+        <div class="prop-val">00:42</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-label">Speed</div>
+        <div class="prop-val">100%</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-label">Opacity</div>
+        <div class="prop-val">100%</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-label">Scale</div>
+        <div class="prop-val">100%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Timecode counter
+let seconds = 14, frames = 22;
+let playing = false;
+let timer;
+
+function pad(n, d=2) { return String(n).padStart(d, '0'); }
+
+function updateTimecode() {
+  document.getElementById('timecode').textContent =
+    `00:00:${pad(seconds)}:${pad(frames)}`;
+}
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('playBtn');
+  if (playing) {
+    btn.classList.add('playing');
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    timer = setInterval(() => {
+      frames++;
+      if (frames >= 30) { frames = 0; seconds++; }
+      if (seconds >= 72) { seconds = 0; frames = 0; }
+      updateTimecode();
+    }, 33);
+  } else {
+    btn.classList.remove('playing');
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    clearInterval(timer);
+  }
+}
+
+function skipTime(s) {
+  seconds = Math.max(0, Math.min(71, seconds + s));
+  updateTimecode();
+}
+
+// Subtitle rotation
+const subtitles = [
+  'The light fades at the edge of the world',
+  'Nothing lasts, and that\'s the beauty of it',
+  'A single moment, stretched into forever',
+  'The city breathes in silence after dark',
+];
+let si = 0;
+setInterval(() => {
+  si = (si + 1) % subtitles.length;
+  document.getElementById('subtitleText').textContent = subtitles[si];
+}, 4000);
+
+// Toast
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// AI Chat
+const aiResponses = {
+  'subtitles': 'Transcribing audio... Done ✓ Added 47 captions in English. Use the language selector to export in 50+ languages.',
+  'color': 'Analyzing reference clip luminance and hue... Applied matching grade. Delta E: 4.2 — near-perfect match.',
+  'speed': 'Detected 3 drone shots. Applied smooth speed ramp: 100% → 40% → 100% with ease curves on each.',
+  'reframe': 'Reframing to 1080×1920 (9:16). Used AI face/subject detection to keep key subjects centered.',
+  'transitions': 'Added 6 cross-dissolve transitions (12 frames each) at clip boundaries. Try "make them snappier" or "use whip pans".',
+  'audio': 'Noise floor reduced by 28dB. Voice frequencies boosted. Levels normalized to -14 LUFS for streaming.',
+  'default': 'Processing your request... Done ✓ Changes applied to the timeline. Let me know if you\'d like any adjustments.',
+};
+
+function addMessage(text) {
+  document.getElementById('aiInput').value = text;
+  sendMessage();
+}
+
+function sendMessage() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const chat = document.getElementById('chatArea');
+
+  // User message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg user';
+  userMsg.innerHTML = `<div class="msg-label">You</div><div class="msg-bubble">${text}</div>`;
+  chat.appendChild(userMsg);
+  input.value = '';
+
+  // Thinking indicator
+  const thinking = document.createElement('div');
+  thinking.className = 'msg ai';
+  thinking.innerHTML = `<div class="msg-label">✦ PixelPilot</div><div class="msg-bubble" style="color:var(--muted)">Analyzing<span class="typing-dots">...</span></div>`;
+  chat.appendChild(thinking);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Typing dots
+  let dotCount = 0;
+  const dotsInterval = setInterval(() => {
+    dotCount = (dotCount + 1) % 4;
+    const dots = thinking.querySelector('.typing-dots');
+    if (dots) dots.textContent = '.'.repeat(dotCount + 1);
+  }, 300);
+
+  setTimeout(() => {
+    clearInterval(dotsInterval);
+    chat.removeChild(thinking);
+
+    const lower = text.toLowerCase();
+    let resp = aiResponses.default;
+    if (lower.includes('subtitle') || lower.includes('caption')) resp = aiResponses.subtitles;
+    else if (lower.includes('color') || lower.includes('colour') || lower.includes('grade')) resp = aiResponses.color;
+    else if (lower.includes('speed') || lower.includes('ramp')) resp = aiResponses.speed;
+    else if (lower.includes('reframe') || lower.includes('tiktok') || lower.includes('9:16')) resp = aiResponses.reframe;
+    else if (lower.includes('transition')) resp = aiResponses.transitions;
+    else if (lower.includes('audio') || lower.includes('noise')) resp = aiResponses.audio;
+
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'msg ai';
+    aiMsg.innerHTML = `
+      <div class="msg-label">✦ PixelPilot</div>
+      <div class="msg-bubble">${resp}</div>
+      <div class="msg-actions">
+        <button class="apply-btn" onclick="showToast('✅ Changes confirmed')">Keep</button>
+        <button class="apply-btn secondary" onclick="showToast('↩ Reverted')">Undo</button>
+      </div>`;
+    chat.appendChild(aiMsg);
+    chat.scrollTop = chat.scrollHeight;
+  }, 1400);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowLeft') skipTime(-1);
+  if (e.code === 'ArrowRight') skipTime(1);
+  if (e.key === 'Enter' && e.metaKey) sendMessage();
+});
+
+// Enter in textarea
+document.getElementById('aiInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendMessage(); }
+});
+</script>
+</body>
+</html>

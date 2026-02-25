@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PixelPilot AI — Let's get you set up</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --bg: #07070d;
+  --panel: #0e0e18;
+  --panel2: #15151f;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #edeaf8;
+  --muted: #57556e;
+  --muted2: #8e8bab;
+  --teal: #00ddb0;
+  --orange: #ff5c28;
+  --gold: #f2c13a;
+  --purple: #a78bfa;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo span { color: var(--teal); }
+
+/* Step progress */
+.steps-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.step-dot-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.step-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  background: var(--panel);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  cursor: default;
+}
+.step-dot.active {
+  border-color: var(--teal);
+  background: rgba(0,221,176,0.12);
+  color: var(--teal);
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(0,221,176,0.1);
+}
+.step-dot.done {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--bg);
+}
+.step-dot.done svg { display: block; }
+.step-dot svg { display: none; }
+
+.step-label {
+  position: absolute;
+  top: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  transition: color 0.3s;
+}
+.step-dot.active .step-label { color: var(--teal); }
+.step-dot.done .step-label { color: var(--muted2); }
+
+.step-line {
+  width: 60px;
+  height: 2px;
+  background: var(--border2);
+  margin: 0 4px;
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+.step-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: var(--teal);
+  width: 0%;
+  transition: width 0.5s ease;
+  border-radius: 1px;
+}
+.step-line.done::after { width: 100%; }
+
+.skip-btn {
+  font-size: 13px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  transition: color 0.2s;
+  padding: 6px 0;
+}
+.skip-btn:hover { color: var(--text); }
+
+/* ── MAIN CONTENT ── */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 40px 48px 60px;
+}
+
+/* Background atmosphere */
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  transition: all 1.2s ease;
+}
+.orb1 { width: 500px; height: 500px; top: -100px; left: -100px; background: radial-gradient(circle, rgba(0,221,176,0.1), transparent 70%); }
+.orb2 { width: 400px; height: 400px; bottom: -80px; right: -80px; background: radial-gradient(circle, rgba(255,92,40,0.1), transparent 70%); }
+
+/* Step container */
+.step-content {
+  width: 100%;
+  max-width: 680px;
+  position: relative;
+}
+
+.step-panel {
+  display: none;
+  animation: step-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.step-panel.active { display: block; }
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes step-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-20px); }
+}
+
+.step-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.step-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--orange); }
+
+.step-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 6vw, 72px);
+  line-height: 0.92;
+  margin-bottom: 16px;
+}
+.step-title em { font-style: normal; color: var(--teal); }
+
+.step-sub {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--muted2);
+  max-width: 520px;
+  margin-bottom: 40px;
+  font-weight: 400;
+}
+
+/* ── STEP 1: Role selector ── */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.role-card {
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 24px 20px;
+  background: var(--panel);
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.role-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(0,221,176,0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.role-card:hover::before { opacity: 1; }
+.role-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.role-card.selected {
+  border-color: var(--teal);
+  background: rgba(0,221,176,0.06);
+}
+.role-card.selected::before { opacity: 1; }
+
+.role-emoji { font-size: 32px; margin-bottom: 12px; display: block; }
+.role-name { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+.role-desc { font-size: 11px; color: var(--muted2); line-height: 1.5; }
+
+.selected-check {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 20px; height: 20px;
+  background: var(--teal);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.role-card.selected .selected-check { display: flex; }
+
+/* ── STEP 2: Content type ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 36px;
+}
+
+.content-card {
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 18px 20px;
+  background: var(--panel);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+.content-card:hover { transform: translateX(3px); border-color: var(--border2); }
+.content-card.selected { border-color: var(--teal); background: rgba(0,221,176,0.05); }
+
+.content-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.content-card.selected .content-icon { background: rgba(0,221,176,0.1); border-color: rgba(0,221,176,0.2); }
+
+.content-info { flex: 1; }
+.content-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.content-hint { font-size: 11px; color: var(--muted2); }
+
+.content-check {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border2);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.content-card.selected .content-check {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+
+/* ── STEP 3: Upload / connect ── */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 12px;
+  padding: 52px 32px;
+  text-align: center;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  background: var(--panel);
+}
+.upload-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(0,221,176,0.06), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--teal); }
+.upload-zone:hover::before, .upload-zone.dragover::before { opacity: 1; }
+.upload-zone.has-file { border-color: var(--teal); background: rgba(0,221,176,0.04); }
+
+.upload-icon {
+  width: 60px; height: 60px;
+  border-radius: 14px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 24px;
+  transition: transform 0.2s;
+}
+.upload-zone:hover .upload-icon { transform: scale(1.05) translateY(-2px); }
+
+.upload-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.upload-sub { font-size: 12px; color: var(--muted2); margin-bottom: 16px; }
+.upload-formats { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+.upload-browse {
+  display: inline-block;
+  padding: 8px 20px;
+  background: rgba(0,221,176,0.1);
+  border: 1px solid rgba(0,221,176,0.3);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+  margin: 12px 0 10px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.upload-browse:hover { background: rgba(0,221,176,0.18); }
+
+.connect-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 36px;
+}
+.connect-btn {
+  flex: 1;
+  padding: 12px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--panel);
+  color: var(--muted2);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.connect-btn:hover { border-color: var(--border2); color: var(--text); background: var(--panel2); transform: translateY(-1px); }
+.connect-btn.connected { border-color: var(--teal); color: var(--teal); background: rgba(0,221,176,0.06); }
+
+/* File preview */
+.file-preview {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--panel2);
+  border: 1px solid rgba(0,221,176,0.25);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.file-preview.show { display: flex; }
+.file-thumb {
+  width: 56px; height: 36px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #1a0a00, #003322);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.file-info { flex: 1; }
+.file-name { font-size: 13px; font-weight: 700; }
+.file-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); margin-top: 2px; }
+.file-remove {
+  background: none; border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.15s;
+  padding: 4px;
+}
+.file-remove:hover { color: var(--error, #ff4560); }
+
+/* ── STEP 4: AI preferences ── */
+.pref-group { margin-bottom: 28px; }
+.pref-label { font-size: 12px; font-weight: 700; color: var(--muted2); letter-spacing: 0.5px; margin-bottom: 12px; }
+
+.pref-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pref-chip {
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border2);
+  background: var(--panel);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.pref-chip:hover { border-color: var(--border2); color: var(--text); background: var(--panel2); }
+.pref-chip.selected {
+  border-color: var(--teal);
+  background: rgba(0,221,176,0.08);
+  color: var(--teal);
+}
+
+/* Slider */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--panel2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--teal);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+.range-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--teal);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* Toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.toggle-info { }
+.toggle-name { font-size: 13px; font-weight: 700; }
+.toggle-hint { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+
+.toggle-switch {
+  width: 40px; height: 22px;
+  border-radius: 11px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--teal); border-color: var(--teal); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: white;
+  top: 2px; left: 2px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-switch.on::after { left: 20px; }
+
+/* ── STEP 5: Ready! ── */
+.ready-card {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.ready-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--orange), var(--teal), var(--gold));
+}
+
+.ready-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--bg);
+  margin: 0 auto 20px;
+  box-shadow: 0 0 0 6px rgba(255,92,40,0.15);
+  animation: avatar-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes avatar-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.ready-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; margin-bottom: 6px; }
+.ready-plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,221,176,0.1);
+  border: 1px solid rgba(0,221,176,0.2);
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.ready-stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+.ready-stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--teal); }
+.ready-stat-label { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+
+.confetti-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.conf-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--panel);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted2);
+  animation: pill-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.conf-pill:nth-child(1) { animation-delay: 0.1s; }
+.conf-pill:nth-child(2) { animation-delay: 0.2s; }
+.conf-pill:nth-child(3) { animation-delay: 0.3s; }
+@keyframes pill-in { from { opacity: 0; transform: scale(0.7) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  padding: 24px 48px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: rgba(7,7,13,0.8);
+  backdrop-filter: blur(12px);
+}
+
+.back-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 24px;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted2);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.back-btn:hover { color: var(--text); border-color: var(--border2); background: var(--panel); }
+.back-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+.next-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 36px;
+  border-radius: 7px;
+  border: none;
+  background: var(--teal);
+  color: var(--bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.next-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.12));
+}
+.next-btn:hover { background: white; transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,221,176,0.25); }
+.next-btn.final { background: var(--orange); }
+.next-btn.final:hover { background: var(--gold); }
+
+.step-counter {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.step-counter span { color: var(--teal); font-weight: 500; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 100;
+  transition: transform 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="#" class="logo">Pixel<span>Pilot</span> AI</a>
+
+  <div class="steps-nav">
+    <!-- Step 1 -->
+    <div class="step-dot-wrap">
+      <div class="step-dot active" id="dot1">
+        1
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="step-label">Role</div>
+      </div>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-dot-wrap">
+      <div class="step-dot" id="dot2">
+        2
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="step-label">Content</div>
+      </div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-dot-wrap">
+      <div class="step-dot" id="dot3">
+        3
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="step-label">Upload</div>
+      </div>
+    </div>
+    <div class="step-line" id="line3"></div>
+    <div class="step-dot-wrap">
+      <div class="step-dot" id="dot4">
+        4
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="step-label">AI Setup</div>
+      </div>
+    </div>
+    <div class="step-line" id="line4"></div>
+    <div class="step-dot-wrap">
+      <div class="step-dot" id="dot5">
+        5
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="step-label">Ready!</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="skip-btn" onclick="goToStep(5)">Skip setup →</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+
+  <div class="step-content">
+
+    <!-- ── STEP 1: WHO ARE YOU ── -->
+    <div class="step-panel active" id="step1">
+      <div class="step-eyebrow">Step 1 of 5</div>
+      <h1 class="step-title">What kind of<br>creator are <em>you?</em></h1>
+      <p class="step-sub">We'll tailor your AI editing experience to match your workflow and style.</p>
+
+      <div class="role-grid">
+        <div class="role-card" onclick="selectRole(this)">
+          <div class="selected-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="role-emoji">🎬</span>
+          <div class="role-name">Content Creator</div>
+          <div class="role-desc">YouTube, TikTok, Reels — daily uploads</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this)">
+          <div class="selected-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="role-emoji">🏢</span>
+          <div class="role-name">Marketing Team</div>
+          <div class="role-desc">Brand videos, ads, social campaigns</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this)">
+          <div class="selected-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="role-emoji">🎙</span>
+          <div class="role-name">Podcaster</div>
+          <div class="role-desc">Interview clips, audiograms, shorts</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this)">
+          <div class="selected-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="role-emoji">🎓</span>
+          <div class="role-name">Educator</div>
+          <div class="role-desc">Courses, tutorials, explainer videos</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this)">
+          <div class="selected-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="role-emoji">🎥</span>
+          <div class="role-name">Filmmaker</div>
+          <div class="role-desc">Short films, docs, cinematic work</div>
+        </div>
+        <div class="role-card" onclick="selectRole(this)">
+          <div class="selected-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="role-emoji">✨</span>
+          <div class="role-name">Something else</div>
+          <div class="role-desc">I'll figure out what works for me</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: CONTENT TYPE ── -->
+    <div class="step-panel" id="step2">
+      <div class="step-eyebrow">Step 2 of 5</div>
+      <h1 class="step-title">What do you<br>mainly <em>edit?</em></h1>
+      <p class="step-sub">Select all that apply — we'll pre-configure your AI tools and shortcuts.</p>
+
+      <div class="content-grid">
+        <div class="content-card selected" onclick="toggleContent(this)">
+          <div class="content-icon">📹</div>
+          <div class="content-info">
+            <div class="content-name">Long-form video</div>
+            <div class="content-hint">20+ min YouTube, interviews, vlogs</div>
+          </div>
+          <div class="content-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="content-card selected" onclick="toggleContent(this)">
+          <div class="content-icon">📱</div>
+          <div class="content-info">
+            <div class="content-name">Short-form video</div>
+            <div class="content-hint">Reels, TikTok, Shorts — under 60s</div>
+          </div>
+          <div class="content-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="content-card" onclick="toggleContent(this)">
+          <div class="content-icon">🎙</div>
+          <div class="content-info">
+            <div class="content-name">Podcast / Audio</div>
+            <div class="content-hint">Recorded audio, transcription, cleanup</div>
+          </div>
+          <div class="content-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="content-card" onclick="toggleContent(this)">
+          <div class="content-icon">🎞</div>
+          <div class="content-info">
+            <div class="content-name">Cinematic / Film</div>
+            <div class="content-hint">Color grade, LUTs, narrative pacing</div>
+          </div>
+          <div class="content-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="content-card" onclick="toggleContent(this)">
+          <div class="content-icon">📣</div>
+          <div class="content-info">
+            <div class="content-name">Ads & Marketing</div>
+            <div class="content-hint">Product videos, testimonials, promos</div>
+          </div>
+          <div class="content-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="content-card" onclick="toggleContent(this)">
+          <div class="content-icon">🎓</div>
+          <div class="content-info">
+            <div class="content-name">Tutorials & Courses</div>
+            <div class="content-hint">Screen recordings, slide videos, demos</div>
+          </div>
+          <div class="content-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: UPLOAD ── -->
+    <div class="step-panel" id="step3">
+      <div class="step-eyebrow">Step 3 of 5</div>
+      <h1 class="step-title">Drop your first<br><em>project</em></h1>
+      <p class="step-sub">Upload a video to try PixelPilot right away — or connect your cloud storage.</p>
+
+      <div class="file-preview" id="filePreview">
+        <div class="file-thumb">🎬</div>
+        <div class="file-info">
+          <div class="file-name" id="fileName">my_video.mp4</div>
+          <div class="file-meta" id="fileMeta">MP4 · 1080p · 2.4 GB</div>
+        </div>
+        <button class="file-remove" onclick="removeFile()">✕</button>
+      </div>
+
+      <div class="upload-zone" id="uploadZone" onclick="fakeUpload()" ondragover="handleDrag(event)" ondragleave="handleDragLeave(event)">
+        <div class="upload-icon">📁</div>
+        <div class="upload-title">Drop video here</div>
+        <div class="upload-sub">or browse your files</div>
+        <div class="upload-browse">Browse files</div>
+        <div class="upload-formats">MP4 · MOV · MKV · AVI · up to 20 GB</div>
+      </div>
+
+      <div class="connect-options">
+        <button class="connect-btn" id="driveBtn" onclick="connectSource('driveBtn', '☁ Google Drive')">
+          <svg width="14" height="14" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+          Google Drive
+        </button>
+        <button class="connect-btn" id="dropboxBtn" onclick="connectSource('dropboxBtn', '📦 Dropbox')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#0061FF"><path d="M12 6.9L6 10.5l6 3.6 6-3.6L12 6.9zm-6 7.2L12 17.7l6-3.6-6-3.6-6 3.6zM6 3.3L12 6.9l6-3.6-6-3.6L6 3.3zm0 14.4l6 3.6 6-3.6-6-3.6-6 3.6z"/></svg>
+          Dropbox
+        </button>
+        <button class="connect-btn" id="frameBtn" onclick="connectSource('frameBtn', '🎬 Frame.io')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          Frame.io
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: AI PREFERENCES ── -->
+    <div class="step-panel" id="step4">
+      <div class="step-eyebrow">Step 4 of 5</div>
+      <h1 class="step-title">Tune your<br><em>AI Pilot</em></h1>
+      <p class="step-sub">Tell the AI how you like to edit — it'll remember these preferences forever.</p>
+
+      <div class="pref-group">
+        <div class="pref-label">Editing style</div>
+        <div class="pref-chips">
+          <div class="pref-chip selected" onclick="this.classList.toggle('selected')">⚡ Fast & punchy</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">🎬 Cinematic & slow</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">📰 Documentary</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">🎵 Music-driven</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">💬 Talking head</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">🔀 Dynamic / mixed</div>
+        </div>
+      </div>
+
+      <div class="pref-group">
+        <div class="pref-label">Default color mood</div>
+        <div class="pref-chips">
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">🌅 Warm & golden</div>
+          <div class="pref-chip selected" onclick="this.classList.toggle('selected')">🌊 Teal & cool</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">⚫ Dark & moody</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">☀ Bright & airy</div>
+          <div class="pref-chip" onclick="this.classList.toggle('selected')">🎨 Match original</div>
+        </div>
+      </div>
+
+      <div class="pref-group">
+        <div class="pref-label">AI aggressiveness</div>
+        <div class="slider-row">
+          <span style="font-size:11px;color:var(--muted)">Subtle</span>
+          <input type="range" min="0" max="100" value="65" id="aggroSlider" oninput="document.getElementById('aggroVal').textContent=this.value+'%'">
+          <span style="font-size:11px;color:var(--muted)">Bold</span>
+          <div class="range-val" id="aggroVal">65%</div>
+        </div>
+        <div class="slider-labels" style="padding:0 30px">
+          <span>Minimal AI edits</span>
+          <span>Let AI take control</span>
+        </div>
+      </div>
+
+      <div class="pref-group">
+        <div class="pref-label">AI features</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Auto-remove silences</div>
+            <div class="toggle-hint">Automatically strip pauses over 0.5s</div>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Smart captions</div>
+            <div class="toggle-hint">Add styled subtitles to every new project</div>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Beat sync cuts</div>
+            <div class="toggle-hint">Align transitions to music automatically</div>
+          </div>
+          <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-name">Usage analytics</div>
+            <div class="toggle-hint">Help us improve PixelPilot with anonymous data</div>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 5: READY ── -->
+    <div class="step-panel" id="step5">
+      <div class="ready-card">
+        <div class="ready-avatar">🚀</div>
+        <div class="ready-name">You're all set, Alex!</div>
+        <div class="ready-plan">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Pro Plan · Billed monthly
+        </div>
+        <div class="ready-stats">
+          <div>
+            <div class="ready-stat-num">∞</div>
+            <div class="ready-stat-label">Exports</div>
+          </div>
+          <div>
+            <div class="ready-stat-num">4K</div>
+            <div class="ready-stat-label">Max res</div>
+          </div>
+          <div>
+            <div class="ready-stat-num">50+</div>
+            <div class="ready-stat-label">Languages</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="confetti-row">
+        <div class="conf-pill">⚡ Fast & punchy editing</div>
+        <div class="conf-pill">🌊 Teal color mood</div>
+        <div class="conf-pill">✂ Auto-silence removal</div>
+      </div>
+
+      <p style="font-size:13px;color:var(--muted2);text-align:center;margin-bottom:8px">Your first project is queued up and ready to go.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="back-btn" id="backBtn" onclick="prevStep()" disabled>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </button>
+
+  <div class="step-counter">Step <span id="stepNum">1</span> of 5</div>
+
+  <button class="next-btn" id="nextBtn" onclick="nextStep()">
+    Continue
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 5;
+
+function updateNav() {
+  document.getElementById('stepNum').textContent = currentStep;
+  document.getElementById('backBtn').disabled = currentStep === 1;
+
+  const nextBtn = document.getElementById('nextBtn');
+  if (currentStep === totalSteps) {
+    nextBtn.textContent = '';
+    nextBtn.innerHTML = '🚀 Open the Editor';
+    nextBtn.classList.add('final');
+    nextBtn.onclick = () => showToast('🎬 Launching your editor...');
+  } else {
+    nextBtn.innerHTML = `Continue <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+    nextBtn.classList.remove('final');
+    nextBtn.onclick = nextStep;
+  }
+
+  // Update dots
+  for (let i = 1; i <= totalSteps; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'step-dot';
+    if (i < currentStep) dot.classList.add('done');
+    else if (i === currentStep) dot.classList.add('active');
+  }
+
+  // Update lines
+  for (let i = 1; i < totalSteps; i++) {
+    const line = document.getElementById('line' + i);
+    line.className = 'step-line' + (i < currentStep ? ' done' : '');
+  }
+}
+
+function goToStep(n) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = Math.min(Math.max(n, 1), totalSteps);
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateNav();
+}
+
+function nextStep() {
+  if (currentStep < totalSteps) {
+    const toasts = {
+      1: '✓ Role saved!',
+      2: '✓ Content types saved!',
+      3: '✓ Storage configured!',
+      4: '✓ AI preferences locked in!',
+    };
+    showToast(toasts[currentStep] || '');
+    goToStep(currentStep + 1);
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) goToStep(currentStep - 1);
+}
+
+// Role selection (single)
+function selectRole(card) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+// Content toggle (multi)
+function toggleContent(card) {
+  card.classList.toggle('selected');
+}
+
+// Upload fake
+function fakeUpload() {
+  const names = ['campaign_video.mp4', 'interview_raw.mov', 'product_demo.mp4', 'vlog_day1.mp4'];
+  const metas = ['MP4 · 4K · 3.1 GB', 'MOV · 1080p · 1.8 GB', 'MP4 · 1080p · 540 MB', 'MP4 · 4K · 4.2 GB'];
+  const i = Math.floor(Math.random() * names.length);
+  document.getElementById('fileName').textContent = names[i];
+  document.getElementById('fileMeta').textContent = metas[i];
+  document.getElementById('filePreview').classList.add('show');
+  document.getElementById('uploadZone').classList.add('has-file');
+  showToast('📁 ' + names[i] + ' — ready to edit!');
+}
+
+function removeFile() {
+  document.getElementById('filePreview').classList.remove('show');
+  document.getElementById('uploadZone').classList.remove('has-file');
+}
+
+function handleDrag(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.add('dragover');
+}
+function handleDragLeave() {
+  document.getElementById('uploadZone').classList.remove('dragover');
+}
+
+// Connect source
+function connectSource(id, name) {
+  const btn = document.getElementById(id);
+  const isConnected = btn.classList.contains('connected');
+  if (isConnected) {
+    btn.classList.remove('connected');
+    btn.innerHTML = btn.innerHTML.replace(' ✓', '');
+    showToast('Disconnected ' + name);
+  } else {
+    btn.classList.add('connected');
+    showToast('✓ Connected to ' + name);
+  }
+}
+
+let toastTimer;
+function showToast(msg) {
+  if (!msg) return;
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'Enter') nextStep();
+  if (e.key === 'ArrowLeft') prevStep();
+});
+
+updateNav();
+</script>
+</body>
+</html>
