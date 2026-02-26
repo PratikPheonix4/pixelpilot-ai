@@ -714,7 +714,7 @@ body {
 <!-- ── SIDEBAR ── -->
 <div class="sidebar">
   <div class="sidebar-logo">
-    <a href="index.html" class="logo">Pixel<span>Pilot</span> AI</a>
+    <a href="#" class="logo">Pixel<span>Pilot</span> AI</a>
   </div>
 
   <div class="workspace-pill" onclick="showToast('🔄 Switch workspace')">
@@ -728,7 +728,7 @@ body {
 
   <div class="sidebar-section">
     <div class="sidebar-label">Main</div>
-    <div class="nav-item" onclick="window.location.href='pixelpilot-projects.html'">
+    <div class="nav-item" onclick="showToast('🏠 Home dashboard')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </div>
@@ -737,7 +737,7 @@ body {
       Projects
       <span class="nav-badge">12</span>
     </div>
-    <div class="nav-item" onclick="window.location.href='pixelpilot-dashboard.html'">
+    <div class="nav-item" onclick="showToast('🎬 Opening editor')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       Editor
     </div>
@@ -880,7 +880,7 @@ body {
     <div class="projects-grid" id="projectsGrid">
 
       <!-- Card 1: AI editing -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" onclick="showToast('🎬 Opening sunset_campaign_v3')">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#1a0800,#3d1500)"></div>
           <div class="thumb-icon">🌅</div>
@@ -912,7 +912,7 @@ body {
       </div>
 
       <!-- Card 2 -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" onclick="showToast('🏔 Opening drone_footage_final')">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#001514,#003328)"></div>
           <div class="thumb-icon">🏔</div>
@@ -936,7 +936,7 @@ body {
       </div>
 
       <!-- Card 3: AI editing -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" onclick="showToast('🎙 Opening podcast_ep14_edit')">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#0a001a,#1a0033)"></div>
           <div class="thumb-icon">🎙</div>
@@ -961,7 +961,7 @@ body {
       </div>
 
       <!-- Card 4 -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" onclick="showToast('🎓 Opening tutorial_react_hooks')">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#1a1400,#2b2200)"></div>
           <div class="thumb-icon">🎓</div>
@@ -985,7 +985,7 @@ body {
       </div>
 
       <!-- Card 5 -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" onclick="showToast('🌿 Opening brand_video_final')">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#001400,#002800)"></div>
           <div class="thumb-icon">🌿</div>
@@ -1009,7 +1009,7 @@ body {
       </div>
 
       <!-- Card 6 -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" onclick="showToast('🎬 Opening product_demo_v2')">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#001a1a,#003344)"></div>
           <div class="thumb-icon">💻</div>
@@ -1036,42 +1036,42 @@ body {
 
     <!-- List view (hidden by default) -->
     <div class="proj-list" id="projectsList">
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" onclick="showToast('🎬 Opening sunset_campaign_v3')">
         <div class="list-thumb" style="background:linear-gradient(135deg,#1a0800,#3d1500)">🌅</div>
         <div class="list-name">sunset_campaign_v3.mp4</div>
         <div class="list-meta">1:12 · 4K · 2.4 GB</div>
         <div class="proj-status s-ai" style="margin-right:8px">AI editing</div>
         <div class="list-date">2 hours ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" onclick="showToast('🏔 Opening drone_footage_final')">
         <div class="list-thumb" style="background:linear-gradient(135deg,#001514,#003328)">🏔</div>
         <div class="list-name">drone_footage_final.mp4</div>
         <div class="list-meta">3:40 · 4K · 5.1 GB</div>
         <div class="proj-status s-ready" style="margin-right:8px">Ready</div>
         <div class="list-date">Yesterday</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" onclick="showToast('🎙 Opening podcast_ep14_edit')">
         <div class="list-thumb" style="background:linear-gradient(135deg,#0a001a,#1a0033)">🎙</div>
         <div class="list-name">podcast_ep14_edit.mp4</div>
         <div class="list-meta">42:18 · 1080p · 3.8 GB</div>
         <div class="proj-status s-edit" style="margin-right:8px">Editing</div>
         <div class="list-date">2 days ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" onclick="showToast('🎓 Opening tutorial_react_hooks')">
         <div class="list-thumb" style="background:linear-gradient(135deg,#1a1400,#2b2200)">🎓</div>
         <div class="list-name">tutorial_react_hooks.mp4</div>
         <div class="list-meta">18:55 · 1080p · 1.2 GB</div>
         <div class="proj-status s-exported" style="margin-right:8px">Exported</div>
         <div class="list-date">5 days ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" onclick="showToast('🌿 Opening brand_video_final')">
         <div class="list-thumb" style="background:linear-gradient(135deg,#001400,#002800)">🌿</div>
         <div class="list-name">brand_video_final.mp4</div>
         <div class="list-meta">2:05 · 4K · 4.6 GB</div>
         <div class="proj-status s-exported" style="margin-right:8px">Exported</div>
         <div class="list-date">1 week ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" onclick="showToast('💻 Opening product_demo_v2')">
         <div class="list-thumb" style="background:linear-gradient(135deg,#001a1a,#003344)">💻</div>
         <div class="list-name">product_demo_v2.mp4</div>
         <div class="list-meta">4:30 · 1080p · 2.1 GB</div>
