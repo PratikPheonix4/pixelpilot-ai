@@ -1017,7 +1017,8 @@ body {
     <div class="sidebar-section">
       <div class="sidebar-label">Media Library</div>
     </div>
-
+<input type="file" id="videoInput" accept=".mp4,.mov,.mkv,.avi,.webm" 
+       style="display:none" onchange="handleVideoUpload(this)">
     <div class="media-library">
       <div class="media-grid">
         <div class="media-item selected" onclick="showToast('🎬 sunset_golden.mp4 selected')">
@@ -1051,12 +1052,13 @@ body {
           <div class="media-name">b_roll_nature.mp4</div>
         </div>
       </div>
-      <button class="add-media-btn" onclick="showToast('📂 Open file picker...')">
+      <button class="add-media-btn" onclick="document.getElementById('videoInput').click()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Media
       </button>
     </div>
   </div>
+  
 
   <!-- CENTER -->
   <div class="center">
@@ -1433,5 +1435,54 @@ document.getElementById('aiInput').addEventListener('keydown', e => {
 });
 </script>
 <script src="pixelpilot-api-client.js"></script>
+  <script src="pixelpilot-api-client.js"></script>
+<script>
+const api = new PixelPilotAPI();
+
+// Fake user ID for now — replace with real auth later
+const USER_ID = "demo-user-" + (localStorage.getItem("ppUserId") || (() => {
+  const id = Math.random().toString(36).slice(2);
+  localStorage.setItem("ppUserId", id);
+  return id;
+})());
+
+async function handleVideoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  showToast("⬆ Uploading " + file.name + "...");
+
+  try {
+    // 1. Upload the video
+    const upload = await api.uploadVideo(file, USER_ID, file.name);
+    localStorage.setItem("currentProjectId", upload.project_id);
+    showToast("✅ Uploaded! Starting AI processing...");
+
+    // 2. Kick off AI jobs
+    const processing = await api.processVideo(
+      upload.project_id,
+      USER_ID,
+      ["remove_silences", "transcribe"],
+      {
+        remove_silences: { min_silence_ms: 500 },
+      }
+    );
+
+    // 3. Poll each job and update UI
+    processing.job_ids.forEach(jobId => {
+      api.pollJob(jobId, (progress, status) => {
+        showToast(`🤖 AI: ${status} — ${progress}%`);
+      }).then(job => {
+        showToast("✨ Done: " + job.job_type + " complete!");
+      }).catch(err => {
+        showToast("❌ Job failed: " + err.message);
+      });
+    });
+
+  } catch (err) {
+    showToast("❌ Upload failed: " + err.message);
+  }
+}
+</script>
 </body>
 </html>
