@@ -1165,87 +1165,62 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
+</body>
+</html>
 <script src="pixelpilot-api-client.js"></script>
 <script>
-const api = new PixelPilotAPI();
-const USER_ID = "demo-user-" + (localStorage.getItem("ppUserId") || "guest");
-
-// Load real projects on page load
-async function loadProjects() {
+// ── API integration with safe fallback ──
+// If backend isn't ready yet, demo cards stay visible (non-fatal)
+(async () => {
   try {
-    const res = await api.listProjects(USER_ID);
-    if (!res.projects.length) return; // keep the demo cards if no real projects yet
+    const api = new PixelPilotAPI();
+    const userId = localStorage.getItem("ppUserId") || "guest";
+    const res = await api.listProjects(userId);
+
+    if (!res.projects || !res.projects.length) return; // keep demo cards
 
     const grid = document.getElementById("projectsGrid");
     const list = document.getElementById("projectsList");
+    if (!grid) return;
+
     grid.innerHTML = "";
-    list.innerHTML = "";
+    if (list) list.innerHTML = "";
 
     res.projects.forEach(p => {
-      const statusClass = {
-        draft: "s-draft", processing: "s-edit",
-        ready: "s-ready", exported: "s-exported"
-      }[p.status] || "s-draft";
+      const statusClass = { draft:"s-draft", processing:"s-edit", ready:"s-ready", exported:"s-exported" }[p.status] || "s-draft";
+      const statusLabel = { draft:"Draft", processing:"AI editing", ready:"Ready", exported:"Exported" }[p.status] || p.status;
+      const sizeMB  = p.file_size_bytes ? (p.file_size_bytes/1024/1024).toFixed(0)+" MB" : "—";
+      const dur     = p.duration_seconds ? new Date(p.duration_seconds*1000).toISOString().slice(14,19) : "—";
+      const dateStr = new Date(p.created_at).toLocaleDateString();
 
-      const statusLabel = {
-        draft: "Draft", processing: "AI editing",
-        ready: "Ready", exported: "Exported"
-      }[p.status] || p.status;
-
-      const sizeMB = p.file_size_bytes
-        ? (p.file_size_bytes / 1024 / 1024).toFixed(0) + " MB"
-        : "—";
-
-      const duration = p.duration_seconds
-        ? new Date(p.duration_seconds * 1000).toISOString().slice(14, 19)
-        : "—";
-
-      // Grid card
       grid.innerHTML += `
-        <div class="proj-card" onclick="openProject('${p.id}')">
+        <div class="proj-card" onclick="localStorage.setItem('currentProjectId','${p.id}');window.location.href='pixelpilot-dashboard.html'">
           <div class="proj-thumb">
             <div class="thumb-gradient" style="background:linear-gradient(135deg,#0d0d1a,#001a14)"></div>
             <div class="thumb-icon">🎬</div>
             <div class="thumb-overlay"></div>
-            <div class="thumb-duration">${duration}</div>
-            <div class="thumb-res">${p.resolution || 'HD'}</div>
-            <div class="thumb-actions">
-              <div class="thumb-action-btn play" onclick="event.stopPropagation();showToast('▶ Preview')">▶</div>
-              <div class="thumb-action-btn" onclick="event.stopPropagation();openProject('${p.id}')">✏</div>
-            </div>
+            <div class="thumb-duration">${dur}</div>
+            <div class="thumb-res">${p.resolution||'HD'}</div>
           </div>
           <div class="proj-body">
             <div class="proj-name">${p.name}</div>
-            <div class="proj-meta">${duration} <span class="meta-sep"></span> ${sizeMB}</div>
-            <div class="proj-footer">
-              <div class="proj-status ${statusClass}">${statusLabel}</div>
-            </div>
+            <div class="proj-meta">${dur} <span class="meta-sep"></span> ${sizeMB} <span class="meta-sep"></span> ${dateStr}</div>
+            <div class="proj-footer"><div class="proj-status ${statusClass}">${statusLabel}</div></div>
           </div>
         </div>`;
 
-      // List row
-      list.innerHTML += `
-        <div class="list-row" onclick="openProject('${p.id}')">
+      if (list) list.innerHTML += `
+        <div class="list-row" onclick="localStorage.setItem('currentProjectId','${p.id}');window.location.href='pixelpilot-dashboard.html'">
           <div class="list-thumb" style="background:linear-gradient(135deg,#0d0d1a,#001a14)">🎬</div>
           <div class="list-name">${p.name}</div>
-          <div class="list-meta">${duration} · ${sizeMB}</div>
+          <div class="list-meta">${dur} · ${sizeMB}</div>
           <div class="proj-status ${statusClass}" style="margin-right:8px">${statusLabel}</div>
-          <div class="list-date">${new Date(p.created_at).toLocaleDateString()}</div>
+          <div class="list-date">${dateStr}</div>
         </div>`;
     });
-  } catch (err) {
-    console.warn("Could not load projects:", err.message);
-    // Demo cards stay visible — non-fatal
+  } catch(e) {
+    // Backend not ready or no projects yet — demo cards stay, no crash
+    console.warn("API not ready yet:", e.message);
   }
-}
-
-function openProject(projectId) {
-  localStorage.setItem("currentProjectId", projectId);
-  window.location.href = "pixelpilot-dashboard.html";
-}
-
-// Run on load
-loadProjects();
+})();
 </script>
-</body>
-</html>
