@@ -1649,8 +1649,7 @@ IMPORTANT:
 
     // Plain text reply
     const cleanReply = reply.replace(/ACTION:.*$/ms, '').trim();
-    aiAppendMsg('ai', cleanReply.replace(/
-/g, '<br>'));
+   aiAppendMsg('ai', cleanReply.replace(/\n/g, '<br>'));
 
   } catch(err) {
     thinking._stopThinking?.();
