@@ -979,7 +979,7 @@ body {
       <div class="save-dot"></div>
       Auto-saving
     </div>
-    <button class="export-btn" onclick="showToast('🚀 Export started — 4K MP4')">
+    <button class="export-btn" onclick="handleExport()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
     </button>
@@ -1433,6 +1433,46 @@ document.addEventListener('keydown', e => {
 document.getElementById('aiInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendMessage(); }
 });
+async function handleExport() {
+  const projectId = localStorage.getItem("currentProjectId");
+  if (!projectId) {
+    showToast("❌ No project open — upload a video first");
+    return;
+  }
+
+  showToast("📦 Starting export...");
+  try {
+    const job = await api.exportVideo(projectId, USER_ID, {
+      format: "mp4",
+      resolution: "1080p",
+      fps: 30
+    });
+
+    showToast("🚀 Export queued — est. " + job.estimated_seconds + "s");
+
+    // Poll until done
+    api.pollJob(job.job_id, (progress) => {
+      showToast("📦 Exporting... " + progress + "%");
+    }).then(done => {
+      const url = done.result?.export_url;
+      showToast("✅ Export ready!");
+      if (url) window.open(url, "_blank");
+    });
+  } catch (err) {
+    showToast("❌ Export failed: " + err.message);
+  }
+}
+```
+
+---
+
+## Step 5 — Upload all changed files to GitHub
+
+Upload these 3 files to your GitHub repo (drag & drop into the repo root):
+```
+pixelpilot-api-client.js   ← updated with your Railway URL
+pixelpilot-dashboard.html  ← upload button + export wired up
+pixelpilot-projects.html   ← loads real projects from API  
 </script>
 <script src="pixelpilot-api-client.js"></script>
   <script src="pixelpilot-api-client.js"></script>
