@@ -940,6 +940,56 @@ body {
   white-space: nowrap;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── Real video player styles ── */
+.empty-state {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; z-index: 5;
+  background: linear-gradient(135deg, #07070c, #0d0d1a);
+}
+.empty-icon { font-size: 40px; opacity: 0.4; }
+.empty-title { font-family: "Bebas Neue", sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--muted2); }
+.empty-sub { font-size: 12px; color: var(--muted); }
+.empty-btn {
+  margin-top: 8px; padding: 9px 22px;
+  border-radius: 7px; border: 1px solid rgba(0,245,196,0.35);
+  background: rgba(0,245,196,0.07); color: var(--teal);
+  font-family: "Epilogue", sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.empty-btn:hover { background: rgba(0,245,196,0.15); }
+
+.caption-overlay {
+  position: absolute; bottom: 14%; left: 50%;
+  transform: translateX(-50%);
+  font-family: "DM Mono", monospace;
+  font-size: clamp(10px, 1.4vw, 15px);
+  color: white;
+  background: rgba(0,0,0,0.65);
+  padding: 4px 12px; border-radius: 4px;
+  text-align: center; max-width: 80%;
+  z-index: 6; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+.caption-overlay.show { opacity: 1; }
+
+/* Media library thumbnails */
+.media-item-thumb {
+  width: 100%; aspect-ratio: 16/9;
+  object-fit: cover; border-radius: 4px;
+  display: block;
+}
+.media-item-placeholder {
+  width: 100%; aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #0d0d1a, #001a14);
+  border-radius: 4px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 20px;
+}
+
 </style>
 </head>
 <body>
@@ -1077,7 +1127,7 @@ body {
 
     <!-- PLAYBACK -->
     <div class="playback-bar">
-      <div class="timecode" id="timecode">00:00:14:22</div>
+      <div class="timecode" id="timecode">00:00:00:00</div>
       <div class="playback-controls">
         <button class="pb-btn" title="Skip back" onclick="skipTime(-5)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
@@ -1094,6 +1144,10 @@ body {
         <button class="pb-btn" title="Skip forward" onclick="skipTime(5)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
         </button>
+      </div>
+      <div class="progress-wrap" style="flex:1;height:4px;background:var(--panel2);border-radius:2px;cursor:pointer;position:relative;margin:0 8px" id="progressBar" onclick="seekVideo(event)">
+        <div id="progressFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:2px;pointer-events:none"></div>
+        <div id="progressHead" style="position:absolute;top:50%;right:auto;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;background:white;left:0%;pointer-events:none;transition:left 0.1s linear"></div>
       </div>
       <div class="volume-row">
         <span class="vol-icon">🔊</span>
@@ -1285,54 +1339,178 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-// Timecode counter
-let seconds = 14, frames = 22;
-let playing = false;
-let timer;
+// ── REAL VIDEO PLAYER ────────────────────────────────────────────
+const vid       = document.getElementById('mainVideo');
+const emptyState = document.getElementById('emptyState');
+const timecodeEl = document.getElementById('timecode');
+const playBtn   = document.getElementById('playBtn');
+const progressFill = document.getElementById('progressFill');
+const progressHead = document.getElementById('progressHead');
+const caption   = document.getElementById('captionOverlay');
+const volSlider = document.querySelector('.vol-slider');
+
+// State
+let _captions = [];   // [{start_ms, end_ms, text}]
+let _clips    = [];   // uploaded project clips
 
 function pad(n, d=2) { return String(n).padStart(d, '0'); }
 
-function updateTimecode() {
-  document.getElementById('timecode').textContent =
-    `00:00:${pad(seconds)}:${pad(frames)}`;
+function fmtTimecode(secs) {
+  secs = secs || 0;
+  const h  = Math.floor(secs / 3600);
+  const m  = Math.floor((secs % 3600) / 60);
+  const s  = Math.floor(secs % 60);
+  const fr = Math.floor((secs % 1) * 30);
+  return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(fr)}`;
 }
 
+// ── Load video into player ──
+function loadVideoIntoPlayer(url, name) {
+  vid.src = url;
+  vid.style.display = 'block';
+  emptyState.style.display = 'none';
+  vid.load();
+  showToast('🎬 Loading: ' + name);
+  updateMediaLibrary(url, name);
+}
+
+// ── Video events ──
+vid.addEventListener('timeupdate', () => {
+  const pct = vid.duration ? (vid.currentTime / vid.duration) * 100 : 0;
+  progressFill.style.width = pct + '%';
+  progressHead.style.left  = pct + '%';
+  timecodeEl.textContent   = fmtTimecode(vid.currentTime);
+  updateCaptions(vid.currentTime * 1000);
+  updateTimelinePlayhead(pct);
+});
+
+vid.addEventListener('loadedmetadata', () => {
+  showToast('✅ Video ready — ' + fmtTimecode(vid.duration));
+  updateTimelineDuration(vid.duration);
+});
+
+vid.addEventListener('ended', () => {
+  playBtn.classList.remove('playing');
+  playBtn.innerHTML = PLAY_ICON;
+});
+
+vid.addEventListener('error', (e) => {
+  showToast('❌ Video load error — check URL');
+  console.error('Video error:', e);
+});
+
+const PLAY_ICON  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+const PAUSE_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+// ── Controls ──
 function togglePlay() {
-  playing = !playing;
-  const btn = document.getElementById('playBtn');
-  if (playing) {
-    btn.classList.add('playing');
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    timer = setInterval(() => {
-      frames++;
-      if (frames >= 30) { frames = 0; seconds++; }
-      if (seconds >= 72) { seconds = 0; frames = 0; }
-      updateTimecode();
-    }, 33);
+  if (!vid.src) { document.getElementById('videoInput').click(); return; }
+  if (vid.paused) {
+    vid.play();
+    playBtn.classList.add('playing');
+    playBtn.innerHTML = PAUSE_ICON;
   } else {
-    btn.classList.remove('playing');
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
-    clearInterval(timer);
+    vid.pause();
+    playBtn.classList.remove('playing');
+    playBtn.innerHTML = PLAY_ICON;
   }
 }
 
 function skipTime(s) {
-  seconds = Math.max(0, Math.min(71, seconds + s));
-  updateTimecode();
+  if (!vid.src) return;
+  vid.currentTime = Math.max(0, Math.min(vid.duration || 0, vid.currentTime + s));
 }
 
-// Subtitle rotation
-const subtitles = [
-  'The light fades at the edge of the world',
-  'Nothing lasts, and that\'s the beauty of it',
-  'A single moment, stretched into forever',
-  'The city breathes in silence after dark',
-];
-let si = 0;
-setInterval(() => {
-  si = (si + 1) % subtitles.length;
-  document.getElementById('subtitleText').textContent = subtitles[si];
-}, 4000);
+function seekVideo(e) {
+  if (!vid.src || !vid.duration) return;
+  const bar  = document.getElementById('progressBar');
+  const rect = bar.getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  vid.currentTime = pct * vid.duration;
+}
+
+// Volume
+if (volSlider) {
+  volSlider.addEventListener('input', () => { vid.volume = volSlider.value / 100; });
+}
+
+// ── Captions ──
+function setCaptions(words) {
+  // Build sentence-level captions from word timestamps
+  _captions = [];
+  if (!words || !words.length) return;
+  let buf = [], startMs = words[0].start;
+  words.forEach((w, i) => {
+    buf.push(w.text);
+    const isLast = i === words.length - 1;
+    const longEnough = buf.join(' ').length > 40;
+    const bigGap = !isLast && (words[i+1].start - w.end) > 800;
+    if (longEnough || bigGap || isLast) {
+      _captions.push({ start_ms: startMs, end_ms: w.end, text: buf.join(' ') });
+      buf = [];
+      if (!isLast) startMs = words[i+1].start;
+    }
+  });
+}
+
+function updateCaptions(currentMs) {
+  const cap = _captions.find(c => currentMs >= c.start_ms && currentMs <= c.end_ms);
+  if (cap) { caption.textContent = cap.text; caption.classList.add('show'); }
+  else { caption.classList.remove('show'); }
+}
+
+// ── Timeline playhead sync ──
+function updateTimelinePlayhead(pct) {
+  const ph = document.getElementById('timelinePlayhead');
+  if (!ph) return;
+  const tl = document.querySelector('.timeline-tracks');
+  if (!tl) return;
+  ph.style.left = pct + '%';
+}
+
+function updateTimelineDuration(dur) {
+  // Update timeline clip widths proportionally if needed
+  showToast('⏱ Duration: ' + fmtTimecode(dur));
+}
+
+// ── Media library: add real uploaded clip ──
+function updateMediaLibrary(url, name) {
+  const lib = document.querySelector('.media-library-items') || document.querySelector('.sidebar-left .media-item')?.parentElement;
+  if (!lib) return;
+
+  // Create thumbnail via video element
+  const thumbVid = document.createElement('video');
+  thumbVid.src   = url;
+  thumbVid.preload = 'metadata';
+  thumbVid.muted = true;
+
+  const item = document.createElement('div');
+  item.className = 'media-item selected';
+  item.style.cssText = 'cursor:pointer;position:relative';
+  item.onclick = () => loadVideoIntoPlayer(url, name);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 80; canvas.height = 45;
+  canvas.style.cssText = 'width:100%;border-radius:4px;display:block';
+  item.appendChild(canvas);
+
+  const dur = document.createElement('div');
+  dur.className = 'media-duration';
+  dur.textContent = '—';
+  item.appendChild(dur);
+
+  thumbVid.addEventListener('loadedmetadata', () => {
+    thumbVid.currentTime = Math.min(1, thumbVid.duration * 0.1);
+    dur.textContent = fmtTimecode(thumbVid.duration).slice(3,8); // MM:SS
+  });
+  thumbVid.addEventListener('seeked', () => {
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(thumbVid, 0, 0, canvas.width, canvas.height);
+  });
+
+  // Prepend to media library
+  lib.insertBefore(item, lib.firstChild);
+}
 
 // Toast
 let toastTimer;
@@ -1456,34 +1634,88 @@ if (typeof window._ppApiLoaded === 'undefined') {
   async function handleVideoUpload(input) {
     const file = input.files[0];
     if (!file) return;
-    input.value = ''; // reset so same file can be re-selected
+    input.value = '';
 
-    showToast('⬆ Uploading ' + file.name + '...');
+    // ── Instant local preview while uploading ──
+    const localURL = URL.createObjectURL(file);
+    loadVideoIntoPlayer(localURL, file.name);
+    showToast('⬆ Uploading ' + file.name + ' to cloud...');
 
     try {
+      // ── Upload to backend ──
       const upload = await _api.uploadVideo(file, _userId, file.name);
       localStorage.setItem('currentProjectId', upload.project_id);
-      showToast('✅ Uploaded! AI processing starting...');
 
+      // ── Switch to cloud URL (clean, no ?) ──
+      const cloudURL = upload.video_url.replace(/\?$/, '');
+      vid.src = cloudURL;
+
+      showToast('✅ Uploaded! Starting AI analysis...');
+      updateProjectName(file.name);
+
+      // ── Kick off AI processing ──
       const processing = await _api.processVideo(
         upload.project_id, _userId,
         ['remove_silences', 'transcribe'],
-        { remove_silences: { min_silence_ms: 500 } }
+        { remove_silences: { min_silence_ms: 400 } }
       );
 
+      // ── Poll each job ──
       processing.job_ids.forEach(jobId => {
         _api.pollJob(jobId, (progress, status) => {
           showToast('🤖 AI ' + status + ' — ' + progress + '%');
         }).then(job => {
-          showToast('✨ ' + job.job_type.replace('_',' ') + ' complete!');
+          const type = job.job_type.replace(/_/g,' ');
+          showToast('✨ ' + type + ' complete!');
+
+          // Apply captions if transcription done
+          if (job.job_type === 'transcribe' && job.result?.words) {
+            setCaptions(job.result.words);
+            showToast('💬 Captions ready — playing with subtitles!');
+          }
+
+          // Apply silence markers if silence removal done
+          if (job.job_type === 'remove_silences' && job.result?.silence_segments) {
+            markSilences(job.result.silence_segments);
+            const saved = job.result.total_silence_saved_seconds;
+            showToast('✂ Removed ' + job.result.silence_count + ' silences — saved ' + saved + 's');
+          }
         }).catch(err => {
           showToast('❌ ' + err.message);
         });
       });
 
     } catch(err) {
-      showToast('❌ Upload failed: ' + err.message);
+      // Local preview still works even if upload fails
+      showToast('⚠ Cloud upload failed — playing local preview');
+      console.error('Upload error:', err);
     }
+  }
+
+  // ── Update project name in topbar ──
+  function updateProjectName(name) {
+    const el = document.querySelector('.project-name');
+    if (el) el.childNodes[1].textContent = name;
+  }
+
+  // ── Mark silence segments on timeline ──
+  function markSilences(segments) {
+    const tl = document.querySelector('.tl-track[data-track="v1"]') || document.querySelector('.tl-clips');
+    if (!tl || !vid.duration) return;
+    segments.forEach(seg => {
+      const pctStart = (seg.start_ms / 1000 / vid.duration) * 100;
+      const pctWidth = (seg.duration_ms / 1000 / vid.duration) * 100;
+      const marker = document.createElement('div');
+      marker.title = 'Silence: ' + seg.duration_ms + 'ms';
+      marker.style.cssText = `
+        position:absolute; top:0; bottom:0;
+        left:${pctStart}%; width:${pctWidth}%;
+        background:rgba(255,87,32,0.25);
+        border-left:1px solid rgba(255,87,32,0.6);
+        pointer-events:none; z-index:10;
+      `;
+      tl.appendChild(marker);
+    });
   }
 
   // ── EXPORT ──────────────────────────────────────
@@ -1511,5 +1743,29 @@ if (typeof window._ppApiLoaded === 'undefined') {
   // expose to global scope so onclick attributes work
   window.handleVideoUpload = handleVideoUpload;
   window.handleExport = handleExport;
+  window.loadVideoIntoPlayer = loadVideoIntoPlayer;
+
+  // ── Load project video on page load (if returning from projects) ──
+  (async () => {
+    const projectId = localStorage.getItem('currentProjectId');
+    if (!projectId) return;
+    try {
+      const proj = await _api.getProject(projectId, _userId);
+      if (proj.video_url) {
+        const url = proj.video_url.replace(/\?$/, '');
+        loadVideoIntoPlayer(url, proj.name);
+        updateProjectName(proj.name);
+
+        // Also restore any completed captions
+        const transcribeJob = (proj.jobs || []).find(j => j.job_type === 'transcribe' && j.status === 'done');
+        if (transcribeJob?.result?.words) {
+          setCaptions(transcribeJob.result.words);
+          showToast('💬 Captions restored from last session');
+        }
+      }
+    } catch(e) {
+      console.warn('Could not restore project:', e.message);
+    }
+  })();
 }
 </script>
