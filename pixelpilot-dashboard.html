@@ -1360,11 +1360,9 @@ document.addEventListener('DOMContentLoaded', function() {
   initVideoPlayer();
 });
 
-function initVideoPlayer() {
-
-// State
-let _captions = [];   // [{start_ms, end_ms, text}]
-let _clips    = [];   // uploaded project clips
+// ── Globals accessible to onclick attributes ──
+let _captions = [];
+let _clips    = [];
 
 function pad(n, d=2) { return String(n).padStart(d, '0'); }
 
@@ -1376,6 +1374,8 @@ function fmtTimecode(secs) {
   const fr = Math.floor((secs % 1) * 30);
   return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(fr)}`;
 }
+
+function initVideoPlayer() {
 
 // ── Load video into player ── (globally safe, works before or after DOMContentLoaded)
 function loadVideoIntoPlayer(url, name) {
@@ -1417,42 +1417,44 @@ vid.addEventListener('error', (e) => {
   console.error('Video error:', e);
 });
 
+// Volume wiring (inside initVideoPlayer, needs volSlider ready)
+  if (volSlider) {
+    volSlider.addEventListener('input', () => { vid.volume = volSlider.value / 100; });
+  }
+} // end initVideoPlayer
+
+// ── Controls (global scope — used by onclick attributes) ──
 const PLAY_ICON  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
 const PAUSE_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
 
-// ── Controls ──
 function togglePlay() {
-  if (!vid || !vid.src) { document.getElementById('videoInput').click(); return; }
-  if (vid.paused) {
-    vid.play();
-    playBtn.classList.add('playing');
-    playBtn.innerHTML = PAUSE_ICON;
+  const _v = vid || document.getElementById('mainVideo');
+  const _b = playBtn || document.getElementById('playBtn');
+  if (!_v || !_v.src) { document.getElementById('videoInput').click(); return; }
+  if (_v.paused) {
+    _v.play();
+    if (_b) { _b.classList.add('playing'); _b.innerHTML = PAUSE_ICON; }
   } else {
-    vid.pause();
-    playBtn.classList.remove('playing');
-    playBtn.innerHTML = PLAY_ICON;
+    _v.pause();
+    if (_b) { _b.classList.remove('playing'); _b.innerHTML = PLAY_ICON; }
   }
 }
 
 function skipTime(s) {
-  if (!vid || !vid.src) return;
-  vid.currentTime = Math.max(0, Math.min(vid.duration || 0, vid.currentTime + s));
+  const _v = vid || document.getElementById('mainVideo');
+  if (!_v || !_v.src) return;
+  _v.currentTime = Math.max(0, Math.min(_v.duration || 0, _v.currentTime + s));
 }
 
 function seekVideo(e) {
-  if (!vid || !vid.src || !vid.duration) return;
+  const _v = vid || document.getElementById('mainVideo');
+  if (!_v || !_v.src || !_v.duration) return;
   const bar  = document.getElementById('progressBar');
+  if (!bar) return;
   const rect = bar.getBoundingClientRect();
   const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  vid.currentTime = pct * vid.duration;
+  _v.currentTime = pct * _v.duration;
 }
-
-// Volume
-if (volSlider) {
-  volSlider.addEventListener('input', () => { vid.volume = volSlider.value / 100; });
-}
-
-} // end initVideoPlayer
 
 // ── Captions ──
 function setCaptions(words) {
