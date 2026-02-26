@@ -1377,15 +1377,20 @@ function fmtTimecode(secs) {
   return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(fr)}`;
 }
 
-// ── Load video into player ──
+// ── Load video into player ── (globally safe, works before or after DOMContentLoaded)
 function loadVideoIntoPlayer(url, name) {
-  vid.src = url;
-  vid.style.display = 'block';
-  emptyState.style.display = 'none';
-  vid.load();
-  showToast('🎬 Loading: ' + name);
-  updateMediaLibrary(url, name);
+  const _vid = vid || document.getElementById('mainVideo');
+  const _es  = emptyState || document.getElementById('emptyState');
+  if (!_vid) { console.warn('Video element not ready yet'); return; }
+  _vid.src = url;
+  _vid.style.display = 'block';
+  if (_es) _es.style.display = 'none';
+  _vid.load();
+  showToast('🎬 Loading: ' + (name || 'video'));
+  updateMediaLibrary(url, name || 'video');
 }
+// Expose immediately so API block can call it before DOMContentLoaded
+window.loadVideoIntoPlayer = loadVideoIntoPlayer;
 
 // ── Video events ──
 vid.addEventListener('timeupdate', () => {
@@ -1490,7 +1495,9 @@ function updateTimelineDuration(dur) {
 
 // ── Media library: add real uploaded clip ──
 function updateMediaLibrary(url, name) {
-  const lib = document.querySelector('.media-library-items') || document.querySelector('.sidebar-left .media-item')?.parentElement;
+  const lib = document.querySelector('.media-library-items') 
+    || document.querySelector('#mediaList')
+    || document.querySelector('.add-media-btn')?.parentElement;
   if (!lib) return;
 
   // Create thumbnail via video element
@@ -1758,10 +1765,9 @@ if (typeof window._ppApiLoaded === 'undefined') {
   // expose to global scope so onclick attributes work
   window.handleVideoUpload = handleVideoUpload;
   window.handleExport = handleExport;
-  window.loadVideoIntoPlayer = loadVideoIntoPlayer;
 
   // ── Load project video on page load (if returning from projects) ──
-  (async () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     const projectId = localStorage.getItem('currentProjectId');
     if (!projectId) return;
     try {
@@ -1781,6 +1787,6 @@ if (typeof window._ppApiLoaded === 'undefined') {
     } catch(e) {
       console.warn('Could not restore project:', e.message);
     }
-  })();
+  });
 }
 </script>
