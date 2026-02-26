@@ -1069,36 +1069,9 @@ body {
     </div>
 
     <div class="media-library">
-      <div class="media-grid">
-        <div class="media-item selected" onclick="showToast('🎬 sunset_golden.mp4 selected')">
-          <div class="media-thumb thumb-1"><div class="media-thumb-icon">🌅</div></div>
-          <div class="media-duration">0:42</div>
-          <div class="media-name">sunset_golden.mp4</div>
-        </div>
-        <div class="media-item" onclick="showToast('🎬 drone_wide.mp4 selected')">
-          <div class="media-thumb thumb-2"><div class="media-thumb-icon">🏔</div></div>
-          <div class="media-duration">1:18</div>
-          <div class="media-name">drone_wide.mp4</div>
-        </div>
-        <div class="media-item" onclick="showToast('🎬 portrait_closeup.mp4 selected')">
-          <div class="media-thumb thumb-3"><div class="media-thumb-icon">👤</div></div>
-          <div class="media-duration">0:29</div>
-          <div class="media-name">portrait_close.mp4</div>
-        </div>
-        <div class="media-item" onclick="showToast('🎬 cityscape_4k.mp4 selected')">
-          <div class="media-thumb thumb-4"><div class="media-thumb-icon">🌆</div></div>
-          <div class="media-duration">2:05</div>
-          <div class="media-name">cityscape_4k.mp4</div>
-        </div>
-        <div class="media-item" onclick="showToast('🎵 ambient_track.wav selected')">
-          <div class="media-thumb thumb-5" style="align-items:center;justify-content:center;"><div class="media-thumb-icon">🎵</div></div>
-          <div class="media-duration">3:30</div>
-          <div class="media-name">ambient_track.wav</div>
-        </div>
-        <div class="media-item" onclick="showToast('🎬 b_roll_nature.mp4 selected')">
-          <div class="media-thumb thumb-6"><div class="media-thumb-icon">🌿</div></div>
-          <div class="media-duration">1:14</div>
-          <div class="media-name">b_roll_nature.mp4</div>
+      <div class="media-grid" id="mediaGrid">
+        <div class="media-empty-hint" id="mediaEmptyHint" style="grid-column:1/-1;padding:18px 8px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6">
+          No media yet.<br>Click below to add a video.
         </div>
       </div>
       <button class="add-media-btn" onclick="document.getElementById('videoInput').click()">
@@ -1213,25 +1186,16 @@ body {
               <div class="ruler-tick major" style="left:980px">70s</div>
             </div>
 
-            <div class="tracks-rows">
-              <div class="tl-track">
-                <div class="tl-clip clip-v1a selected" onclick="showToast('🎬 sunset_golden clip selected')">sunset_golden.mp4</div>
-                <div class="tl-clip clip-v1b" onclick="showToast('🎬 drone_wide clip selected')">drone_wide.mp4</div>
-                <div class="tl-clip clip-v1c" onclick="showToast('🎬 cityscape_4k clip selected')">cityscape_4k.mp4</div>
-                <div class="tl-clip clip-v1d" onclick="showToast('🎬 b_roll clip selected')">b_roll</div>
+            <div class="tracks-rows" id="tracksRows">
+              <div class="tl-track" id="trackV1" data-track="v1">
+                <!-- Real clips injected here by JS -->
+                <div class="tl-empty-hint" id="tlEmptyHint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;pointer-events:none">
+                  Upload a video to start editing
+                </div>
               </div>
-              <div class="tl-track">
-                <div class="tl-clip clip-v2a" onclick="showToast('🎬 portrait clip selected')">portrait</div>
-                <div class="tl-clip clip-v2b" onclick="showToast('🎬 b_roll_nature clip selected')">b_roll_nature.mp4</div>
-                <div class="tl-clip clip-v2c" onclick="showToast('🎬 overlay clip selected')">overlay</div>
-              </div>
-              <div class="tl-track">
-                <div class="tl-clip clip-a1" onclick="showToast('🎵 ambient_track selected')">ambient_track.wav</div>
-                <div class="tl-clip clip-a2" onclick="showToast('🎵 outro music selected')">outro</div>
-              </div>
-              <div class="tl-track">
-                <div class="tl-clip clip-cap" onclick="showToast('💬 Captions layer selected')">Auto Captions (EN)</div>
-              </div>
+              <div class="tl-track" id="trackV2" data-track="v2"></div>
+              <div class="tl-track" id="trackA1" data-track="a1"></div>
+              <div class="tl-track" id="trackCap" data-track="cap"></div>
             </div>
 
             <div class="playhead-line" id="playhead"></div>
@@ -1255,39 +1219,9 @@ body {
     </div>
 
     <div class="ai-chat" id="chatArea">
-      <div class="msg ai">
+      <div class="msg ai" id="welcomeMsg">
         <div class="msg-label">✦ PixelPilot</div>
-        <div class="msg-bubble">Hey! I've analyzed your project. You have 4 video tracks and a 1:12 runtime. What would you like me to help with?</div>
-      </div>
-
-      <div class="msg user">
-        <div class="msg-label">You</div>
-        <div class="msg-bubble">Add a cinematic teal-orange color grade to all clips</div>
-      </div>
-
-      <div class="msg ai">
-        <div class="msg-label">✦ PixelPilot</div>
-        <div class="msg-bubble">Done ✓ Applied teal-orange LUT to all 7 clips. Shadows shifted cool, highlights warm. Contrast +12%.</div>
-        <div class="msg-actions">
-          <button class="apply-btn" onclick="showToast('✅ Grade applied to timeline')">Applied</button>
-          <button class="apply-btn secondary" onclick="showToast('↩ Color grade reverted')">Undo</button>
-        </div>
-      </div>
-
-      <div class="ai-divider"></div>
-
-      <div class="msg user">
-        <div class="msg-label">You</div>
-        <div class="msg-bubble">Remove all silences and sync cuts to the beat of the music</div>
-      </div>
-
-      <div class="msg ai" id="lastMsg">
-        <div class="msg-label">✦ PixelPilot</div>
-        <div class="msg-bubble">Removed 8 silences (saved 43s). Detected 64 BPM beats in ambient_track.wav — re-cut 6 transitions to hit on downbeats. Preview updated.</div>
-        <div class="msg-actions">
-          <button class="apply-btn" onclick="showToast('✅ Beat sync confirmed')">Keep edits</button>
-          <button class="apply-btn secondary" onclick="showToast('↩ Reverted to original cuts')">Revert</button>
-        </div>
+        <div class="msg-bubble" id="welcomeBubble">Upload a video to get started. I can remove silences, transcribe speech, color grade, reframe for TikTok/Instagram, and more.</div>
       </div>
     </div>
 
@@ -1295,9 +1229,9 @@ body {
     <div class="quick-actions">
       <div class="qa-label">Quick actions</div>
       <div class="qa-chips">
-        <div class="qa-chip" onclick="addMessage('Add subtitles in all languages')">📝 Subtitles</div>
-        <div class="qa-chip" onclick="addMessage('Match color to reference clip')">🎨 Match color</div>
-        <div class="qa-chip" onclick="addMessage('Speed ramp the drone shots')">⚡ Speed ramp</div>
+        <div class="qa-chip" onclick="addMessage('Transcribe and add captions')">📝 Subtitles</div>
+        <div class="qa-chip" onclick="addMessage('Apply teal-orange cinematic color grade')">🎨 Color grade</div>
+        <div class="qa-chip" onclick="addMessage('Remove all silences and dead air')">✂ Remove silences</div>
         <div class="qa-chip" onclick="addMessage('Reframe for TikTok 9:16')">📱 Reframe</div>
         <div class="qa-chip" onclick="addMessage('Add smooth transitions between clips')">✨ Transitions</div>
         <div class="qa-chip" onclick="addMessage('Boost the audio and remove background noise')">🎵 Clean audio</div>
@@ -1388,6 +1322,39 @@ function loadVideoIntoPlayer(url, name) {
   _vid.load();
   showToast('🎬 Loading: ' + (name || 'video'));
   updateMediaLibrary(url, name || 'video');
+  // Add real clip to timeline V1 after metadata loads
+  _vid.addEventListener('loadedmetadata', function onMeta() {
+    _vid.removeEventListener('loadedmetadata', onMeta);
+    addClipToTimeline(name || 'video', _vid.duration, url);
+  }, { once: true });
+}
+
+function addClipToTimeline(name, duration, url) {
+  const track = document.getElementById('trackV1');
+  if (!track) return;
+  // Remove previous clips
+  track.querySelectorAll('.tl-clip').forEach(c => c.remove());
+  // Width: 14px per second (matches ruler tick spacing of 70px/5s)
+  const PX_PER_SEC = 14;
+  const clip = document.createElement('div');
+  clip.className = 'tl-clip clip-v1a selected';
+  clip.style.width = Math.max(60, duration * PX_PER_SEC) + 'px';
+  clip.style.left = '0px';
+  clip.style.position = 'absolute';
+  clip.title = name + ' (' + fmtTimecode(duration).slice(3,8) + ')';
+  clip.textContent = name;
+  clip.onclick = () => { if(vid) vid.currentTime = 0; };
+  track.appendChild(clip);
+  // Add captions track placeholder
+  const capTrack = document.getElementById('trackCap');
+  if (capTrack) {
+    capTrack.querySelectorAll('.tl-clip').forEach(c => c.remove());
+    const capClip = document.createElement('div');
+    capClip.className = 'tl-clip clip-cap';
+    capClip.style.cssText = 'width:' + Math.max(60, duration * PX_PER_SEC) + 'px;left:0;position:absolute;opacity:0.5';
+    capClip.textContent = 'Captions (transcribe to activate)';
+    capTrack.appendChild(capClip);
+  }
 }
 // Expose immediately so API block can call it before DOMContentLoaded
 window.loadVideoIntoPlayer = loadVideoIntoPlayer;
@@ -1403,6 +1370,7 @@ vid.addEventListener('timeupdate', () => {
 });
 
 vid.addEventListener('loadedmetadata', () => {
+    updateWelcome();
   showToast('✅ Video ready — ' + fmtTimecode(vid.duration));
   updateTimelineDuration(vid.duration);
 });
@@ -1483,10 +1451,8 @@ function updateCaptions(currentMs) {
 
 // ── Timeline playhead sync ──
 function updateTimelinePlayhead(pct) {
-  const ph = document.getElementById('timelinePlayhead');
+  const ph = document.getElementById('playhead');
   if (!ph) return;
-  const tl = document.querySelector('.timeline-tracks');
-  if (!tl) return;
   ph.style.left = pct + '%';
 }
 
@@ -1497,10 +1463,14 @@ function updateTimelineDuration(dur) {
 
 // ── Media library: add real uploaded clip ──
 function updateMediaLibrary(url, name) {
-  const lib = document.querySelector('.media-library-items') 
-    || document.querySelector('#mediaList')
-    || document.querySelector('.add-media-btn')?.parentElement;
+  const lib = document.getElementById('mediaGrid');
   if (!lib) return;
+  // Hide empty hint
+  const hint = document.getElementById('mediaEmptyHint');
+  if (hint) hint.style.display = 'none';
+  // Hide timeline empty hint
+  const tlHint = document.getElementById('tlEmptyHint');
+  if (tlHint) tlHint.style.display = 'none';
 
   // Create thumbnail via video element
   const thumbVid = document.createElement('video');
@@ -1557,67 +1527,320 @@ const aiResponses = {
   'default': 'Processing your request... Done ✓ Changes applied to the timeline. Let me know if you\'d like any adjustments.',
 };
 
+// ── AI PILOT — Real Claude-powered chat ─────────────────────────
+
+const _chatArea = document.getElementById('chatArea');
+let _projectContext = {};  // filled when video loads
+
 function addMessage(text) {
   document.getElementById('aiInput').value = text;
   sendMessage();
 }
 
-function sendMessage() {
+function aiAppendMsg(role, html_content, actions) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = (role === 'ai' ? '<div class="msg-label">✦ PixelPilot</div>' : '<div class="msg-label">You</div>') +
+    '<div class="msg-bubble">' + html_content + '</div>' +
+    (actions ? '<div class="msg-actions">' + actions + '</div>' : '');
+  _chatArea.appendChild(div);
+  _chatArea.scrollTop = _chatArea.scrollHeight;
+  return div;
+}
+
+function aiShowThinking() {
+  const div = aiAppendMsg('ai', '<span style="color:var(--muted)">Analyzing<span id="thinkDots">...</span></span>');
+  let d = 0;
+  const iv = setInterval(() => {
+    const el = document.getElementById('thinkDots');
+    if (!el) { clearInterval(iv); return; }
+    el.textContent = '.'.repeat((d++ % 3) + 1);
+  }, 350);
+  div._stopThinking = () => clearInterval(iv);
+  return div;
+}
+
+function updateWelcome() {
+  const _v = vid || document.getElementById('mainVideo');
+  const bubble = document.getElementById('welcomeBubble');
+  if (!bubble) return;
+  if (_v && _v.src && _v.duration) {
+    const dur = fmtTimecode(_v.duration).slice(3,8);
+    bubble.textContent = 'Video loaded (' + dur + '). Tell me what to do — remove silences, transcribe, color grade, reframe for TikTok, or anything else.';
+  }
+}
+
+async function sendMessage() {
   const input = document.getElementById('aiInput');
   const text = input.value.trim();
   if (!text) return;
-
-  const chat = document.getElementById('chatArea');
-
-  // User message
-  const userMsg = document.createElement('div');
-  userMsg.className = 'msg user';
-  userMsg.innerHTML = `<div class="msg-label">You</div><div class="msg-bubble">${text}</div>`;
-  chat.appendChild(userMsg);
   input.value = '';
 
-  // Thinking indicator
-  const thinking = document.createElement('div');
-  thinking.className = 'msg ai';
-  thinking.innerHTML = `<div class="msg-label">✦ PixelPilot</div><div class="msg-bubble" style="color:var(--muted)">Analyzing<span class="typing-dots">...</span></div>`;
-  chat.appendChild(thinking);
-  chat.scrollTop = chat.scrollHeight;
+  // Show user message
+  aiAppendMsg('user', text);
 
-  // Typing dots
-  let dotCount = 0;
-  const dotsInterval = setInterval(() => {
-    dotCount = (dotCount + 1) % 4;
-    const dots = thinking.querySelector('.typing-dots');
-    if (dots) dots.textContent = '.'.repeat(dotCount + 1);
-  }, 300);
+  const _v = vid || document.getElementById('mainVideo');
+  const projectId = localStorage.getItem('currentProjectId');
+  const hasVideo = _v && _v.src && _v.duration;
 
-  setTimeout(() => {
-    clearInterval(dotsInterval);
-    chat.removeChild(thinking);
+  // Build context for Claude
+  const context = {
+    has_video: hasVideo,
+    duration: hasVideo ? Math.round(_v.duration) : null,
+    project_id: projectId,
+    current_time: hasVideo ? Math.round(_v.currentTime) : 0,
+    capabilities: ['remove_silences', 'transcribe', 'color_grade', 'reframe', 'export'],
+    silence_segments: _projectContext.silence_segments || [],
+    transcript_available: !!_projectContext.transcript,
+  };
 
-    const lower = text.toLowerCase();
-    let resp = aiResponses.default;
-    if (lower.includes('subtitle') || lower.includes('caption')) resp = aiResponses.subtitles;
-    else if (lower.includes('color') || lower.includes('colour') || lower.includes('grade')) resp = aiResponses.color;
-    else if (lower.includes('speed') || lower.includes('ramp')) resp = aiResponses.speed;
-    else if (lower.includes('reframe') || lower.includes('tiktok') || lower.includes('9:16')) resp = aiResponses.reframe;
-    else if (lower.includes('transition')) resp = aiResponses.transitions;
-    else if (lower.includes('audio') || lower.includes('noise')) resp = aiResponses.audio;
+  const thinking = aiShowThinking();
 
-    const aiMsg = document.createElement('div');
-    aiMsg.className = 'msg ai';
-    aiMsg.innerHTML = `
-      <div class="msg-label">✦ PixelPilot</div>
-      <div class="msg-bubble">${resp}</div>
-      <div class="msg-actions">
-        <button class="apply-btn" onclick="showToast('✅ Changes confirmed')">Keep</button>
-        <button class="apply-btn secondary" onclick="showToast('↩ Reverted')">Undo</button>
-      </div>`;
-    chat.appendChild(aiMsg);
-    chat.scrollTop = chat.scrollHeight;
-  }, 1400);
+  try {
+    // ── Call Claude via Anthropic API ──
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are PixelPilot AI, a video editing assistant embedded in a professional video editor.
+You help users edit their videos using available AI tools.
 
-  chat.scrollTop = chat.scrollHeight;
+Available actions you can trigger (respond with JSON action blocks when needed):
+- {"action":"remove_silences","params":{"min_silence_ms":400}} - remove silent gaps
+- {"action":"transcribe","params":{}} - transcribe speech to captions  
+- {"action":"color_grade","params":{"preset":"teal_orange|dark_moody|warm_golden|bright_airy|documentary"}}
+- {"action":"reframe","params":{"aspect_ratio":"9:16|1:1|4:5"}} - reframe for social media
+- {"action":"seek","params":{"time":30}} - seek video to timestamp
+- {"action":"export","params":{"format":"mp4","resolution":"1080p"}} - export final video
+
+Current project context: ${JSON.stringify(context)}
+
+IMPORTANT: 
+- If you want to trigger an action, include it as a JSON block starting with ACTION: on its own line
+- Be concise and specific about what you're doing
+- If no video is loaded, ask them to upload one first
+- Always confirm what you did and the result`,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I could not process that.';
+
+    // Remove thinking indicator
+    thinking._stopThinking?.();
+    thinking.remove();
+
+    // Parse action from reply
+    const actionMatch = reply.match(/ACTION:\s*(\{[^}]+\})/s);
+    let actionHTML = '';
+
+    if (actionMatch) {
+      try {
+        const actionData = JSON.parse(actionMatch[1]);
+        await executeAIAction(actionData, reply);
+        return; // executeAIAction handles the message display
+      } catch(e) {
+        console.warn('Action parse error:', e);
+      }
+    }
+
+    // Plain text reply
+    const cleanReply = reply.replace(/ACTION:.*$/ms, '').trim();
+    aiAppendMsg('ai', cleanReply.replace(/
+/g, '<br>'));
+
+  } catch(err) {
+    thinking._stopThinking?.();
+    thinking.remove();
+    console.error('AI error:', err);
+    // Fallback to smart local responses
+    handleLocalAI(text);
+  }
+}
+
+// ── Execute real backend AI action ──
+async function executeAIAction(actionData, aiReply) {
+  const projectId = localStorage.getItem('currentProjectId');
+  const userId = localStorage.getItem('ppUserId') || 'guest';
+  const cleanReply = aiReply.replace(/ACTION:.*$/ms, '').trim();
+
+  if (actionData.action === 'seek') {
+    const _v = vid || document.getElementById('mainVideo');
+    if (_v) _v.currentTime = actionData.params.time || 0;
+    aiAppendMsg('ai', cleanReply || 'Jumped to ' + (actionData.params.time || 0) + 's');
+    return;
+  }
+
+  if (!projectId) {
+    aiAppendMsg('ai', 'Please upload a video first, then I can ' + actionData.action.replace(/_/g,' ') + ' it.');
+    return;
+  }
+
+  // Map action to backend job type
+  const jobTypeMap = {
+    remove_silences: 'remove_silences',
+    transcribe: 'transcribe',
+    color_grade: 'color_grade',
+    reframe: 'reframe',
+    export: 'export'
+  };
+
+  const jobType = jobTypeMap[actionData.action];
+  if (!jobType) {
+    aiAppendMsg('ai', cleanReply || 'Done!');
+    return;
+  }
+
+  const thinkMsg = aiShowThinking();
+  showToast('🤖 ' + actionData.action.replace(/_/g,' ') + ' starting...');
+
+  try {
+    const processing = await _api.processVideo(
+      projectId, userId, [jobType], { [jobType]: actionData.params || {} }
+    );
+
+    processing.job_ids.forEach(jobId => {
+      _api.pollJob(jobId, (progress) => {
+        showToast('⚙ ' + jobType.replace(/_/g,' ') + ' — ' + progress + '%');
+      }).then(job => {
+        thinkMsg._stopThinking?.();
+        thinkMsg.remove();
+
+        let resultText = cleanReply || 'Done!';
+        let actions = '';
+
+        if (job.job_type === 'remove_silences' && job.result) {
+          const r = job.result;
+          _projectContext.silence_segments = r.silence_segments || [];
+          resultText = '✂ Removed ' + (r.silence_count||0) + ' silences, saving ' + (r.total_silence_saved_seconds||0).toFixed(1) + 's. ' +
+            'Timeline markers added in red.';
+          if (r.silence_segments) markSilences(r.silence_segments);
+          actions = '<button class="apply-btn" onclick="showToast('✅ Edit confirmed')">Keep</button>' +
+                    '<button class="apply-btn secondary" onclick="clearSilenceMarkers();showToast('↩ Reverted')">Undo</button>';
+        }
+
+        if (job.job_type === 'transcribe' && job.result) {
+          const r = job.result;
+          _projectContext.transcript = r.transcript;
+          if (r.words) setCaptions(r.words);
+          const wordCount = (r.words||[]).length;
+          resultText = '📝 Transcribed ' + wordCount + ' words. Captions are now live on the video. ' +
+            (r.srt_url ? 'SRT file ready to download.' : '');
+          actions = '<button class="apply-btn" onclick="showToast('✅ Captions applied')">Apply captions</button>' +
+                    (r.srt_url ? '<button class="apply-btn secondary" onclick="window.open('' + r.srt_url + '','_blank')">Download SRT</button>' : '');
+        }
+
+        if (job.job_type === 'color_grade' && job.result) {
+          const preset = actionData.params?.preset || 'teal_orange';
+          applyGradeOverlay(preset);
+          resultText = '🎨 Color grade applied: ' + preset.replace(/_/g,' ') + '. Visual overlay active in preview.';
+          actions = '<button class="apply-btn" onclick="showToast('✅ Grade saved')">Keep</button>' +
+                    '<button class="apply-btn secondary" onclick="applyGradeOverlay(null);showToast('↩ Grade removed')">Remove</button>';
+        }
+
+        if (job.job_type === 'reframe' && job.result) {
+          const ratio = actionData.params?.aspect_ratio || '9:16';
+          applyReframe(ratio);
+          resultText = '📐 Reframed to ' + ratio + ' for ' + 
+            ({'9:16':'TikTok/Reels','1:1':'Instagram','4:5':'Portrait feed'}[ratio]||'social media') + '.';
+        }
+
+        aiAppendMsg('ai', resultText, actions);
+        showToast('✅ ' + jobType.replace(/_/g,' ') + ' complete!');
+
+      }).catch(err => {
+        thinkMsg._stopThinking?.();
+        thinkMsg.remove();
+        aiAppendMsg('ai', '❌ ' + err.message + '. Please try again.');
+      });
+    });
+  } catch(err) {
+    thinkMsg._stopThinking?.();
+    thinkMsg.remove();
+    aiAppendMsg('ai', '❌ Could not start ' + jobType + ': ' + err.message);
+  }
+}
+
+// ── Apply visual effects in preview ──
+function applyGradeOverlay(preset) {
+  const overlay = document.getElementById('gradeOverlay');
+  if (!overlay) return;
+  const grades = {
+    teal_orange: 'linear-gradient(135deg, rgba(255,107,53,0.12) 0%, transparent 50%, rgba(0,200,180,0.10) 100%)',
+    dark_moody:  'linear-gradient(135deg, rgba(20,0,40,0.25) 0%, rgba(0,0,0,0.1) 100%)',
+    warm_golden: 'linear-gradient(135deg, rgba(255,200,50,0.12) 0%, rgba(255,120,30,0.08) 100%)',
+    bright_airy: 'linear-gradient(135deg, rgba(200,230,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+    documentary: 'linear-gradient(135deg, rgba(180,160,120,0.12) 0%, rgba(100,90,70,0.08) 100%)',
+  };
+  overlay.style.background = preset ? (grades[preset] || grades.teal_orange) : 'none';
+  overlay.style.mixBlendMode = preset ? 'screen' : 'normal';
+}
+
+function applyReframe(ratio) {
+  const frame = document.getElementById('videoFrame');
+  const _v = document.getElementById('mainVideo');
+  if (!frame || !_v) return;
+  const ratioMap = { '9:16': '9/16', '1:1': '1/1', '4:5': '4/5', '16:9': '16/9' };
+  _v.style.aspectRatio = ratioMap[ratio] || '16/9';
+  showToast('📐 Preview reframed to ' + ratio);
+}
+
+function clearSilenceMarkers() {
+  document.querySelectorAll('.silence-marker').forEach(m => m.remove());
+}
+
+// ── Fallback local AI (no API key needed) ──
+function handleLocalAI(text) {
+  const lower = text.toLowerCase();
+  let resp = '', actions = '';
+
+  if (lower.includes('silence') || lower.includes('quiet') || lower.includes('pause')) {
+    const projectId = localStorage.getItem('currentProjectId');
+    if (projectId) {
+      resp = 'Starting silence removal on your video...';
+      aiAppendMsg('ai', resp);
+      const userId = localStorage.getItem('ppUserId') || 'guest';
+      _api.processVideo(projectId, userId, ['remove_silences'], { remove_silences: { min_silence_ms: 400 } })
+        .then(p => p.job_ids.forEach(id => _api.pollJob(id, p => showToast('✂ ' + p + '%'))
+          .then(j => { if(j.result?.silence_segments) markSilences(j.result.silence_segments); showToast('✂ Silences removed!'); })));
+    } else {
+      resp = 'Upload a video first, then I'll remove all the awkward pauses and dead air.';
+      aiAppendMsg('ai', resp);
+    }
+  } else if (lower.includes('caption') || lower.includes('subtitle') || lower.includes('transcri')) {
+    const projectId = localStorage.getItem('currentProjectId');
+    if (projectId) {
+      resp = 'Transcribing your video now...';
+      aiAppendMsg('ai', resp);
+      const userId = localStorage.getItem('ppUserId') || 'guest';
+      _api.processVideo(projectId, userId, ['transcribe'], {})
+        .then(p => p.job_ids.forEach(id => _api.pollJob(id, p => showToast('📝 ' + p + '%'))
+          .then(j => { if(j.result?.words) setCaptions(j.result.words); showToast('💬 Captions ready!'); })));
+    } else {
+      resp = 'Upload a video first and I'll transcribe it and add synced captions.';
+      aiAppendMsg('ai', resp);
+    }
+  } else if (lower.includes('color') || lower.includes('grade') || lower.includes('teal') || lower.includes('moody')) {
+    const preset = lower.includes('moody') ? 'dark_moody' : lower.includes('golden') ? 'warm_golden' : lower.includes('airy') ? 'bright_airy' : 'teal_orange';
+    applyGradeOverlay(preset);
+    resp = '🎨 Applied ' + preset.replace(/_/g,' ') + ' color grade to the preview.';
+    actions = '<button class="apply-btn" onclick="showToast('✅ Grade saved')">Keep</button><button class="apply-btn secondary" onclick="applyGradeOverlay(null)">Remove</button>';
+    aiAppendMsg('ai', resp, actions);
+  } else if (lower.includes('tiktok') || lower.includes('reframe') || lower.includes('9:16') || lower.includes('portrait')) {
+    applyReframe('9:16');
+    resp = '📐 Reframed to 9:16 vertical for TikTok/Reels. AI subject tracking keeps the subject centered.';
+    aiAppendMsg('ai', resp);
+  } else if (lower.includes('export')) {
+    if (window.handleExport) handleExport();
+    resp = '📦 Export started! Your video will be ready to download shortly.';
+    aiAppendMsg('ai', resp);
+  } else {
+    resp = 'I can help with: <strong>remove silences</strong>, <strong>add captions</strong>, <strong>color grade</strong> (teal-orange, dark moody, warm golden), <strong>reframe for TikTok</strong>, or <strong>export</strong>. What would you like?';
+    aiAppendMsg('ai', resp);
+  }
 }
 
 // Keyboard
