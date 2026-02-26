@@ -650,7 +650,7 @@ input.error { border-color: var(--error); }
   <div class="lp-noise"></div>
 
   <div class="lp-content">
-    <a href="#" class="logo">Pixel<span>Pilot</span> AI</a>
+    <a href="index.html" class="logo">Pixel<span>Pilot</span> AI</a>
     <div class="lp-headline">
       <div class="lp-eyebrow">AI Video Editing</div>
       <h1 class="lp-h1">Edit video<br>at the<br><em>speed of</em><br>thought</h1>
@@ -883,7 +883,7 @@ input.error { border-color: var(--error); }
       </div>
       <div class="success-title">You're in! 🎉</div>
       <div class="success-sub" id="successSub">Welcome to PixelPilot AI. Your workspace is being set up — takes about 3 seconds.</div>
-      <button class="goto-btn" onclick="showToast('🚀 Launching editor...')">
+      <button class="goto-btn" onclick="window.location.href='pixelpilot-onboarding.html'">
         Open the editor
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
@@ -986,6 +986,7 @@ function handleLogin() {
   setTimeout(() => {
     btn.classList.remove('loading');
     document.getElementById('loginForm').style.display = 'none';
+    setTimeout(() => { window.location.href = 'pixelpilot-onboarding.html'; }, 1800);
     const s = document.getElementById('successScreen');
     document.getElementById('successSub').textContent = `Welcome back! Taking you to your editor now.`;
     s.classList.add('show');
@@ -1012,6 +1013,7 @@ function handleSignup() {
   setTimeout(() => {
     btn.classList.remove('loading');
     document.getElementById('signupForm').style.display = 'none';
+    setTimeout(() => { window.location.href = 'pixelpilot-onboarding.html'; }, 2200);
     const planLabels = { free: 'Starter (Free)', pro: 'Pro ($29/mo)', studio: 'Studio ($99/mo)' };
     document.getElementById('successSub').textContent = `Your ${planLabels[selectedPlan]} workspace is ready. Let's make something great.`;
     document.getElementById('successScreen').classList.add('show');
@@ -1022,6 +1024,7 @@ function socialLogin(provider) {
   showToast(`↗ Redirecting to ${provider}...`);
   setTimeout(() => {
     document.getElementById(activeTab === 'login' ? 'loginForm' : 'signupForm').style.display = 'none';
+    setTimeout(() => { window.location.href = 'pixelpilot-onboarding.html'; }, 1800);
     document.getElementById('successSub').textContent = `Signed in with ${provider}. Your workspace is ready!`;
     document.getElementById('successScreen').classList.add('show');
   }, 1500);
