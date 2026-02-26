@@ -1113,15 +1113,18 @@ body {
     <!-- PREVIEW -->
     <div class="preview">
       <div class="preview-bg"></div>
-      <div class="video-frame">
-        <div class="scene-gradient"></div>
-        <div class="scene-overlay"></div>
+      <div class="video-frame" id="videoFrame">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">🎬</div>
+          <div class="empty-title">No video loaded</div>
+          <div class="empty-sub">Click Add Media to upload a video</div>
+          <button class="empty-btn" onclick="document.getElementById('videoInput').click()">+ Add Media</button>
+        </div>
+        <video id="mainVideo" style="display:none;width:100%;height:100%;object-fit:contain;background:#000" preload="metadata" playsinline></video>
+        <div class="caption-overlay" id="captionOverlay"></div>
         <div class="letterbox-top"></div>
         <div class="letterbox-bottom"></div>
-        <div class="frame-text">
-          <div class="frame-subtitle" id="subtitleText">The light fades at the edge of the world</div>
-        </div>
-        <div class="grade-overlay"></div>
+        <div class="grade-overlay" id="gradeOverlay"></div>
       </div>
     </div>
 
@@ -1340,14 +1343,24 @@ body {
 
 <script>
 // ── REAL VIDEO PLAYER ────────────────────────────────────────────
-const vid       = document.getElementById('mainVideo');
-const emptyState = document.getElementById('emptyState');
-const timecodeEl = document.getElementById('timecode');
-const playBtn   = document.getElementById('playBtn');
-const progressFill = document.getElementById('progressFill');
-const progressHead = document.getElementById('progressHead');
-const caption   = document.getElementById('captionOverlay');
-const volSlider = document.querySelector('.vol-slider');
+// All DOM-dependent code runs after DOM is ready
+let vid, emptyState, timecodeEl, playBtn, progressFill, progressHead, caption, volSlider;
+
+document.addEventListener('DOMContentLoaded', function() {
+  vid          = document.getElementById('mainVideo');
+  emptyState   = document.getElementById('emptyState');
+  timecodeEl   = document.getElementById('timecode');
+  playBtn      = document.getElementById('playBtn');
+  progressFill = document.getElementById('progressFill');
+  progressHead = document.getElementById('progressHead');
+  caption      = document.getElementById('captionOverlay');
+  volSlider    = document.querySelector('.vol-slider');
+
+  if (!vid) { console.error('mainVideo element not found!'); return; }
+  initVideoPlayer();
+});
+
+function initVideoPlayer() {
 
 // State
 let _captions = [];   // [{start_ms, end_ms, text}]
@@ -1404,7 +1417,7 @@ const PAUSE_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="curren
 
 // ── Controls ──
 function togglePlay() {
-  if (!vid.src) { document.getElementById('videoInput').click(); return; }
+  if (!vid || !vid.src) { document.getElementById('videoInput').click(); return; }
   if (vid.paused) {
     vid.play();
     playBtn.classList.add('playing');
@@ -1417,12 +1430,12 @@ function togglePlay() {
 }
 
 function skipTime(s) {
-  if (!vid.src) return;
+  if (!vid || !vid.src) return;
   vid.currentTime = Math.max(0, Math.min(vid.duration || 0, vid.currentTime + s));
 }
 
 function seekVideo(e) {
-  if (!vid.src || !vid.duration) return;
+  if (!vid || !vid.src || !vid.duration) return;
   const bar  = document.getElementById('progressBar');
   const rect = bar.getBoundingClientRect();
   const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -1433,6 +1446,8 @@ function seekVideo(e) {
 if (volSlider) {
   volSlider.addEventListener('input', () => { vid.volume = volSlider.value / 100; });
 }
+
+} // end initVideoPlayer
 
 // ── Captions ──
 function setCaptions(words) {
