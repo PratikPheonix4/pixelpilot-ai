@@ -1,4 +1,4 @@
- /**
+/**
  * PixelPilot AI — Frontend API Client
  * ─────────────────────────────────────────────────
  * Drop this <script> tag into any PixelPilot HTML page.
@@ -15,7 +15,7 @@ class PixelPilotAPI {
 
   constructor() {
     // ← Replace with your Railway URL after deploying
-    this.base = "pixel-pilot-ai-backend-production.up.railway.app";
+    this.base = "https://pixel-pilot-ai-backend-production.up.railway.app";
   }
 
   // ── helper ────────────────────────────────────────
