@@ -1717,8 +1717,9 @@ async function executeAIAction(actionData, aiReply) {
           resultText = '✂ Removed ' + (r.silence_count||0) + ' silences, saving ' + (r.total_silence_saved_seconds||0).toFixed(1) + 's. ' +
             'Timeline markers added in red.';
           if (r.silence_segments) markSilences(r.silence_segments);
-          actions = '<button class="apply-btn" onclick="showToast('✅ Edit confirmed')">Keep</button>' +
-                    '<button class="apply-btn secondary" onclick="clearSilenceMarkers();showToast('↩ Reverted')">Undo</button>';
+          actions =
+  '<button class="apply-btn" onclick="showToast(\'✅ Edit confirmed\')">Keep</button>' +
+  '<button class="apply-btn secondary" onclick="clearSilenceMarkers(); showToast(\'↩ Reverted\')">Undo</button>';
         }
 
         if (job.job_type === 'transcribe' && job.result) {
