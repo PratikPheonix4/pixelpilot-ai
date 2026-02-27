@@ -1254,23 +1254,88 @@ body {
       <div class="prop-title">Clip Properties</div>
       <div class="prop-row">
         <div class="prop-label">Duration</div>
-        <div class="prop-val">00:42</div>
+        <div class="prop-val" id="propDuration">--:--</div>
       </div>
       <div class="prop-row">
         <div class="prop-label">Speed</div>
-        <div class="prop-val">100%</div>
+        <div class="prop-val" id="propSpeed" style="cursor:pointer" onclick="cycleSpeed()" title="Click to change speed">100%</div>
       </div>
       <div class="prop-row">
         <div class="prop-label">Opacity</div>
-        <div class="prop-val">100%</div>
+        <div class="prop-val" style="display:flex;align-items:center;gap:6px">
+          <input type="range" min="0" max="100" value="100" id="propOpacity"
+            style="width:60px;accent-color:var(--teal)"
+            oninput="applyOpacity(this.value)">
+          <span id="propOpacityVal">100%</span>
+        </div>
       </div>
       <div class="prop-row">
         <div class="prop-label">Scale</div>
-        <div class="prop-val">100%</div>
+        <div class="prop-val" style="display:flex;align-items:center;gap:6px">
+          <input type="range" min="50" max="200" value="100" id="propScale"
+            style="width:60px;accent-color:var(--teal)"
+            oninput="applyScale(this.value)">
+          <span id="propScaleVal">100%</span>
+        </div>
+      </div>
+      <div class="prop-row" style="margin-top:8px">
+        <div class="prop-label">Volume</div>
+        <div class="prop-val" style="display:flex;align-items:center;gap:6px">
+          <input type="range" min="0" max="100" value="100" id="propVolume"
+            style="width:60px;accent-color:var(--teal)"
+            oninput="applyVolume(this.value)">
+          <span id="propVolumeVal">100%</span>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+
+// === CLIP PROPERTIES ===
+var _speedSteps = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+var _speedIdx   = 3; // default 1x
+
+function updateClipProperties(v) {
+  if (!v) return;
+  var dur = document.getElementById('propDuration');
+  if (dur) dur.textContent = fmtTimecode(v.duration).slice(3,8);
+}
+
+function cycleSpeed() {
+  var v = vid || document.getElementById('mainVideo');
+  if (!v) return;
+  _speedIdx = (_speedIdx + 1) % _speedSteps.length;
+  var s = _speedSteps[_speedIdx];
+  v.playbackRate = s;
+  var el = document.getElementById('propSpeed');
+  if (el) el.textContent = (s * 100) + '%';
+  showToast('Speed: ' + s + 'x');
+}
+
+function applyOpacity(val) {
+  var v = document.getElementById('mainVideo');
+  if (v) v.style.opacity = val / 100;
+  var el = document.getElementById('propOpacityVal');
+  if (el) el.textContent = val + '%';
+}
+
+function applyScale(val) {
+  var v = document.getElementById('mainVideo');
+  if (v) v.style.transform = 'scale(' + (val / 100) + ')';
+  var el = document.getElementById('propScaleVal');
+  if (el) el.textContent = val + '%';
+}
+
+function applyVolume(val) {
+  var v = vid || document.getElementById('mainVideo');
+  if (v) v.volume = val / 100;
+  var el = document.getElementById('propVolumeVal');
+  if (el) el.textContent = val + '%';
+  // Sync main volume slider too
+  var vs = document.querySelector('.vol-slider');
+  if (vs) vs.value = val;
+}
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1320,6 +1385,9 @@ function initVideoPlayer() {
     if (progressFill) progressFill.style.width = pct + '%';
     if (progressHead) progressHead.style.left  = pct + '%';
     if (timecodeEl)   timecodeEl.textContent   = fmtTimecode(vid.currentTime);
+    // Update duration if not yet set
+    var pd = document.getElementById('propDuration');
+    if (pd && pd.textContent === '--:--' && vid.duration) pd.textContent = fmtTimecode(vid.duration).slice(3,8);
     updateCaptions(vid.currentTime * 1000);
     var ph = document.getElementById('playhead');
     if (ph) ph.style.left = pct + '%';
@@ -1380,7 +1448,7 @@ function seekVideo(e) {
 function updateTimelineDuration(dur) { /* timeline updated via addClipToTimeline */ }
 
 // === LOAD VIDEO ===
-function loadVideoIntoPlayer(url, name) {
+function loadVideoIntoPlayer(url, name, skipLibrary) {
   var v  = vid || document.getElementById('mainVideo');
   var es = emptyState || document.getElementById('emptyState');
   if (!v) { console.warn('video element not ready'); return; }
@@ -1389,10 +1457,12 @@ function loadVideoIntoPlayer(url, name) {
   if (es) es.style.display = 'none';
   v.load();
   showToast('Loading: ' + (name || 'video'));
-  updateMediaLibrary(url, name || 'video');
+  // Only add to media library on first upload, not when clicking existing items
+  if (!skipLibrary) updateMediaLibrary(url, name || 'video');
   v.addEventListener('loadedmetadata', function onMeta() {
     v.removeEventListener('loadedmetadata', onMeta);
     addClipToTimeline(name || 'video', v.duration, url);
+    updateClipProperties(v);
   });
 }
 window.loadVideoIntoPlayer = loadVideoIntoPlayer;
@@ -1433,7 +1503,12 @@ function updateMediaLibrary(url, name) {
   var item = document.createElement('div');
   item.className = 'media-item selected';
   item.style.cssText = 'cursor:pointer;position:relative';
-  (function(u, n) { item.onclick = function() { loadVideoIntoPlayer(u, n); }; })(url, name);
+  (function(u, n) { item.onclick = function() {
+    // Deselect all, select this
+    document.querySelectorAll('.media-item').forEach(function(x) { x.classList.remove('selected'); });
+    item.classList.add('selected');
+    loadVideoIntoPlayer(u, n, true); // skipLibrary=true — don't add duplicate
+  }; })(url, name);
   var canvas = document.createElement('canvas');
   canvas.width = 80; canvas.height = 45;
   canvas.style.cssText = 'width:100%;border-radius:4px;display:block;background:#111';
