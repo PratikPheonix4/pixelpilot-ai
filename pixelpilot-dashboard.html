@@ -1230,8 +1230,8 @@ body {
       <div class="qa-label">Quick actions</div>
       <div class="qa-chips">
         <div class="qa-chip" onclick="addMessage('Transcribe and add captions')">📝 Subtitles</div>
-        <div class="qa-chip" onclick="addMessage('Apply teal-orange cinematic color grade')">🎨 Color grade</div>
-        <div class="qa-chip" onclick="addMessage('Remove all silences and dead air')">✂ Remove silences</div>
+        <div class="qa-chip" onclick="addMessage('Apply teal-orange color grade')">🎨 Teal-Orange</div>
+        <div class="qa-chip" onclick="addMessage('Remove all silences')">✂ Silences</div>
         <div class="qa-chip" onclick="addMessage('Reframe for TikTok 9:16')">📱 Reframe</div>
         <div class="qa-chip" onclick="addMessage('Add smooth transitions between clips')">✨ Transitions</div>
         <div class="qa-chip" onclick="addMessage('Boost the audio and remove background noise')">🎵 Clean audio</div>
@@ -1547,11 +1547,12 @@ function applyGradeOverlay(preset) {
   var overlay = document.getElementById('gradeOverlay');
   if (!overlay) return;
   var grades = {
-    'teal_orange':  'linear-gradient(135deg, rgba(255,107,53,0.12) 0%, transparent 50%, rgba(0,200,180,0.10) 100%)',
-    'dark_moody':   'linear-gradient(135deg, rgba(20,0,40,0.25) 0%, rgba(0,0,0,0.1) 100%)',
-    'warm_golden':  'linear-gradient(135deg, rgba(255,200,50,0.12) 0%, rgba(255,120,30,0.08) 100%)',
-    'bright_airy':  'linear-gradient(135deg, rgba(200,230,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-    'documentary':  'linear-gradient(135deg, rgba(180,160,120,0.12) 0%, rgba(100,90,70,0.08) 100%)'
+    'teal_orange':  'linear-gradient(135deg, rgba(255,107,53,0.18) 0%, transparent 50%, rgba(0,200,180,0.15) 100%)',
+    'dark_moody':   'linear-gradient(135deg, rgba(10,0,30,0.45) 0%, rgba(0,0,20,0.2) 100%)',
+    'warm_golden':  'linear-gradient(135deg, rgba(255,200,50,0.20) 0%, rgba(255,120,30,0.12) 100%)',
+    'bright_airy':  'linear-gradient(135deg, rgba(200,230,255,0.22) 0%, rgba(255,255,255,0.12) 100%)',
+    'documentary':  'linear-gradient(135deg, rgba(180,160,120,0.20) 0%, rgba(100,90,70,0.12) 100%)',
+    'pink_dream':   'linear-gradient(135deg, rgba(255,100,180,0.20) 0%, rgba(180,80,255,0.12) 100%)'
   };
   overlay.style.background     = preset ? (grades[preset] || grades['teal_orange']) : 'none';
   overlay.style.mixBlendMode   = preset ? 'screen' : 'normal';
@@ -1626,75 +1627,142 @@ function addMessage(text) {
 }
 
 function sendMessage() {
-  var input  = document.getElementById('aiInput');
-  var text   = input ? input.value.trim() : '';
+  var input = document.getElementById('aiInput');
+  var text  = input ? input.value.trim() : '';
   if (!text) return;
   if (input) input.value = '';
   aiAppendMsg('user', text);
-
   var v         = vid || document.getElementById('mainVideo');
   var projectId = localStorage.getItem('currentProjectId');
   var hasVideo  = !!(v && v.src && v.duration);
   var lower     = text.toLowerCase();
 
-  // Route to backend action
-  if (lower.indexOf('silence') > -1 || lower.indexOf('quiet') > -1 || lower.indexOf('dead air') > -1) {
-    triggerJob('remove_silences', {min_silence_ms: 400}, 'Removing silences...');
+  if (lower.indexOf('silence') > -1 || lower.indexOf('dead air') > -1 || lower.indexOf('pause') > -1) {
+    if (!projectId) { aiAppendMsg('ai', 'Please upload a video first.'); return; }
+    triggerJob('remove_silences', {min_silence_ms: 400}, 'Analyzing audio for silences...');
   } else if (lower.indexOf('caption') > -1 || lower.indexOf('subtitle') > -1 || lower.indexOf('transcri') > -1) {
-    triggerJob('transcribe', {}, 'Transcribing speech...');
-  } else if (lower.indexOf('teal') > -1 || (lower.indexOf('color') > -1 && lower.indexOf('orange') > -1)) {
-    applyGradeOverlay('teal_orange');
-    aiAppendMsg('ai', 'Applied teal-orange cinematic grade. Shadows cool, highlights warm.',
-      '<button class="apply-btn" onclick="showToast(\'Kept\')">Keep</button><button class="apply-btn secondary" onclick="applyGradeOverlay(null)">Remove</button>');
-  } else if (lower.indexOf('moody') > -1 || lower.indexOf('dark') > -1) {
-    applyGradeOverlay('dark_moody');
-    aiAppendMsg('ai', 'Applied dark moody grade.',
-      '<button class="apply-btn" onclick="showToast(\'Kept\')">Keep</button><button class="apply-btn secondary" onclick="applyGradeOverlay(null)">Remove</button>');
-  } else if (lower.indexOf('golden') > -1 || lower.indexOf('warm') > -1) {
-    applyGradeOverlay('warm_golden');
-    aiAppendMsg('ai', 'Applied warm golden grade.',
-      '<button class="apply-btn" onclick="showToast(\'Kept\')">Keep</button><button class="apply-btn secondary" onclick="applyGradeOverlay(null)">Remove</button>');
-  } else if (lower.indexOf('grade') > -1 || lower.indexOf('color') > -1 || lower.indexOf('lut') > -1) {
-    applyGradeOverlay('teal_orange');
-    aiAppendMsg('ai', 'Applied teal-orange grade — the most cinematic preset. Say "dark moody", "warm golden", or "bright airy" for other styles.',
-      '<button class="apply-btn" onclick="showToast(\'Kept\')">Keep</button><button class="apply-btn secondary" onclick="applyGradeOverlay(null)">Remove</button>');
-  } else if (lower.indexOf('tiktok') > -1 || lower.indexOf('9:16') > -1 || lower.indexOf('portrait') > -1 || lower.indexOf('reframe') > -1 || lower.indexOf('vertical') > -1) {
-    applyReframe('9:16');
-    aiAppendMsg('ai', 'Reframed to 9:16 vertical for TikTok/Reels. Preview updated.');
+    if (!projectId) { aiAppendMsg('ai', 'Upload the video first so it can be transcribed from the cloud.'); return; }
+    triggerJob('transcribe', {}, 'Transcribing with AssemblyAI...');
+  } else if (lower.indexOf('pink') > -1 || lower.indexOf('rose') > -1) {
+    applyGradeOverlay('pink_dream'); aiGradeReply('pink dream');
+  } else if (lower.indexOf('teal') > -1 || lower.indexOf('cyan') > -1) {
+    applyGradeOverlay('teal_orange'); aiGradeReply('teal-orange');
+  } else if (lower.indexOf('moody') > -1 || (lower.indexOf('dark') > -1 && (lower.indexOf('grade') > -1 || lower.indexOf('colour') > -1 || lower.indexOf('color') > -1))) {
+    applyGradeOverlay('dark_moody'); aiGradeReply('dark moody');
+  } else if (lower.indexOf('golden') > -1 || lower.indexOf('sunset') > -1) {
+    applyGradeOverlay('warm_golden'); aiGradeReply('warm golden');
+  } else if (lower.indexOf('airy') > -1 || lower.indexOf('fresh') > -1 || lower.indexOf('bright') > -1) {
+    applyGradeOverlay('bright_airy'); aiGradeReply('bright airy');
+  } else if (lower.indexOf('cinematic') > -1 || lower.indexOf('film') > -1) {
+    applyGradeOverlay('documentary'); aiGradeReply('cinematic');
+  } else if ((lower.indexOf('reset') > -1 || lower.indexOf('remove') > -1) && (lower.indexOf('grade') > -1 || lower.indexOf('colour') > -1 || lower.indexOf('color') > -1)) {
+    applyGradeOverlay(null); aiAppendMsg('ai', 'Color grade removed.');
+  } else if (lower.indexOf('grade') > -1 || lower.indexOf('colour') > -1 || lower.indexOf('color') > -1 || lower.indexOf('lut') > -1) {
+    aiAppendMsg('ai', 'Which grade? Say: <strong>teal-orange</strong>, <strong>dark moody</strong>, <strong>warm golden</strong>, <strong>bright airy</strong>, <strong>pink dream</strong>, or <strong>cinematic</strong>. Or "reset grade" to remove.');
+  } else if (lower.indexOf('tiktok') > -1 || lower.indexOf('reels') > -1 || lower.indexOf('9:16') > -1) {
+    applyReframe('9:16'); aiAppendMsg('ai', 'Reframed to 9:16 vertical for TikTok/Reels.');
   } else if (lower.indexOf('instagram') > -1 || lower.indexOf('square') > -1 || lower.indexOf('1:1') > -1) {
-    applyReframe('1:1');
-    aiAppendMsg('ai', 'Reframed to 1:1 square for Instagram.');
-  } else if (lower.indexOf('export') > -1) {
-    if (window.handleExport) handleExport();
-    else aiAppendMsg('ai', 'Export started — your video will be ready to download shortly.');
+    applyReframe('1:1'); aiAppendMsg('ai', 'Reframed to 1:1 square for Instagram.');
+  } else if (lower.indexOf('4:5') > -1 || lower.indexOf('portrait feed') > -1) {
+    applyReframe('4:5'); aiAppendMsg('ai', 'Reframed to 4:5 portrait.');
+  } else if (lower.indexOf('youtube') > -1 || lower.indexOf('16:9') > -1 || (lower.indexOf('reset') > -1 && lower.indexOf('reframe') > -1)) {
+    applyReframe('16:9'); aiAppendMsg('ai', 'Reset to 16:9 landscape.');
+  } else if (lower.indexOf('reframe') > -1) {
+    aiAppendMsg('ai', 'Reframe to: <strong>TikTok</strong> (9:16), <strong>Instagram square</strong> (1:1), <strong>portrait</strong> (4:5), or <strong>YouTube</strong> (16:9).');
+  } else if (lower.indexOf('transition') > -1 || lower.indexOf('fade') > -1 || lower.indexOf('dissolve') > -1) {
+    applyTransitions(lower);
+  } else if (lower.indexOf('slow') > -1 || lower.indexOf('0.5') > -1) {
+    setVideoSpeed(0.5); aiAppendMsg('ai', 'Slow motion 0.5x applied.');
+  } else if (lower.indexOf('2x') > -1 || (lower.indexOf('fast') > -1 && lower.indexOf('speed') > -1)) {
+    setVideoSpeed(2); aiAppendMsg('ai', 'Speed set to 2x.');
+  } else if (lower.indexOf('normal speed') > -1 || lower.indexOf('reset speed') > -1 || lower.indexOf('1x') > -1) {
+    setVideoSpeed(1); aiAppendMsg('ai', 'Speed reset to 1x.');
+  } else if ((lower.indexOf('remove') > -1 || lower.indexOf('delete') > -1 || lower.indexOf('mute') > -1) && (lower.indexOf('music') > -1 || lower.indexOf('audio') > -1)) {
+    removeAudioTrack();
+  } else if ((lower.indexOf('add') > -1 || lower.indexOf('upload') > -1) && (lower.indexOf('music') > -1 || lower.indexOf('audio') > -1 || lower.indexOf('sound') > -1)) {
+    document.getElementById('audioInput').click();
+    aiAppendMsg('ai', 'Select an audio file (MP3, WAV, AAC). It will appear on the A1 track in the timeline.');
+  } else if (lower.indexOf('music') > -1 || lower.indexOf('audio') > -1) {
+    aiAppendMsg('ai', 'Audio options: <strong>add music</strong> to upload, <strong>remove music</strong> to delete the track.');
+  } else if (lower.indexOf('export') > -1 || lower.indexOf('download') > -1) {
+    handleExport();
   } else if (!hasVideo) {
-    aiAppendMsg('ai', 'No video loaded yet. Click <strong>Add Media</strong> to upload a video first, then tell me what you want to do with it.');
+    aiAppendMsg('ai', 'No video loaded. Click <strong>Add Media</strong> to upload first.');
   } else {
-    aiAppendMsg('ai', 'I can help with: <strong>remove silences</strong>, <strong>transcribe / add captions</strong>, <strong>color grade</strong> (teal-orange, dark moody, warm golden), <strong>reframe for TikTok</strong>, or <strong>export</strong>. What would you like?');
+    aiAppendMsg('ai', 'I can help with: <strong>remove silences</strong> | <strong>add captions</strong> | <strong>color grade</strong> (teal-orange, dark moody, warm golden, bright airy, pink, cinematic, reset) | <strong>reframe</strong> (TikTok, Instagram, YouTube) | <strong>transitions</strong> (fade, dissolve) | <strong>speed</strong> (slow/2x/reset) | <strong>add/remove music</strong> | <strong>export</strong>');
   }
+}
+
+function aiGradeReply(name) {
+  aiAppendMsg('ai', 'Applied ' + name + ' color grade.',
+    '<button class="apply-btn" onclick="showToast(\'Grade kept\')">Keep</button>' +
+    '<button class="apply-btn secondary" onclick="applyGradeOverlay(null)">Remove</button>');
+}
+
+function setVideoSpeed(s) {
+  var v = vid || document.getElementById('mainVideo');
+  if (!v) return;
+  v.playbackRate = s;
+  var el = document.getElementById('propSpeed');
+  if (el) el.textContent = Math.round(s * 100) + '%';
+  showToast('Speed: ' + s + 'x');
+}
+
+function applyTransitions(lower) {
+  var type = 'fade';
+  if (lower.indexOf('dissolve') > -1) type = 'dissolve';
+  else if (lower.indexOf('cut') > -1) type = 'hard cut';
+  else if (lower.indexOf('zoom') > -1) type = 'zoom';
+  else if (lower.indexOf('slide') > -1) type = 'slide';
+
+  // Add chip to FX track
+  var fxTrack = document.getElementById('trackFX');
+  if (fxTrack) {
+    var chip = document.createElement('div');
+    chip.className = 'tl-clip';
+    chip.style.cssText = 'position:absolute;left:0;width:100px;background:rgba(120,80,255,0.6);border-color:rgba(160,120,255,0.8);font-size:9px;cursor:pointer';
+    chip.textContent = type + ' fx';
+    chip.onclick = function() { chip.remove(); showToast('Transition removed'); };
+    fxTrack.appendChild(chip);
+    switchTimelineView('fx');
+  }
+  aiAppendMsg('ai', 'Added ' + type + ' transition to the FX track.',
+    '<button class="apply-btn" onclick="switchTimelineView(\'fx\')">View FX tab</button>');
+}
+
+function removeAudioTrack() {
+  ['trackA1','trackA2'].forEach(function(id) {
+    var t = document.getElementById(id);
+    if (t) t.querySelectorAll('.tl-clip').forEach(function(c) { c.remove(); });
+  });
+  document.querySelectorAll('audio.tl-audio').forEach(function(a) { a.pause(); a.remove(); });
+  aiAppendMsg('ai', 'Audio track removed from the timeline.');
 }
 
 function triggerJob(jobType, params, startMsg) {
   var projectId = localStorage.getItem('currentProjectId');
-  var userId    = localStorage.getItem('ppUserId') || 'guest';
+  var userId    = getUserId();
   if (!projectId) {
-    aiAppendMsg('ai', 'Please upload a video first, then I can ' + jobType.replace(/_/g, ' ') + ' it.');
+    aiAppendMsg('ai', 'Upload a video first, then I can ' + jobType.replace(/_/g, ' ') + ' it.');
     return;
   }
-  aiAppendMsg('ai', startMsg || 'Working on it...');
+  var thinkDiv = aiAppendMsg('ai', startMsg || 'Working...');
   var jobParams = {};
   jobParams[jobType] = params;
   getApi().processVideo(projectId, userId, [jobType], jobParams).then(function(processing) {
     processing.job_ids.forEach(function(jobId) {
       getApi().pollJob(jobId, function(progress) {
-        showToast(jobType.replace(/_/g,' ') + ' — ' + progress + '%');
+        showToast(jobType.replace(/_/g,' ') + ' ' + progress + '%');
       }).then(function(job) {
+        if (thinkDiv && thinkDiv.parentNode) thinkDiv.remove();
         handleJobResult(job);
       }).catch(function(err) {
-        aiAppendMsg('ai', 'Error: ' + err.message);
+        if (thinkDiv && thinkDiv.parentNode) thinkDiv.remove();
+        aiAppendMsg('ai', 'Error: ' + err.message + '. Check that your video URL is publicly accessible.');
       });
     });
   }).catch(function(err) {
+    if (thinkDiv && thinkDiv.parentNode) thinkDiv.remove();
     aiAppendMsg('ai', 'Could not start ' + jobType + ': ' + err.message);
   });
 }
@@ -1702,93 +1770,146 @@ function triggerJob(jobType, params, startMsg) {
 function handleJobResult(job) {
   var result = job.result || {};
   if (job.job_type === 'remove_silences') {
-    var saved = result.total_silence_saved_seconds || 0;
+    var saved = (result.total_silence_saved_seconds || 0).toFixed(1);
     var count = result.silence_count || 0;
     if (result.silence_segments) { clearSilenceMarkers(); markSilences(result.silence_segments); }
     _projectContext.silence_segments = result.silence_segments || [];
-    aiAppendMsg('ai',
-      'Removed ' + count + ' silences, saving ' + saved.toFixed(1) + 's. Red markers show removed sections.',
-      '<button class="apply-btn" onclick="showToast(\'Edits kept\')">Keep</button><button class="apply-btn secondary" onclick="clearSilenceMarkers();showToast(\'Reverted\')">Undo</button>'
-    );
+    aiAppendMsg('ai', 'Removed ' + count + ' silences, saving ' + saved + 's. Red markers on the V1 track.',
+      '<button class="apply-btn" onclick="showToast(\'Edits kept\')">Keep</button>' +
+      '<button class="apply-btn secondary" onclick="clearSilenceMarkers()">Undo</button>');
   } else if (job.job_type === 'transcribe') {
     if (result.words) setCaptions(result.words);
     _projectContext.transcript = result.transcript;
     var wc = (result.words || []).length;
-    var srtBtn = result.srt_url ? '<a class="apply-btn secondary" href="' + result.srt_url + '" target="_blank">Download SRT</a>' : '';
-    aiAppendMsg('ai',
-      'Transcribed ' + wc + ' words. Captions are now synced to the video.',
-      '<button class="apply-btn" onclick="showToast(\'Captions applied\')">Apply</button>' + srtBtn
-    );
+    activateCaptionTrack();
+    aiAppendMsg('ai', 'Transcribed ' + wc + ' words. Captions are now synced on the CAP track.',
+      '<button class="apply-btn" onclick="showToast(\'Captions applied\')">Apply</button>' +
+      (result.srt_url ? '<a class="apply-btn secondary" href="' + result.srt_url + '" target="_blank">Download SRT</a>' : ''));
   } else {
     aiAppendMsg('ai', job.job_type.replace(/_/g,' ') + ' complete!');
   }
   showToast(job.job_type.replace(/_/g,' ') + ' done!');
 }
 
-// === UPLOAD HANDLER ===
-async function handleVideoUpload(input) {
+function activateCaptionTrack() {
+  var capTrack = document.getElementById('trackCap');
+  if (!capTrack) return;
+  capTrack.querySelectorAll('.tl-clip').forEach(function(c) { c.remove(); });
+  var v = vid || document.getElementById('mainVideo');
+  var PX = 14;
+  var dur = v ? v.duration : 60;
+  var clip = document.createElement('div');
+  clip.className = 'tl-clip clip-cap';
+  clip.style.cssText = 'position:absolute;left:0;width:' + Math.max(60, dur * PX) + 'px;background:rgba(0,245,196,0.25);border-color:rgba(0,245,196,0.6)';
+  clip.textContent = 'Captions (synced)';
+  capTrack.appendChild(clip);
+}
+
+
+// === TIMELINE VIEW SWITCHER ===
+var _tlZoom = 100;
+
+function switchTimelineView(view) {
+  // Update tab buttons
+  ['Video','Audio','FX'].forEach(function(v) {
+    var btn = document.getElementById('tlBtn' + v);
+    if (btn) btn.classList.toggle('active', v.toLowerCase() === view);
+  });
+
+  // Show/hide track rows and labels based on view
+  var trackRows  = document.querySelectorAll('#tracksRows .tl-track');
+  var trackLabels = document.querySelectorAll('#trackLabels .tl-track-label');
+
+  trackRows.forEach(function(row) {
+    var views = (row.getAttribute('data-view') || 'video').split(',');
+    row.style.display = views.indexOf(view) > -1 ? '' : 'none';
+  });
+  trackLabels.forEach(function(label) {
+    var views = (label.getAttribute('data-view') || 'video').split(',');
+    label.style.display = views.indexOf(view) > -1 ? '' : 'none';
+  });
+
+  // Show FX track only in FX view
+  var fxRow = document.getElementById('trackFX');
+  if (fxRow) fxRow.style.display = view === 'fx' ? '' : 'none';
+
+  showToast(view.toUpperCase() + ' timeline view');
+}
+
+function zoomTimeline(dir) {
+  var steps = [50, 75, 100, 150, 200, 300];
+  var idx = steps.indexOf(_tlZoom);
+  if (idx === -1) idx = 2;
+  idx = Math.max(0, Math.min(steps.length-1, idx + dir));
+  _tlZoom = steps[idx];
+  var label = document.getElementById('tlZoomLabel');
+  if (label) label.textContent = _tlZoom + '%';
+  // Scale all clips
+  var PX_BASE = 14;
+  var PX = PX_BASE * _tlZoom / 100;
+  var v = vid || document.getElementById('mainVideo');
+  if (!v || !v.duration) return;
+  document.querySelectorAll('.tl-clip').forEach(function(clip) {
+    // Re-derive width from duration if possible
+  });
+  // Rescale V1 clip
+  var v1clips = document.querySelectorAll('#trackV1 .tl-clip');
+  v1clips.forEach(function(clip) {
+    if (v && v.duration) clip.style.width = Math.max(60, v.duration * PX) + 'px';
+  });
+  showToast('Zoom: ' + _tlZoom + '%');
+}
+
+// === AUDIO UPLOAD HANDLER ===
+function handleAudioUpload(input) {
   var file = input.files[0];
   if (!file) return;
   input.value = '';
 
-  var localURL = URL.createObjectURL(file);
-  loadVideoIntoPlayer(localURL, file.name);
-  showToast('Uploading ' + file.name + '...');
-  updateProjectNameUI(file.name);
+  var url = URL.createObjectURL(file);
 
-  try {
-    var upload = await getApi().uploadVideo(file, getUserId(), file.name);
-    localStorage.setItem('currentProjectId', upload.project_id);
-    var cloudURL = (upload.video_url || '').replace(/\?$/, '');
-    if (cloudURL && vid) { vid.src = cloudURL; }
-    showToast('Uploaded! AI is ready.');
-    updateWelcome();
-  } catch(err) {
-    showToast('Upload failed: ' + err.message);
-    console.error('Upload error:', err);
+  // Create audio element
+  var audioEl = document.createElement('audio');
+  audioEl.className = 'tl-audio';
+  audioEl.src = url;
+  audioEl.controls = false;
+  audioEl.loop = false;
+  document.body.appendChild(audioEl);
+
+  // Sync with video playback
+  var v = vid || document.getElementById('mainVideo');
+  if (v) {
+    v.addEventListener('play', function() { audioEl.play(); });
+    v.addEventListener('pause', function() { audioEl.pause(); });
+    v.addEventListener('seeked', function() { audioEl.currentTime = v.currentTime; });
   }
-}
-window.handleVideoUpload = handleVideoUpload;
 
-// === EXPORT ===
-async function handleExport() {
-  var projectId = localStorage.getItem('currentProjectId');
-  if (!projectId) { showToast('No project — upload a video first'); return; }
-  var userId = localStorage.getItem('ppUserId') || 'guest';
-  showToast('Starting export...');
-  try {
-    var job = await getApi().exportVideo(projectId, userId, { format:'mp4', resolution:'1080p', fps:30 });
-    showToast('Export queued — est. ' + job.estimated_seconds + 's');
-    getApi().pollJob(job.job_id, function(p) { showToast('Exporting ' + p + '%'); }).then(function(done) {
-      showToast('Export ready!');
-      var url = done.result && done.result.export_url;
-      if (url) window.open(url, '_blank');
-    });
-  } catch(err) { showToast('Export failed: ' + err.message); }
-}
-window.handleExport = handleExport;
+  // Add clip to A1 track
+  var track = document.getElementById('trackA1');
+  if (track) {
+    track.querySelectorAll('.tl-clip').forEach(function(c) { c.remove(); });
+    var clip = document.createElement('div');
+    clip.className = 'tl-clip';
+    clip.style.cssText = 'position:absolute;left:0;width:300px;background:rgba(0,180,80,0.35);border-color:rgba(0,220,100,0.6);font-size:9px;cursor:pointer';
+    clip.textContent = file.name;
+    clip.title = 'Click to mute/unmute';
+    var muted = false;
+    clip.onclick = function() {
+      muted = !muted;
+      audioEl.muted = muted;
+      clip.style.opacity = muted ? '0.4' : '1';
+      showToast(muted ? 'Audio muted' : 'Audio unmuted');
+    };
+    track.appendChild(clip);
+    switchTimelineView('audio');
+  }
 
-// === TOAST ===
-var _toastTimer;
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
+  showToast('Music added: ' + file.name);
+  aiAppendMsg('ai', 'Added <strong>' + file.name + '</strong> to the A1 audio track. It syncs with video playback. Click the green clip to mute/unmute.',
+    '<button class="apply-btn secondary" onclick="removeAudioTrack()">Remove track</button>');
 }
+window.handleAudioUpload = handleAudioUpload;
 
-// === AI CHAT QUICK ACTIONS ===
-var aiResponses = {
-  'subtitles':    'Transcribing...',
-  'color':        'Applying grade...',
-  'speed':        'Speed ramp applied to selected clip.',
-  'reframe':      'Reframing to 9:16...',
-  'transitions':  'Added smooth transitions.',
-  'audio':        'Cleaned audio (noise reduction applied).',
-  'default':      'Tell me more about what you want to do.'
-};
 
 // === KEYBOARD ===
 document.addEventListener('keydown', function(e) {
