@@ -1291,52 +1291,6 @@ body {
   </div>
 </div>
 
-
-// === CLIP PROPERTIES ===
-var _speedSteps = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
-var _speedIdx   = 3; // default 1x
-
-function updateClipProperties(v) {
-  if (!v) return;
-  var dur = document.getElementById('propDuration');
-  if (dur) dur.textContent = fmtTimecode(v.duration).slice(3,8);
-}
-
-function cycleSpeed() {
-  var v = vid || document.getElementById('mainVideo');
-  if (!v) return;
-  _speedIdx = (_speedIdx + 1) % _speedSteps.length;
-  var s = _speedSteps[_speedIdx];
-  v.playbackRate = s;
-  var el = document.getElementById('propSpeed');
-  if (el) el.textContent = (s * 100) + '%';
-  showToast('Speed: ' + s + 'x');
-}
-
-function applyOpacity(val) {
-  var v = document.getElementById('mainVideo');
-  if (v) v.style.opacity = val / 100;
-  var el = document.getElementById('propOpacityVal');
-  if (el) el.textContent = val + '%';
-}
-
-function applyScale(val) {
-  var v = document.getElementById('mainVideo');
-  if (v) v.style.transform = 'scale(' + (val / 100) + ')';
-  var el = document.getElementById('propScaleVal');
-  if (el) el.textContent = val + '%';
-}
-
-function applyVolume(val) {
-  var v = vid || document.getElementById('mainVideo');
-  if (v) v.volume = val / 100;
-  var el = document.getElementById('propVolumeVal');
-  if (el) el.textContent = val + '%';
-  // Sync main volume slider too
-  var vs = document.querySelector('.vol-slider');
-  if (vs) vs.value = val;
-}
-
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1850,6 +1804,51 @@ if (aiInputEl) {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendMessage(); }
   });
 }
+
+// === CLIP PROPERTIES ===
+var _speedSteps = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+var _speedIdx   = 3; // default 1x
+
+function updateClipProperties(v) {
+  if (!v) return;
+  var dur = document.getElementById('propDuration');
+  if (dur) dur.textContent = fmtTimecode(v.duration).slice(3,8);
+}
+
+function cycleSpeed() {
+  var v = vid || document.getElementById('mainVideo');
+  if (!v) return;
+  _speedIdx = (_speedIdx + 1) % _speedSteps.length;
+  var s = _speedSteps[_speedIdx];
+  v.playbackRate = s;
+  var el = document.getElementById('propSpeed');
+  if (el) el.textContent = (s * 100) + '%';
+  showToast('Speed: ' + s + 'x');
+}
+
+function applyOpacity(val) {
+  var v = document.getElementById('mainVideo');
+  if (v) v.style.opacity = val / 100;
+  var el = document.getElementById('propOpacityVal');
+  if (el) el.textContent = val + '%';
+}
+
+function applyScale(val) {
+  var v = document.getElementById('mainVideo');
+  if (v) v.style.transform = 'scale(' + (val / 100) + ')';
+  var el = document.getElementById('propScaleVal');
+  if (el) el.textContent = val + '%';
+}
+
+function applyVolume(val) {
+  var v = vid || document.getElementById('mainVideo');
+  if (v) v.volume = val / 100;
+  var el = document.getElementById('propVolumeVal');
+  if (el) el.textContent = val + '%';
+  var vs = document.querySelector('.vol-slider');
+  if (vs) vs.value = val;
+}
+
 </script>
 </body>
 </html>
