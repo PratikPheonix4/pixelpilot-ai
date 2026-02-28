@@ -949,18 +949,28 @@ async function saveProfile() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ full_name })
+      body: JSON.stringify({ full_name, ...(window._pendingAvatar ? { avatar_url: window._pendingAvatar } : {}) })
     });
 
-    if (!res.ok) throw new Error(await res.text());
-    const updated = await res.json();
-    localStorage.setItem('pp_user', JSON.stringify(updated));
-    populateUI(updated);
+    if (res.status === 401) {
+      showToast('Session expired — please log in again', 'error');
+      setTimeout(() => { localStorage.clear(); window.location.href = 'pixelpilot-auth.html'; }, 2000);
+      return;
+    }
 
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail || 'Save failed');
+      throw new Error(msg);
+    }
+
+    localStorage.setItem('pp_user', JSON.stringify(data));
+    populateUI(data);
+    window._pendingAvatar = null;
     showSaveIndicator('saved');
     showToast('Profile updated!', 'success');
-  } catch {
-    showToast('Failed to save — please try again', 'error');
+  } catch (err) {
+    showToast(err.message || 'Failed to save — please try again', 'error');
   } finally {
     btn.disabled = false;
     btn.innerHTML = 'Save changes';
@@ -1019,7 +1029,9 @@ function handleAvatarChange(e) {
     const url = ev.target.result;
     const al = document.getElementById('avatarLarge');
     al.innerHTML = `<img src="${url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    showToast('Avatar preview updated — save to confirm', 'success');
+    // Store pending avatar for save
+    window._pendingAvatar = url;
+    showToast('Avatar preview set — click Save changes to confirm', 'success');
   };
   reader.readAsDataURL(file);
 }
