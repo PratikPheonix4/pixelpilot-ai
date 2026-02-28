@@ -1090,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById('loginEmail');
     if (el) el.value = rem;
     const cb = document.getElementById('rememberCheck');
-    if (cb) cb.checked = true;
+    if (cb) cb.classList.add('checked');
   }
 });
 
@@ -1146,7 +1146,8 @@ function togglePass(inputId, btn) {
 // ═══════════════════════════════════════════════════════
 function toggleCheck(id) {
   const el = document.getElementById(id);
-  if (el) el.checked = !el.checked;
+  if (!el) return;
+  el.classList.toggle('checked');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1336,7 +1337,7 @@ async function handleLogin(e) {
 
   const email    = (document.getElementById('loginEmail')?.value  || '').trim();
   const password =  document.getElementById('loginPass')?.value   || '';
-  const remember =  document.getElementById('rememberCheck')?.checked;
+  const remember = document.getElementById('rememberCheck')?.classList.contains('checked');
 
   let valid = true;
   if (!email)          { showFieldErr('loginEmailErr', 'Email is required'); valid = false; }
@@ -1371,7 +1372,7 @@ async function handleSignup(e) {
   const lastName  =  (document.getElementById('lastName')?.value    || '').trim();
   const email     =  (document.getElementById('signupEmail')?.value || '').trim();
   const password  =   document.getElementById('signupPass')?.value  || '';
-  const terms     =   document.getElementById('termsCheck')?.checked;
+  const terms = document.getElementById('termsCheck')?.classList.contains('checked');
 
   let valid = true;
   if (!firstName)               { showFieldErr('firstNameErr',   'First name is required'); valid = false; }
