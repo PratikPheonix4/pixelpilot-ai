@@ -720,8 +720,8 @@ body {
   <div class="workspace-pill" onclick="showToast('🔄 Switch workspace')">
     <div class="ws-avatar">JS</div>
     <div class="ws-info">
-      <div class="ws-name">Alex's Studio</div>
-      <div class="ws-plan">Pro Plan</div>
+      <div class="ws-name" id="wsName">My Workspace</div>
+      <div class="ws-plan" id="wsPlan">Free Plan</div>
     </div>
     <div class="ws-chevron">⌄</div>
   </div>
@@ -815,7 +815,7 @@ body {
         New Project
       </button>
 
-      <div class="avatar" onclick="showToast('👤 Profile')">AR</div>
+      <a href="pixelpilot-profile.html" title="Profile" style="text-decoration:none"><div class="avatar" id="topbarAvatar" style="cursor:pointer;">AR</div></a>
     </div>
   </div>
 
@@ -1165,6 +1165,25 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
+
+<script>
+// ── Populate user info from localStorage ──────────────────────────────────────
+(function() {
+  const user = (() => { try { return JSON.parse(localStorage.getItem('pp_user')||'null'); } catch { return null; } })();
+  if (!user) return;
+  
+  // Topbar avatar
+  const av = document.getElementById('topbarAvatar');
+  if (av) av.textContent = (user.full_name || user.email || '?').charAt(0).toUpperCase();
+
+  // Workspace pill
+  const wsName = document.getElementById('wsName');
+  if (wsName) wsName.textContent = (user.full_name || 'My Workspace') + "'s Studio";
+  const wsPlan = document.getElementById('wsPlan');
+  if (wsPlan) wsPlan.textContent = (user.plan || 'free').charAt(0).toUpperCase() + (user.plan||'free').slice(1) + ' Plan';
+})();
+</script>
+
 </body>
 </html>
 <script src="pixelpilot-api-client.js"></script>
