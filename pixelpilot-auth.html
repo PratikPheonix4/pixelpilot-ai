@@ -1076,9 +1076,7 @@ const Auth = {
     localStorage.setItem('pp_refresh', refresh);
     localStorage.setItem('pp_user',    JSON.stringify(user));
   },
-  clear() {
-    ['pp_access','pp_refresh','pp_user'].forEach(k => localStorage.removeItem(k));
-  },
+  clear() { ['pp_access','pp_refresh','pp_user'].forEach(k => localStorage.removeItem(k)); },
   isLoggedIn() { return !!localStorage.getItem('pp_access'); }
 };
 
@@ -1086,12 +1084,7 @@ const Auth = {
 //  ON LOAD
 // ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  // Redirect if already logged in
-  if (Auth.isLoggedIn()) {
-    window.location.href = 'pixelpilot-projects.html';
-    return;
-  }
-  // Pre-fill remembered email
+  if (Auth.isLoggedIn()) { window.location.href = 'pixelpilot-projects.html'; return; }
   const rem = localStorage.getItem('pp_remember_email');
   if (rem) {
     const el = document.getElementById('loginEmail');
@@ -1104,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════════════
 //  TAB SWITCHING
 // ═══════════════════════════════════════════════════════
-let activeTab = 'signup';  // page loads on signup
+let activeTab = 'signup';
 
 function switchTab(tab) {
   activeTab = tab;
@@ -1114,6 +1107,8 @@ function switchTab(tab) {
   document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
   const ss = document.getElementById('successScreen');
   if (ss) ss.style.display = 'none';
+  const fs = document.getElementById('forgotScreen');
+  if (fs) fs.style.display = 'none';
   clearErrors();
 }
 
@@ -1124,31 +1119,30 @@ let selectedPlan = 'free';
 
 function selectPlan(plan) {
   selectedPlan = plan;
+  const map = { free: 'planFree', pro: 'planPro', studio: 'planStudio' };
   ['planFree','planPro','planStudio'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('selected');
   });
-  const map = { free:'planFree', pro:'planPro', studio:'planStudio' };
   const sel = document.getElementById(map[plan]);
   if (sel) sel.classList.add('selected');
 }
 
 // ═══════════════════════════════════════════════════════
-//  PASSWORD VISIBILITY TOGGLE  (matches: togglePass)
+//  PASSWORD TOGGLE  (called from HTML as: togglePass)
 // ═══════════════════════════════════════════════════════
 function togglePass(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
   const show = input.type === 'password';
   input.type = show ? 'text' : 'password';
-  // swap icon
   btn.innerHTML = show
     ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
     : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 }
 
 // ═══════════════════════════════════════════════════════
-//  CHECKBOX TOGGLE  (matches: toggleCheck)
+//  CHECKBOX TOGGLE  (called from HTML as: toggleCheck)
 // ═══════════════════════════════════════════════════════
 function toggleCheck(id) {
   const el = document.getElementById(id);
@@ -1156,55 +1150,44 @@ function toggleCheck(id) {
 }
 
 // ═══════════════════════════════════════════════════════
-//  PASSWORD STRENGTH  (matches: checkStrength)
+//  PASSWORD STRENGTH  (called from HTML as: checkStrength)
 // ═══════════════════════════════════════════════════════
 function checkStrength(val) {
-  const segs  = [
-    document.getElementById('seg1'),
-    document.getElementById('seg2'),
-    document.getElementById('seg3'),
-    document.getElementById('seg4'),
-  ];
+  const segs  = ['seg1','seg2','seg3','seg4'].map(id => document.getElementById(id));
   const label = document.getElementById('strengthLabel');
-
   let score = 0;
-  if (val.length >= 8)            score++;
-  if (val.length >= 12)           score++;
-  if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
-  if (/[0-9]/.test(val))          score++;
-  if (/[^A-Za-z0-9]/.test(val))  score++;
+  if (val.length >= 8)                              score++;
+  if (val.length >= 12)                             score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val))      score++;
+  if (/[0-9]/.test(val))                            score++;
+  if (/[^A-Za-z0-9]/.test(val))                    score++;
   score = Math.min(score, 4);
-
-  const colors = ['','#ff4560','#ff5e2c','#f0be3c','#22d47a'];
-  const labels = ['','Weak','Fair','Good','Strong'];
-
+  const colors = ['', '#ff4560', '#ff5e2c', '#f0be3c', '#22d47a'];
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
   segs.forEach((s, i) => {
     if (!s) return;
     s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.08)';
   });
-  if (label) {
-    label.textContent = val.length === 0 ? '' : labels[score];
-    label.style.color = colors[score];
-  }
+  if (label) { label.textContent = val.length === 0 ? '' : labels[score]; label.style.color = colors[score]; }
 }
 
 // ═══════════════════════════════════════════════════════
-//  FORGOT PASSWORD  (matches: showForgot)
+//  FORGOT PASSWORD  (called from HTML as: showForgot)
 // ═══════════════════════════════════════════════════════
 function showForgot() {
   document.getElementById('loginForm').style.display  = 'none';
   document.getElementById('signupForm').style.display = 'none';
-  // Inject forgot screen if it doesn't exist yet
-  if (!document.getElementById('forgotScreen')) {
-    const div = document.createElement('div');
-    div.id = 'forgotScreen';
-    div.className = 'form-section';
-    div.innerHTML = `
+  let fs = document.getElementById('forgotScreen');
+  if (!fs) {
+    fs = document.createElement('div');
+    fs.id = 'forgotScreen';
+    fs.className = 'form-section';
+    fs.innerHTML = `
       <div class="form-heading">
         <div class="form-title">Reset password</div>
-        <div class="form-sub">We'll send a reset link to your email</div>
+        <div class="form-sub">Enter your email and we'll send a reset link</div>
       </div>
-      <div id="forgotGlobalErr" class="auth-global-error" style="display:none"></div>
+      <div id="forgotErrBox" class="auth-global-error" style="display:none"></div>
       <div class="field-group">
         <label class="field-label">Email address</label>
         <div class="field-wrap">
@@ -1213,20 +1196,22 @@ function showForgot() {
         </div>
         <div class="field-error" id="forgotEmailErr"></div>
       </div>
-      <div id="forgotSuccess" style="display:none;align-items:center;gap:10px;padding:14px;background:rgba(0,232,184,0.08);border:1px solid rgba(0,232,184,0.25);border-radius:8px;font-size:13px;color:var(--teal);font-weight:600;">
-        ✓ Check your inbox — reset link sent!
+      <div id="forgotSuccess" style="display:none;align-items:center;gap:10px;padding:14px;background:rgba(0,232,184,0.08);border:1px solid rgba(0,232,184,0.25);border-radius:8px;font-size:13px;color:var(--teal);font-weight:600;margin-bottom:14px;">
+        ✓ Reset link sent — check your inbox!
       </div>
-      <button class="auth-btn" id="forgotBtn" onclick="handleForgot()">
-        <span class="btn-text">Send reset link</span>
-        <span class="btn-spinner" style="display:none"></span>
-      </button>
-      <div style="text-align:center;margin-top:16px">
+      <button class="auth-btn" id="forgotBtn" onclick="handleForgot()">Send reset link</button>
+      <div style="text-align:center;margin-top:16px;">
         <a href="#" class="forgot-link" onclick="hideForgot()">← Back to sign in</a>
       </div>
     `;
-    document.getElementById('loginForm').parentNode.appendChild(div);
+    document.getElementById('loginForm').parentNode.appendChild(fs);
   } else {
-    document.getElementById('forgotScreen').style.display = 'block';
+    fs.style.display = 'block';
+    // reset state
+    const suc = document.getElementById('forgotSuccess');
+    if (suc) suc.style.display = 'none';
+    const err = document.getElementById('forgotErrBox');
+    if (err) { err.textContent = ''; err.style.display = 'none'; }
   }
   clearErrors();
 }
@@ -1234,34 +1219,34 @@ function showForgot() {
 function hideForgot() {
   const fs = document.getElementById('forgotScreen');
   if (fs) fs.style.display = 'none';
-  switchTab(activeTab);
+  switchTab('login');
 }
 
 async function handleForgot() {
-  const email = (document.getElementById('forgotEmail')?.value || '').trim();
-  const errEl = document.getElementById('forgotEmailErr');
-  const sucEl = document.getElementById('forgotSuccess');
-  const btn   = document.getElementById('forgotBtn');
-  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
-  if (sucEl) sucEl.style.display = 'none';
+  const email  = (document.getElementById('forgotEmail')?.value || '').trim();
+  const errBox = document.getElementById('forgotErrBox');
+  const sucBox = document.getElementById('forgotSuccess');
+  const btn    = document.getElementById('forgotBtn');
 
+  if (errBox) { errBox.textContent = ''; errBox.style.display = 'none'; }
+  if (sucBox) sucBox.style.display = 'none';
   if (!email) {
-    if (errEl) { errEl.textContent = 'Email is required'; errEl.style.display = 'block'; }
+    if (errBox) { errBox.textContent = 'Please enter your email address'; errBox.style.display = 'flex'; }
     return;
   }
   if (btn) btn.disabled = true;
   try {
     await apiCall('/auth/forgot-password', 'POST', { email });
-    if (sucEl) sucEl.style.display = 'flex';
+    if (sucBox) sucBox.style.display = 'flex';
   } catch {
-    if (errEl) { errEl.textContent = 'Could not send — please try again'; errEl.style.display = 'block'; }
+    if (errBox) { errBox.textContent = 'Could not send reset link — please try again'; errBox.style.display = 'flex'; }
   } finally {
     if (btn) btn.disabled = false;
   }
 }
 
 // ═══════════════════════════════════════════════════════
-//  API HELPER
+//  API HELPER — extracts clean string message from any error
 // ═══════════════════════════════════════════════════════
 async function apiCall(path, method = 'GET', body = null, token = null) {
   const headers = { 'Content-Type': 'application/json' };
@@ -1272,7 +1257,24 @@ async function apiCall(path, method = 'GET', body = null, token = null) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw { status: res.status, detail: data.detail || 'Something went wrong' };
+  if (!res.ok) {
+    // FastAPI 422: detail is an array of validation errors
+    // FastAPI 4xx/5xx: detail is a string
+    let msg = 'Something went wrong';
+    if (typeof data.detail === 'string') {
+      msg = data.detail;
+    } else if (Array.isArray(data.detail) && data.detail.length > 0) {
+      // Extract the first validation error message
+      const first = data.detail[0];
+      msg = first.msg || JSON.stringify(first);
+      // Make it user-friendly
+      if (msg.includes('value is not a valid email')) msg = 'Please enter a valid email address';
+      else if (msg.includes('string_too_short') || msg.includes('at least')) msg = 'Password must be at least 8 characters';
+      else if (msg.includes('uppercase')) msg = 'Password must contain an uppercase letter';
+      else if (msg.includes('number')) msg = 'Password must contain a number';
+    }
+    throw { status: res.status, detail: msg };
+  }
   return data;
 }
 
@@ -1281,34 +1283,37 @@ async function apiCall(path, method = 'GET', body = null, token = null) {
 // ═══════════════════════════════════════════════════════
 function showFieldErr(id, msg) {
   const el = document.getElementById(id);
-  if (el) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
 }
+
 function clearErrors() {
-  document.querySelectorAll('.field-error').forEach(e => {
-    e.textContent = ''; e.style.display = 'none';
-  });
-  ['loginGlobalErr','signupGlobalErr'].forEach(id => {
+  document.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; e.style.display = 'none'; });
+  ['loginErrBox', 'signupErrBox'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = ''; el.style.display = 'none'; }
   });
 }
-function showGlobalErr(id, msg) {
-  const el = document.getElementById(id);
-  if (el) { el.textContent = msg; el.style.display = 'flex'; }
-}
-function ensureGlobalErr(formId) {
-  const form = document.getElementById(formId);
-  if (!form) return null;
-  const errId = formId === 'loginForm' ? 'loginGlobalErr' : 'signupGlobalErr';
-  let el = document.getElementById(errId);
+
+function showGlobalErr(boxId, msg) {
+  // Ensure msg is always a string
+  const text = (typeof msg === 'string') ? msg : JSON.stringify(msg);
+  let el = document.getElementById(boxId);
   if (!el) {
+    // Create it inside the active form
+    const formId = activeTab === 'login' ? 'loginForm' : 'signupForm';
+    const form = document.getElementById(formId);
+    if (!form) return;
     el = document.createElement('div');
-    el.id = errId;
+    el.id = boxId;
     el.className = 'auth-global-error';
-    el.style.display = 'none';
-    form.insertBefore(el, form.querySelector('.field-group') || form.firstChild);
+    // Insert before first field-group
+    const firstField = form.querySelector('.field-group, .social-row, .or-divider');
+    form.insertBefore(el, firstField || form.firstChild);
   }
-  return errId;
+  el.textContent = text;
+  el.style.display = 'flex';
 }
 
 function setBtn(btnId, loading) {
@@ -1319,80 +1324,77 @@ function setBtn(btnId, loading) {
   const spinner = btn.querySelector('.btn-spinner');
   if (text)    text.style.display    = loading ? 'none' : '';
   if (spinner) spinner.style.display = loading ? 'flex' : 'none';
+  if (!text && !spinner) btn.style.opacity = loading ? '0.65' : '1';
 }
 
 // ═══════════════════════════════════════════════════════
-//  LOGIN  (matches: handleLogin)
+//  LOGIN  (called from HTML as: handleLogin)
 // ═══════════════════════════════════════════════════════
 async function handleLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
   clearErrors();
 
-  const email    = (document.getElementById('loginEmail')?.value    || '').trim();
-  const password =  document.getElementById('loginPass')?.value     || '';
+  const email    = (document.getElementById('loginEmail')?.value  || '').trim();
+  const password =  document.getElementById('loginPass')?.value   || '';
   const remember =  document.getElementById('rememberCheck')?.checked;
 
   let valid = true;
-  if (!email)    { showFieldErr('loginEmailErr',  'Email is required');    valid = false; }
-  if (!password) { showFieldErr('loginPassErr',   'Password is required'); valid = false; }
+  if (!email)          { showFieldErr('loginEmailErr', 'Email is required'); valid = false; }
+  if (!password)       { showFieldErr('loginPassErr',  'Password is required'); valid = false; }
   if (!valid) return;
 
-  const errKey = ensureGlobalErr('loginForm');
   setBtn('loginBtn', true);
-
   try {
     const data = await apiCall('/auth/login', 'POST', { email, password });
     Auth.save(data.access_token, data.refresh_token, data.user);
     if (remember) localStorage.setItem('pp_remember_email', email);
-    else          localStorage.removeItem('pp_remember_email');
+    else localStorage.removeItem('pp_remember_email');
     showSuccess(data.user, 'pixelpilot-projects.html');
   } catch (err) {
     const msg = err.status === 401 ? 'Incorrect email or password'
-              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.status === 429 ? 'Too many attempts — please wait a moment'
               : err.detail || 'Login failed — please try again';
-    showGlobalErr(errKey, msg);
+    showGlobalErr('loginErrBox', msg);
   } finally {
     setBtn('loginBtn', false);
   }
 }
 
 // ═══════════════════════════════════════════════════════
-//  SIGNUP  (matches: handleSignup)
+//  SIGNUP  (called from HTML as: handleSignup)
 // ═══════════════════════════════════════════════════════
 async function handleSignup(e) {
   if (e && e.preventDefault) e.preventDefault();
   clearErrors();
 
-  const firstName = (document.getElementById('firstName')?.value  || '').trim();
-  const lastName  = (document.getElementById('lastName')?.value   || '').trim();
-  const email     = (document.getElementById('signupEmail')?.value || '').trim();
-  const password  =  document.getElementById('signupPass')?.value  || '';
-  const terms     =  document.getElementById('termsCheck')?.checked;
+  const firstName =  (document.getElementById('firstName')?.value   || '').trim();
+  const lastName  =  (document.getElementById('lastName')?.value    || '').trim();
+  const email     =  (document.getElementById('signupEmail')?.value || '').trim();
+  const password  =   document.getElementById('signupPass')?.value  || '';
+  const terms     =   document.getElementById('termsCheck')?.checked;
 
   let valid = true;
-  if (!firstName)      { showFieldErr('firstNameErr',  'First name required'); valid = false; }
-  if (!email)          { showFieldErr('signupEmailErr', 'Email is required');   valid = false; }
-  if (!password)       { showFieldErr('signupPassErr',  'Password is required'); valid = false; }
-  else if (password.length < 8) { showFieldErr('signupPassErr', 'Min 8 characters'); valid = false; }
-  else if (!/[A-Z]/.test(password)) { showFieldErr('signupPassErr', 'Add an uppercase letter'); valid = false; }
-  else if (!/[0-9]/.test(password)) { showFieldErr('signupPassErr', 'Add a number'); valid = false; }
-  if (!terms)          { showFieldErr('termsErr', 'Please agree to the terms'); valid = false; }
+  if (!firstName)               { showFieldErr('firstNameErr',   'First name is required'); valid = false; }
+  if (!email)                   { showFieldErr('signupEmailErr', 'Email is required'); valid = false; }
+  if (!password)                { showFieldErr('signupPassErr',  'Password is required'); valid = false; }
+  else if (password.length < 8) { showFieldErr('signupPassErr',  'At least 8 characters'); valid = false; }
+  else if (!/[A-Z]/.test(password)) { showFieldErr('signupPassErr', 'Include an uppercase letter'); valid = false; }
+  else if (!/[0-9]/.test(password)) { showFieldErr('signupPassErr', 'Include a number'); valid = false; }
+  if (!terms)                   { showFieldErr('termsErr', 'Please agree to the terms'); valid = false; }
   if (!valid) return;
 
   const full_name = [firstName, lastName].filter(Boolean).join(' ');
-  const errKey = ensureGlobalErr('signupForm');
   setBtn('signupBtn', true);
-
   try {
     const data = await apiCall('/auth/signup', 'POST', { email, password, full_name, plan: selectedPlan });
     Auth.save(data.access_token, data.refresh_token, data.user);
     showSuccess(data.user, 'pixelpilot-onboarding.html');
   } catch (err) {
     const msg = err.status === 409 ? 'An account with this email already exists'
-              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.status === 429 ? 'Too many attempts — please wait a moment'
               : err.detail || 'Signup failed — please try again';
     if (err.status === 409) showFieldErr('signupEmailErr', msg);
-    else showGlobalErr(errKey, msg);
+    else showGlobalErr('signupErrBox', msg);
   } finally {
     setBtn('signupBtn', false);
   }
@@ -1402,8 +1404,12 @@ async function handleSignup(e) {
 //  SUCCESS SCREEN
 // ═══════════════════════════════════════════════════════
 function showSuccess(user, redirectUrl) {
-  document.getElementById('loginForm').style.display  = 'none';
-  document.getElementById('signupForm').style.display = 'none';
+  ['loginForm','signupForm'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const fs = document.getElementById('forgotScreen');
+  if (fs) fs.style.display = 'none';
   const ss = document.getElementById('successScreen');
   if (!ss) { window.location.href = redirectUrl; return; }
   const sub = document.getElementById('successSub');
@@ -1416,7 +1422,7 @@ function showSuccess(user, redirectUrl) {
 //  SOCIAL LOGIN (placeholder)
 // ═══════════════════════════════════════════════════════
 function socialLogin(provider) {
-  showToast(`${provider} login coming soon!`);
+  showToast(`${provider} sign-in coming soon!`);
 }
 
 // ═══════════════════════════════════════════════════════
