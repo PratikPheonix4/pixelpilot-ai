@@ -1062,27 +1062,28 @@ input.error { border-color: var(--error); }
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════════
 const API = 'https://pixel-pilot-ai-backend-production.up.railway.app';
 
-// ═══════════════════════════════════════════════════════
-//  TOKEN STORAGE
-// ═══════════════════════════════════════════════════════
+// ── State ─────────────────────────────────────────────────────────────────────
 const Auth = {
   save(access, refresh, user) {
-    localStorage.setItem('pp_access',  access);
+    localStorage.setItem('pp_access', access);
     localStorage.setItem('pp_refresh', refresh);
-    localStorage.setItem('pp_user',    JSON.stringify(user));
+    localStorage.setItem('pp_user', JSON.stringify(user));
   },
   clear() { ['pp_access','pp_refresh','pp_user'].forEach(k => localStorage.removeItem(k)); },
   isLoggedIn() { return !!localStorage.getItem('pp_access'); }
 };
 
-// ═══════════════════════════════════════════════════════
-//  ON LOAD
-// ═══════════════════════════════════════════════════════
+// OTP state
+let _otpEmail  = '';
+let _otpVerified = false;
+let _otpTimer  = null;
+let _otpSecs   = 0;
+let selectedPlan = 'free';
+let activeTab    = 'signup';
+
+// ── On load ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   if (Auth.isLoggedIn()) { window.location.href = 'pixelpilot-projects.html'; return; }
   const rem = localStorage.getItem('pp_remember_email');
@@ -1094,11 +1095,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ═══════════════════════════════════════════════════════
-//  TAB SWITCHING
-// ═══════════════════════════════════════════════════════
-let activeTab = 'signup';
-
+// ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
   activeTab = tab;
   document.getElementById('loginTab').classList.toggle('active', tab === 'login');
@@ -1112,25 +1109,19 @@ function switchTab(tab) {
   clearErrors();
 }
 
-// ═══════════════════════════════════════════════════════
-//  PLAN SELECTION
-// ═══════════════════════════════════════════════════════
-let selectedPlan = 'free';
-
+// ── Plan selection ────────────────────────────────────────────────────────────
 function selectPlan(plan) {
   selectedPlan = plan;
-  const map = { free: 'planFree', pro: 'planPro', studio: 'planStudio' };
   ['planFree','planPro','planStudio'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('selected');
   });
+  const map = { free:'planFree', pro:'planPro', studio:'planStudio' };
   const sel = document.getElementById(map[plan]);
   if (sel) sel.classList.add('selected');
 }
 
-// ═══════════════════════════════════════════════════════
-//  PASSWORD TOGGLE  (called from HTML as: togglePass)
-// ═══════════════════════════════════════════════════════
+// ── Password toggle ───────────────────────────────────────────────────────────
 function togglePass(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -1141,40 +1132,152 @@ function togglePass(inputId, btn) {
     : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 }
 
-// ═══════════════════════════════════════════════════════
-//  CHECKBOX TOGGLE  (called from HTML as: toggleCheck)
-// ═══════════════════════════════════════════════════════
+// ── Checkbox toggle ───────────────────────────────────────────────────────────
 function toggleCheck(id) {
   const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.toggle('checked');
+  if (el) el.classList.toggle('checked');
 }
 
-// ═══════════════════════════════════════════════════════
-//  PASSWORD STRENGTH  (called from HTML as: checkStrength)
-// ═══════════════════════════════════════════════════════
+// ── Password strength ─────────────────────────────────────────────────────────
 function checkStrength(val) {
   const segs  = ['seg1','seg2','seg3','seg4'].map(id => document.getElementById(id));
   const label = document.getElementById('strengthLabel');
   let score = 0;
-  if (val.length >= 8)                              score++;
-  if (val.length >= 12)                             score++;
-  if (/[A-Z]/.test(val) && /[a-z]/.test(val))      score++;
-  if (/[0-9]/.test(val))                            score++;
-  if (/[^A-Za-z0-9]/.test(val))                    score++;
+  if (val.length >= 8)                             score++;
+  if (val.length >= 12)                            score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val))     score++;
+  if (/[0-9]/.test(val))                           score++;
+  if (/[^A-Za-z0-9]/.test(val))                   score++;
   score = Math.min(score, 4);
-  const colors = ['', '#ff4560', '#ff5e2c', '#f0be3c', '#22d47a'];
-  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  const colors = ['','#ff4560','#ff5e2c','#f0be3c','#22d47a'];
+  const labels = ['','Weak','Fair','Good','Strong'];
   segs.forEach((s, i) => {
     if (!s) return;
     s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.08)';
   });
-  if (label) { label.textContent = val.length === 0 ? '' : labels[score]; label.style.color = colors[score]; }
+  if (label) { label.textContent = val.length ? labels[score] : ''; label.style.color = colors[score]; }
 }
 
-// ═══════════════════════════════════════════════════════
-//  FORGOT PASSWORD  (called from HTML as: showForgot)
-// ═══════════════════════════════════════════════════════
+// ── OTP: Send ─────────────────────────────────────────────────────────────────
+async function sendOTP() {
+  const email     = (document.getElementById('signupEmail')?.value || '').trim();
+  const firstName = (document.getElementById('firstName')?.value   || '').trim();
+  if (!email) { showFieldErr('signupEmailErr', 'Enter your email first'); return; }
+
+  const btn = document.getElementById('sendOtpBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try {
+    await apiCall('/auth/send-otp', 'POST', { email, name: firstName });
+    _otpEmail = email;
+    _otpVerified = false;
+    showOTPBox(email);
+    startOTPTimer();
+    showToast('Code sent! Check your inbox', 'success');
+  } catch (err) {
+    showFieldErr('signupEmailErr', err.detail || 'Failed to send — try again');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send code'; }
+  }
+}
+
+function showOTPBox(email) {
+  let box = document.getElementById('otpBox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'otpBox';
+    box.style.cssText = 'margin-top:16px;padding:20px;background:rgba(0,232,184,0.05);border:1px solid rgba(0,232,184,0.2);border-radius:12px;';
+    // Insert after the email field group
+    const emailGroup = document.getElementById('signupEmail')?.closest('.field-group');
+    if (emailGroup) emailGroup.parentNode.insertBefore(box, emailGroup.nextSibling);
+    else document.getElementById('signupForm').appendChild(box);
+  }
+  box.style.display = 'block';
+  box.innerHTML = `
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:10px;">
+      Enter the 6-digit code sent to <strong style="color:var(--text);">${email}</strong>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+      <input id="otpInput" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+        style="flex:1;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:18px;letter-spacing:8px;color:var(--text);font-family:'DM Mono',monospace;outline:none;text-align:center;"
+        placeholder="______" oninput="this.value=this.value.replace(/[^0-9]/g,'');if(this.value.length===6)verifyOTP()">
+      <button onclick="verifyOTP()" id="verifyOtpBtn"
+        style="background:var(--teal);color:#06060a;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">
+        Verify
+      </button>
+    </div>
+    <div id="otpStatus" style="font-size:12px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+      <span id="otpTimerLabel" style="font-size:11px;color:var(--muted2);">Resend in <strong id="otpCountdown">10:00</strong></span>
+      <button id="resendOtpBtn" onclick="sendOTP()" disabled
+        style="font-size:11px;color:var(--teal);background:none;border:none;cursor:pointer;opacity:0.4;">
+        Resend code
+      </button>
+    </div>
+  `;
+}
+
+function startOTPTimer() {
+  clearInterval(_otpTimer);
+  _otpSecs = 60;
+  const updateTimer = () => {
+    const el = document.getElementById('otpCountdown');
+    const resendBtn = document.getElementById('resendOtpBtn');
+    if (!el) { clearInterval(_otpTimer); return; }
+    const m = Math.floor(_otpSecs / 60);
+    const s = _otpSecs % 60;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    if (_otpSecs <= 0) {
+      clearInterval(_otpTimer);
+      el.textContent = 'expired';
+      if (resendBtn) { resendBtn.disabled = false; resendBtn.style.opacity = '1'; }
+    }
+    _otpSecs--;
+  };
+  updateTimer();
+  _otpTimer = setInterval(updateTimer, 1000);
+}
+
+async function verifyOTP() {
+  const otp   = (document.getElementById('otpInput')?.value || '').trim();
+  const email = _otpEmail;
+  const status = document.getElementById('otpStatus');
+  const btn    = document.getElementById('verifyOtpBtn');
+
+  if (otp.length !== 6) {
+    if (status) { status.textContent = 'Enter the 6-digit code'; status.style.color = 'var(--error)'; }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (status) { status.textContent = 'Verifying…'; status.style.color = 'var(--muted2)'; }
+
+  try {
+    await apiCall('/auth/verify-otp', 'POST', { email, otp });
+    _otpVerified = true;
+    clearInterval(_otpTimer);
+
+    // Show verified state
+    const box = document.getElementById('otpBox');
+    if (box) box.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--teal);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Email verified — ${email}
+      </div>
+    `;
+    showToast('Email verified!', 'success');
+  } catch (err) {
+    _otpVerified = false;
+    const msg = err.detail || 'Invalid code';
+    if (status) { status.textContent = msg; status.style.color = 'var(--error)'; }
+    if (btn) btn.disabled = false;
+    // Shake the input
+    const input = document.getElementById('otpInput');
+    if (input) { input.style.borderColor = 'var(--error)'; setTimeout(() => input.style.borderColor = '', 1500); }
+  }
+}
+
+// ── Forgot password ───────────────────────────────────────────────────────────
 function showForgot() {
   document.getElementById('loginForm').style.display  = 'none';
   document.getElementById('signupForm').style.display = 'none';
@@ -1206,14 +1309,7 @@ function showForgot() {
       </div>
     `;
     document.getElementById('loginForm').parentNode.appendChild(fs);
-  } else {
-    fs.style.display = 'block';
-    // reset state
-    const suc = document.getElementById('forgotSuccess');
-    if (suc) suc.style.display = 'none';
-    const err = document.getElementById('forgotErrBox');
-    if (err) { err.textContent = ''; err.style.display = 'none'; }
-  }
+  } else { fs.style.display = 'block'; }
   clearErrors();
 }
 
@@ -1228,95 +1324,73 @@ async function handleForgot() {
   const errBox = document.getElementById('forgotErrBox');
   const sucBox = document.getElementById('forgotSuccess');
   const btn    = document.getElementById('forgotBtn');
-
   if (errBox) { errBox.textContent = ''; errBox.style.display = 'none'; }
   if (sucBox) sucBox.style.display = 'none';
-  if (!email) {
-    if (errBox) { errBox.textContent = 'Please enter your email address'; errBox.style.display = 'flex'; }
-    return;
-  }
+  if (!email) { if (errBox) { errBox.textContent = 'Please enter your email'; errBox.style.display = 'flex'; } return; }
   if (btn) btn.disabled = true;
   try {
     await apiCall('/auth/forgot-password', 'POST', { email });
     if (sucBox) sucBox.style.display = 'flex';
   } catch {
-    if (errBox) { errBox.textContent = 'Could not send reset link — please try again'; errBox.style.display = 'flex'; }
+    if (errBox) { errBox.textContent = 'Could not send link — try again'; errBox.style.display = 'flex'; }
   } finally {
     if (btn) btn.disabled = false;
   }
 }
 
-// ═══════════════════════════════════════════════════════
-//  API HELPER — extracts clean string message from any error
-// ═══════════════════════════════════════════════════════
+// ── API helper ────────────────────────────────────────────────────────────────
 async function apiCall(path, method = 'GET', body = null, token = null) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${API}${path}`, {
-    method,
-    headers,
+    method, headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    // FastAPI 422: detail is an array of validation errors
-    // FastAPI 4xx/5xx: detail is a string
     let msg = 'Something went wrong';
-    if (typeof data.detail === 'string') {
-      msg = data.detail;
-    } else if (Array.isArray(data.detail) && data.detail.length > 0) {
-      // Extract the first validation error message
-      const first = data.detail[0];
-      msg = first.msg || JSON.stringify(first);
-      // Make it user-friendly
-      if (msg.includes('value is not a valid email')) msg = 'Please enter a valid email address';
-      else if (msg.includes('string_too_short') || msg.includes('at least')) msg = 'Password must be at least 8 characters';
-      else if (msg.includes('uppercase')) msg = 'Password must contain an uppercase letter';
-      else if (msg.includes('number')) msg = 'Password must contain a number';
+    if (typeof data.detail === 'string') msg = data.detail;
+    else if (Array.isArray(data.detail)) {
+      const f = data.detail[0];
+      msg = f.msg || JSON.stringify(f);
+      if (msg.includes('value is not a valid email')) msg = 'Please enter a valid email';
+      else if (msg.includes('string_too_short')) msg = 'Password too short';
     }
     throw { status: res.status, detail: msg };
   }
   return data;
 }
 
-// ═══════════════════════════════════════════════════════
-//  ERROR HELPERS
-// ═══════════════════════════════════════════════════════
+// ── Error helpers ─────────────────────────────────────────────────────────────
 function showFieldErr(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
 }
-
 function clearErrors() {
   document.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; e.style.display = 'none'; });
-  ['loginErrBox', 'signupErrBox'].forEach(id => {
+  ['loginErrBox','signupErrBox'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = ''; el.style.display = 'none'; }
   });
 }
-
 function showGlobalErr(boxId, msg) {
-  // Ensure msg is always a string
-  const text = (typeof msg === 'string') ? msg : JSON.stringify(msg);
+  const text = typeof msg === 'string' ? msg : JSON.stringify(msg);
   let el = document.getElementById(boxId);
   if (!el) {
-    // Create it inside the active form
     const formId = activeTab === 'login' ? 'loginForm' : 'signupForm';
     const form = document.getElementById(formId);
     if (!form) return;
     el = document.createElement('div');
     el.id = boxId;
     el.className = 'auth-global-error';
-    // Insert before first field-group
     const firstField = form.querySelector('.field-group, .social-row, .or-divider');
     form.insertBefore(el, firstField || form.firstChild);
   }
   el.textContent = text;
   el.style.display = 'flex';
 }
-
 function setBtn(btnId, loading) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
@@ -1328,22 +1402,17 @@ function setBtn(btnId, loading) {
   if (!text && !spinner) btn.style.opacity = loading ? '0.65' : '1';
 }
 
-// ═══════════════════════════════════════════════════════
-//  LOGIN  (called from HTML as: handleLogin)
-// ═══════════════════════════════════════════════════════
+// ── Login ─────────────────────────────────────────────────────────────────────
 async function handleLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
   clearErrors();
-
   const email    = (document.getElementById('loginEmail')?.value  || '').trim();
   const password =  document.getElementById('loginPass')?.value   || '';
-  const remember = document.getElementById('rememberCheck')?.classList.contains('checked');
-
+  const remember =  document.getElementById('rememberCheck')?.classList.contains('checked');
   let valid = true;
-  if (!email)          { showFieldErr('loginEmailErr', 'Email is required'); valid = false; }
-  if (!password)       { showFieldErr('loginPassErr',  'Password is required'); valid = false; }
+  if (!email)    { showFieldErr('loginEmailErr', 'Email is required'); valid = false; }
+  if (!password) { showFieldErr('loginPassErr',  'Password is required'); valid = false; }
   if (!valid) return;
-
   setBtn('loginBtn', true);
   try {
     const data = await apiCall('/auth/login', 'POST', { email, password });
@@ -1353,36 +1422,45 @@ async function handleLogin(e) {
     showSuccess(data.user, 'pixelpilot-projects.html');
   } catch (err) {
     const msg = err.status === 401 ? 'Incorrect email or password'
-              : err.status === 429 ? 'Too many attempts — please wait a moment'
-              : err.detail || 'Login failed — please try again';
+              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.detail || 'Login failed';
     showGlobalErr('loginErrBox', msg);
   } finally {
     setBtn('loginBtn', false);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-//  SIGNUP  (called from HTML as: handleSignup)
-// ═══════════════════════════════════════════════════════
+// ── Signup ────────────────────────────────────────────────────────────────────
 async function handleSignup(e) {
   if (e && e.preventDefault) e.preventDefault();
   clearErrors();
-
-  const firstName =  (document.getElementById('firstName')?.value   || '').trim();
-  const lastName  =  (document.getElementById('lastName')?.value    || '').trim();
-  const email     =  (document.getElementById('signupEmail')?.value || '').trim();
-  const password  =   document.getElementById('signupPass')?.value  || '';
-  const terms = document.getElementById('termsCheck')?.classList.contains('checked');
+  const firstName = (document.getElementById('firstName')?.value   || '').trim();
+  const lastName  = (document.getElementById('lastName')?.value    || '').trim();
+  const email     = (document.getElementById('signupEmail')?.value || '').trim();
+  const password  =  document.getElementById('signupPass')?.value  || '';
+  const terms     =  document.getElementById('termsCheck')?.classList.contains('checked');
 
   let valid = true;
-  if (!firstName)               { showFieldErr('firstNameErr',   'First name is required'); valid = false; }
-  if (!email)                   { showFieldErr('signupEmailErr', 'Email is required'); valid = false; }
-  if (!password)                { showFieldErr('signupPassErr',  'Password is required'); valid = false; }
-  else if (password.length < 8) { showFieldErr('signupPassErr',  'At least 8 characters'); valid = false; }
+  if (!firstName)              { showFieldErr('firstNameErr',   'First name required'); valid = false; }
+  if (!email)                  { showFieldErr('signupEmailErr', 'Email required'); valid = false; }
+  if (!password)               { showFieldErr('signupPassErr',  'Password required'); valid = false; }
+  else if (password.length<8)  { showFieldErr('signupPassErr',  'At least 8 characters'); valid = false; }
   else if (!/[A-Z]/.test(password)) { showFieldErr('signupPassErr', 'Include an uppercase letter'); valid = false; }
   else if (!/[0-9]/.test(password)) { showFieldErr('signupPassErr', 'Include a number'); valid = false; }
-  if (!terms)                   { showFieldErr('termsErr', 'Please agree to the terms'); valid = false; }
+  if (!terms)                  { showFieldErr('termsErr', 'Please agree to the terms'); valid = false; }
   if (!valid) return;
+
+  // Must have verified OTP
+  if (!_otpVerified || _otpEmail !== email) {
+    showGlobalErr('signupErrBox', 'Please verify your email first — check the code sent to your inbox');
+    // Auto-show OTP box if not visible
+    if (!document.getElementById('otpBox')) {
+      await sendOTP();
+    } else {
+      document.getElementById('otpBox').scrollIntoView({ behavior: 'smooth' });
+    }
+    return;
+  }
 
   const full_name = [firstName, lastName].filter(Boolean).join(' ');
   setBtn('signupBtn', true);
@@ -1392,8 +1470,9 @@ async function handleSignup(e) {
     showSuccess(data.user, 'pixelpilot-onboarding.html');
   } catch (err) {
     const msg = err.status === 409 ? 'An account with this email already exists'
-              : err.status === 429 ? 'Too many attempts — please wait a moment'
-              : err.detail || 'Signup failed — please try again';
+              : err.status === 403 ? 'Please verify your email first'
+              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.detail || 'Signup failed';
     if (err.status === 409) showFieldErr('signupEmailErr', msg);
     else showGlobalErr('signupErrBox', msg);
   } finally {
@@ -1401,13 +1480,10 @@ async function handleSignup(e) {
   }
 }
 
-// ═══════════════════════════════════════════════════════
-//  SUCCESS SCREEN
-// ═══════════════════════════════════════════════════════
+// ── Success screen ────────────────────────────────────────────────────────────
 function showSuccess(user, redirectUrl) {
   ['loginForm','signupForm'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
   });
   const fs = document.getElementById('forgotScreen');
   if (fs) fs.style.display = 'none';
@@ -1419,24 +1495,18 @@ function showSuccess(user, redirectUrl) {
   setTimeout(() => { window.location.href = redirectUrl; }, 1600);
 }
 
-// ═══════════════════════════════════════════════════════
-//  SOCIAL LOGIN (placeholder)
-// ═══════════════════════════════════════════════════════
-function socialLogin(provider) {
-  showToast(`${provider} sign-in coming soon!`);
-}
+// ── Social login ──────────────────────────────────────────────────────────────
+function socialLogin(provider) { showToast(`${provider} sign-in coming soon!`); }
 
-// ═══════════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════════
+// ── Toast ─────────────────────────────────────────────────────────────────────
 let _tTimer;
-function showToast(msg) {
+function showToast(msg, type = '') {
   const t = document.getElementById('toast');
   if (!t) return;
   t.textContent = msg;
-  t.classList.add('show');
+  t.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(_tTimer);
-  _tTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  _tTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 </script>
 </body>

@@ -1092,6 +1092,7 @@ let _saveTimer;
 function showSaveIndicator(state) {
   const el = document.getElementById('saveIndicator');
   const txt = document.getElementById('saveIndicatorText');
+  if (!el || !txt) return;
   el.className = 'save-indicator show ' + state;
   txt.textContent = state === 'saved' ? 'Saved!' : 'Saving…';
   clearTimeout(_saveTimer);
@@ -1101,10 +1102,11 @@ function showSaveIndicator(state) {
 let _toastTimer;
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  if (!t) { console.warn('Toast:', msg); return; }
+  t.textContent = typeof msg === 'string' ? msg : JSON.stringify(msg);
   t.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
 function formatBytes(bytes) {
