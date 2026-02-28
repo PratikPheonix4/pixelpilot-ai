@@ -1250,36 +1250,13 @@ async function handleForgot() {
 //  API HELPER — extracts clean string message from any error
 // ═══════════════════════════════════════════════════════
 async function apiCall(path, method = 'GET', body = null, token = null) {
-  try {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const res = await fetch(`${API}${path}`, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    // Handle non-2xx responses
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || `Request failed with status ${res.status}`);
-    }
-
-    // Handle empty response (e.g., 204 No Content)
-    if (res.status === 204) return null;
-
-    return await res.json();
-  } catch (err) {
-    console.error('API Error:', err.message);
-    throw err;
-  }
-}
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     // FastAPI 422: detail is an array of validation errors
