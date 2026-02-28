@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PixelPilot AI — Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #06060a;
+  --panel: #0f0f16;
+  --panel2: #16161f;
+  --panel3: #1c1c28;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #eceaf5;
+  --muted: #62607a;
+  --muted2: #908eaa;
+  --teal: #00e8b8;
+  --teal2: #00c49a;
+  --orange: #ff5e2c;
+  --gold: #f0be3c;
+  --error: #ff4560;
+  --success: #22d47a;
+  --sidebar: 240px;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ═══════════════════════════════ SIDEBAR ═══════════════════════════════ */
+.sidebar {
+  width: var(--sidebar);
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--teal), #22d47a);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  color: #06060a;
+  letter-spacing: 0;
+}
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+.logo-text span { color: var(--teal); }
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 8px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.nav-item.active { background: rgba(0,232,184,0.1); color: var(--teal); }
+.nav-item svg { flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--panel2);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.user-pill:hover { background: var(--panel3); }
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--orange));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #06060a;
+  flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 12.5px; font-weight: 600; truncate: nowrap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-plan { font-size: 10.5px; color: var(--muted2); }
+
+/* ═══════════════════════════════ MAIN ═══════════════════════════════ */
+.main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  background: rgba(6,6,10,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 50;
+}
+.topbar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--teal);
+  color: #06060a;
+}
+.btn-primary:hover { background: var(--teal2); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted2);
+  border: 1px solid var(--border2);
+}
+.btn-ghost:hover { background: var(--panel2); color: var(--text); }
+.btn-danger {
+  background: rgba(255,69,96,0.1);
+  color: var(--error);
+  border: 1px solid rgba(255,69,96,0.2);
+}
+.btn-danger:hover { background: rgba(255,69,96,0.2); }
+
+/* ═══════════════════════════════ CONTENT ═══════════════════════════════ */
+.content {
+  padding: 32px;
+  max-width: 900px;
+}
+
+/* Profile hero */
+.profile-hero {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.profile-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,232,184,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.avatar-area { position: relative; flex-shrink: 0; }
+.avatar-large {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--orange));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+  color: #06060a;
+  border: 3px solid rgba(0,232,184,0.3);
+  cursor: pointer;
+  transition: border-color 0.2s;
+  overflow: hidden;
+}
+.avatar-large img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.avatar-large:hover { border-color: var(--teal); }
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: 2px solid var(--panel);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+.profile-info { flex: 1; }
+.profile-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.profile-email { font-size: 13px; color: var(--muted2); margin-bottom: 12px; }
+.profile-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.badge-plan-free   { background: rgba(240,190,60,0.12);  color: var(--gold);    border: 1px solid rgba(240,190,60,0.2); }
+.badge-plan-pro    { background: rgba(0,232,184,0.1);    color: var(--teal);    border: 1px solid rgba(0,232,184,0.2); }
+.badge-plan-studio { background: rgba(255,94,44,0.1);    color: var(--orange);  border: 1px solid rgba(255,94,44,0.2); }
+.badge-joined { background: var(--panel2); color: var(--muted2); border: 1px solid var(--border); }
+
+.profile-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Storage bar */
+.storage-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.storage-info { flex: 1; }
+.storage-label { font-size: 12px; color: var(--muted2); margin-bottom: 8px; display: flex; justify-content: space-between; }
+.storage-bar-track {
+  height: 6px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.storage-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--teal), #22d47a);
+  transition: width 0.6s ease;
+}
+.storage-bar-fill.warn { background: linear-gradient(90deg, var(--gold), #f0a830); }
+.storage-bar-fill.danger { background: linear-gradient(90deg, var(--error), #ff2040); }
+
+/* ═══════════════════════════════ SECTION CARDS ═══════════════════════════════ */
+.section-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title svg { color: var(--teal); }
+.section-sub { font-size: 12px; color: var(--muted2); margin-top: 2px; }
+
+.section-body { padding: 24px; }
+
+/* Form fields */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.field-row.full { grid-template-columns: 1fr; }
+
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 12px; font-weight: 600; color: var(--muted2); letter-spacing: 0.3px; }
+.field-input {
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.15s;
+  outline: none;
+  width: 100%;
+}
+.field-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,232,184,0.08); }
+.field-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.field-hint { font-size: 11px; color: var(--muted); }
+.field-error-msg { font-size: 11px; color: var(--error); display: none; }
+.field-error-msg.show { display: block; }
+
+/* Password field with toggle */
+.pw-wrap { position: relative; }
+.pw-wrap .field-input { padding-right: 40px; }
+.pw-eye {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--muted2); cursor: pointer;
+  padding: 4px; display: flex;
+}
+.pw-eye:hover { color: var(--text); }
+
+/* Plan cards */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.plan-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.plan-card:hover { border-color: var(--border2); background: var(--panel2); }
+.plan-card.current { border-color: var(--teal); background: rgba(0,232,184,0.05); }
+.plan-badge-current {
+  position: absolute;
+  top: -8px; right: 12px;
+  background: var(--teal);
+  color: #06060a;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.plan-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.plan-price { font-size: 22px; font-weight: 800; color: var(--teal); line-height: 1; margin-bottom: 10px; }
+.plan-price span { font-size: 12px; color: var(--muted2); font-weight: 400; }
+.plan-feature { font-size: 11.5px; color: var(--muted2); display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.plan-feature::before { content: '✓'; color: var(--teal); font-weight: 700; }
+
+/* Danger zone */
+.danger-zone { border-color: rgba(255,69,96,0.2); }
+.danger-zone .section-header { border-color: rgba(255,69,96,0.15); }
+.danger-zone .section-title { color: var(--error); }
+.danger-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.danger-item:last-child { border-bottom: none; padding-bottom: 0; }
+.danger-item-info .danger-title { font-size: 13px; font-weight: 600; }
+.danger-item-info .danger-desc { font-size: 12px; color: var(--muted2); margin-top: 2px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--panel3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(34,212,122,0.3); color: var(--success); }
+.toast.error { border-color: rgba(255,69,96,0.3); color: var(--error); }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 32px;
+  width: 420px;
+  max-width: 90vw;
+}
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; margin-bottom: 8px; }
+.modal-sub { font-size: 13px; color: var(--muted2); margin-bottom: 24px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+/* Save indicator */
+.save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted2);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.save-indicator.show { opacity: 1; }
+.save-indicator.saved { color: var(--success); }
+.save-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Spinner */
+.spin {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">PP</div>
+    <div class="logo-text">PIXEL<span>PILOT</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Workspace</div>
+    <a href="pixelpilot-projects.html" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Projects
+    </a>
+    <a href="pixelpilot-dashboard.html" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      Editor
+    </a>
+    <div class="nav-section-label">Account</div>
+    <a href="pixelpilot-profile.html" class="nav-item active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a href="#" class="nav-item" onclick="handleLogout()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign out
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar" id="sidebarAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Loading…</div>
+        <div class="user-plan" id="sidebarPlan">Free plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Profile & Settings</div>
+    <div class="topbar-actions">
+      <span class="save-indicator" id="saveIndicator">
+        <span class="save-dot"></span>
+        <span id="saveIndicatorText">Saving…</span>
+      </span>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveProfile()">
+        Save changes
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Profile hero -->
+    <div class="profile-hero">
+      <div class="avatar-area">
+        <div class="avatar-large" id="avatarLarge" onclick="document.getElementById('avatarInput').click()">
+          <span id="avatarInitial">?</span>
+        </div>
+        <div class="avatar-edit-btn" onclick="document.getElementById('avatarInput').click()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#06060a" stroke-width="3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarChange(event)">
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="heroName">Loading…</div>
+        <div class="profile-email" id="heroEmail">—</div>
+        <div class="profile-badges">
+          <span class="badge badge-plan-free" id="heroPlanBadge">FREE</span>
+          <span class="badge badge-joined" id="heroJoined">Joined —</span>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <div class="stat-num" id="statProjects">—</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num" id="statExports">—</div>
+            <div class="stat-label">Exports</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num" id="statStorage">—</div>
+            <div class="stat-label">Storage used</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Storage bar -->
+    <div class="storage-card">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      <div class="storage-info">
+        <div class="storage-label">
+          <span>Storage</span>
+          <span id="storageText">— / —</span>
+        </div>
+        <div class="storage-bar-track">
+          <div class="storage-bar-fill" id="storageFill" style="width:0%"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="showUpgradeModal()">Upgrade</button>
+    </div>
+
+    <!-- ── SECTION: Personal Info ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Personal Information
+          </div>
+          <div class="section-sub">Your name and contact details</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">First name</label>
+            <input class="field-input" id="firstName" type="text" placeholder="First name">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Last name</label>
+            <input class="field-input" id="lastName" type="text" placeholder="Last name">
+          </div>
+        </div>
+        <div class="field-row full">
+          <div class="field-group">
+            <label class="field-label">Email address</label>
+            <input class="field-input" id="emailField" type="email" disabled>
+            <div class="field-hint">Email cannot be changed. Contact support if needed.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: Change Password ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Change Password
+          </div>
+          <div class="section-sub">Leave blank to keep your current password</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field-row full" style="margin-bottom:16px">
+          <div class="field-group">
+            <label class="field-label">Current password</label>
+            <div class="pw-wrap">
+              <input class="field-input" id="currentPw" type="password" placeholder="Enter current password">
+              <button class="pw-eye" onclick="togglePw('currentPw',this)" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">New password</label>
+            <div class="pw-wrap">
+              <input class="field-input" id="newPw" type="password" placeholder="Min 8 chars, 1 uppercase, 1 number" oninput="checkPwStrength(this.value)">
+              <button class="pw-eye" onclick="togglePw('newPw',this)" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+              <div style="flex:1;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;">
+                <div id="pwStrengthBar" style="height:100%;width:0;border-radius:2px;transition:width 0.3s,background 0.3s;"></div>
+              </div>
+              <span id="pwStrengthLabel" style="font-size:10px;font-weight:700;min-width:48px;text-align:right;"></span>
+            </div>
+            <div class="field-error-msg" id="newPwErr"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Confirm new password</label>
+            <div class="pw-wrap">
+              <input class="field-input" id="confirmPw" type="password" placeholder="Repeat new password">
+              <button class="pw-eye" onclick="togglePw('confirmPw',this)" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-error-msg" id="confirmPwErr"></div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:4px;" onclick="changePassword()">
+          Update password
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SECTION: Plan ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Subscription Plan
+          </div>
+          <div class="section-sub">Your current plan and available upgrades</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="plan-grid">
+          <div class="plan-card" id="planFree">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">$0<span>/mo</span></div>
+            <div class="plan-feature">5 GB storage</div>
+            <div class="plan-feature">10 projects</div>
+            <div class="plan-feature">720p exports</div>
+            <div class="plan-feature">Basic AI tools</div>
+          </div>
+          <div class="plan-card" id="planPro">
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">$29<span>/mo</span></div>
+            <div class="plan-feature">100 GB storage</div>
+            <div class="plan-feature">Unlimited projects</div>
+            <div class="plan-feature">4K exports</div>
+            <div class="plan-feature">All AI tools</div>
+          </div>
+          <div class="plan-card" id="planStudio">
+            <div class="plan-name">Studio</div>
+            <div class="plan-price">$99<span>/mo</span></div>
+            <div class="plan-feature">1 TB storage</div>
+            <div class="plan-feature">Team workspaces</div>
+            <div class="plan-feature">Priority rendering</div>
+            <div class="plan-feature">API access</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:var(--muted2);">
+          To change your plan, <a href="#" style="color:var(--teal);text-decoration:none;" onclick="showUpgradeModal()">contact our team</a> or manage billing.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION: Danger Zone ── -->
+    <div class="section-card danger-zone">
+      <div class="section-header">
+        <div>
+          <div class="section-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Danger Zone
+          </div>
+          <div class="section-sub">Irreversible actions — proceed with caution</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="danger-item">
+          <div class="danger-item-info">
+            <div class="danger-title">Sign out of all devices</div>
+            <div class="danger-desc">Revokes all active sessions across all devices</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:12px;" onclick="signOutAll()">Sign out all</button>
+        </div>
+        <div class="danger-item">
+          <div class="danger-item-info">
+            <div class="danger-title">Delete account</div>
+            <div class="danger-desc">Permanently delete your account and all project data</div>
+          </div>
+          <button class="btn btn-danger" style="font-size:12px;" onclick="showDeleteModal()">Delete account</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ═══ DELETE MODAL ═══ -->
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--error);">Delete Account</div>
+    <div class="modal-sub">This will permanently delete your account, all projects, and exported files. This action <strong>cannot be undone</strong>.</div>
+    <div class="field-group">
+      <label class="field-label">Type <strong style="color:var(--text);">DELETE</strong> to confirm</label>
+      <input class="field-input" id="deleteConfirmInput" type="text" placeholder="DELETE">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" id="deleteConfirmBtn" onclick="confirmDelete()">Delete permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ UPGRADE MODAL ═══ -->
+<div class="modal-backdrop" id="upgradeModal">
+  <div class="modal">
+    <div class="modal-title">Upgrade Plan</div>
+    <div class="modal-sub">Billing and plan management coming soon! For early access to Pro or Studio, reach out to us.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('upgradeModal').classList.remove('open')">Close</button>
+      <button class="btn btn-primary" onclick="showToast('Coming soon! We\'ll notify you.','success');document.getElementById('upgradeModal').classList.remove('open')">Notify me</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://pixel-pilot-ai-backend-production.up.railway.app';
+
+// ── Auth check ────────────────────────────────────────────────────────────────
+const token = localStorage.getItem('pp_access');
+const storedUser = (() => {
+  try { return JSON.parse(localStorage.getItem('pp_user') || 'null'); } catch { return null; }
+})();
+
+if (!token || !storedUser) {
+  window.location.href = 'pixelpilot-auth.html';
+}
+
+// ── Populate UI from stored user ──────────────────────────────────────────────
+function populateUI(user) {
+  if (!user) return;
+
+  // Sidebar
+  const initials = (user.full_name || user.email || '?').charAt(0).toUpperCase();
+  document.getElementById('sidebarAvatar').textContent = initials;
+  document.getElementById('sidebarName').textContent = user.full_name || user.email;
+  document.getElementById('sidebarPlan').textContent = (user.plan || 'free').charAt(0).toUpperCase() + (user.plan||'free').slice(1) + ' plan';
+
+  // Hero
+  document.getElementById('heroName').textContent = user.full_name || user.email;
+  document.getElementById('heroEmail').textContent = user.email;
+  document.getElementById('avatarInitial').textContent = initials;
+
+  // Plan badge
+  const planBadge = document.getElementById('heroPlanBadge');
+  planBadge.textContent = (user.plan || 'free').toUpperCase();
+  planBadge.className = 'badge badge-plan-' + (user.plan || 'free');
+
+  // Joined date
+  if (user.created_at) {
+    const d = new Date(user.created_at);
+    document.getElementById('heroJoined').textContent = 'Joined ' + d.toLocaleDateString('en-US', {month:'short', year:'numeric'});
+  }
+
+  // Stats
+  document.getElementById('statProjects').textContent = user.projects_count ?? 0;
+  document.getElementById('statExports').textContent   = user.exports_count   ?? 0;
+
+  // Storage
+  const used  = user.storage_used_bytes  || 0;
+  const limit = user.storage_limit_bytes || 5368709120;
+  const pct   = Math.min(100, Math.round(used / limit * 100));
+  document.getElementById('statStorage').textContent = formatBytes(used);
+  document.getElementById('storageText').textContent = `${formatBytes(used)} / ${formatBytes(limit)}`;
+  const fill = document.getElementById('storageFill');
+  fill.style.width = pct + '%';
+  fill.className = 'storage-bar-fill' + (pct > 90 ? ' danger' : pct > 70 ? ' warn' : '');
+
+  // Form fields
+  const parts = (user.full_name || '').split(' ');
+  document.getElementById('firstName').value = parts[0] || '';
+  document.getElementById('lastName').value  = parts.slice(1).join(' ') || '';
+  document.getElementById('emailField').value = user.email || '';
+
+  // Avatar image
+  if (user.avatar_url) {
+    const al = document.getElementById('avatarLarge');
+    al.innerHTML = `<img src="${user.avatar_url}" alt="avatar">`;
+  }
+
+  // Plan cards
+  highlightCurrentPlan(user.plan || 'free');
+}
+
+function highlightCurrentPlan(plan) {
+  const map = { free: 'planFree', pro: 'planPro', studio: 'planStudio', team: 'planStudio' };
+  ['planFree','planPro','planStudio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('current');
+    el.querySelector('.plan-badge-current')?.remove();
+  });
+  const target = document.getElementById(map[plan]);
+  if (target) {
+    target.classList.add('current');
+    const badge = document.createElement('div');
+    badge.className = 'plan-badge-current';
+    badge.textContent = 'CURRENT';
+    target.prepend(badge);
+  }
+}
+
+// ── Load fresh user data from API ─────────────────────────────────────────────
+async function loadUser() {
+  try {
+    const res = await fetch(`${API}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.status === 401) { localStorage.clear(); window.location.href = 'pixelpilot-auth.html'; return; }
+    if (!res.ok) throw new Error('Failed');
+    const user = await res.json();
+    localStorage.setItem('pp_user', JSON.stringify(user));
+    populateUI(user);
+  } catch {
+    // Fall back to stored user
+    populateUI(storedUser);
+  }
+}
+
+// ── Save profile ──────────────────────────────────────────────────────────────
+async function saveProfile() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const full_name = [firstName, lastName].filter(Boolean).join(' ');
+
+  if (!full_name) { showToast('Please enter your name', 'error'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Saving…';
+
+  try {
+    const res = await fetch(`${API}/auth/me`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ full_name })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+    const updated = await res.json();
+    localStorage.setItem('pp_user', JSON.stringify(updated));
+    populateUI(updated);
+
+    showSaveIndicator('saved');
+    showToast('Profile updated!', 'success');
+  } catch {
+    showToast('Failed to save — please try again', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Save changes';
+  }
+}
+
+// ── Change password ───────────────────────────────────────────────────────────
+async function changePassword() {
+  const current = document.getElementById('currentPw').value;
+  const newPw   = document.getElementById('newPw').value;
+  const confirm = document.getElementById('confirmPw').value;
+
+  // Clear errors
+  ['newPwErr','confirmPwErr'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ''; el.classList.remove('show');
+  });
+
+  if (!current) { showToast('Enter your current password', 'error'); return; }
+  if (!newPw)   { showFieldErr('newPwErr', 'New password required'); return; }
+  if (newPw.length < 8) { showFieldErr('newPwErr', 'At least 8 characters'); return; }
+  if (!/[A-Z]/.test(newPw)) { showFieldErr('newPwErr', 'Include an uppercase letter'); return; }
+  if (!/[0-9]/.test(newPw)) { showFieldErr('newPwErr', 'Include a number'); return; }
+  if (newPw !== confirm) { showFieldErr('confirmPwErr', 'Passwords do not match'); return; }
+
+  // For password change: logout + re-login with new password
+  // Since we don't have a dedicated change-password endpoint yet, use forgot-password flow hint
+  showToast('Password change coming soon — use Forgot Password for now', 'error');
+}
+
+// ── Password strength ─────────────────────────────────────────────────────────
+function checkPwStrength(val) {
+  let score = 0;
+  if (val.length >= 8)                           score++;
+  if (val.length >= 12)                          score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val))   score++;
+  if (/[0-9]/.test(val))                         score++;
+  if (/[^A-Za-z0-9]/.test(val))                 score++;
+  score = Math.min(score, 4);
+  const colors = ['','#ff4560','#ff5e2c','#f0be3c','#22d47a'];
+  const labels = ['','Weak','Fair','Good','Strong'];
+  document.getElementById('pwStrengthBar').style.cssText = `height:100%;border-radius:2px;transition:all .3s;width:${score*25}%;background:${colors[score]}`;
+  const lbl = document.getElementById('pwStrengthLabel');
+  lbl.textContent = val.length ? labels[score] : '';
+  lbl.style.color = colors[score];
+}
+
+// ── Avatar change ─────────────────────────────────────────────────────────────
+function handleAvatarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const url = ev.target.result;
+    const al = document.getElementById('avatarLarge');
+    al.innerHTML = `<img src="${url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    showToast('Avatar preview updated — save to confirm', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+async function handleLogout() {
+  const refresh = localStorage.getItem('pp_refresh');
+  if (refresh) {
+    fetch(`${API}/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refresh })
+    }).catch(() => {});
+  }
+  localStorage.clear();
+  window.location.href = 'pixelpilot-auth.html';
+}
+
+async function signOutAll() {
+  await handleLogout();
+}
+
+// ── Delete account ────────────────────────────────────────────────────────────
+function showDeleteModal()  { document.getElementById('deleteModal').classList.add('open'); }
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  document.getElementById('deleteConfirmInput').value = '';
+}
+
+function confirmDelete() {
+  const val = document.getElementById('deleteConfirmInput').value.trim();
+  if (val !== 'DELETE') { showToast('Type DELETE to confirm', 'error'); return; }
+  showToast('Account deletion coming soon — contact support', 'error');
+  closeDeleteModal();
+}
+
+// ── Upgrade modal ─────────────────────────────────────────────────────────────
+function showUpgradeModal() { document.getElementById('upgradeModal').classList.add('open'); }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.innerHTML = show
+    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+
+function showFieldErr(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+let _saveTimer;
+function showSaveIndicator(state) {
+  const el = document.getElementById('saveIndicator');
+  const txt = document.getElementById('saveIndicatorText');
+  el.className = 'save-indicator show ' + state;
+  txt.textContent = state === 'saved' ? 'Saved!' : 'Saving…';
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+let _toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function formatBytes(bytes) {
+  if (!bytes) return '0 B';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  if (bytes < 1073741824) return (bytes/1048576).toFixed(1) + ' MB';
+  return (bytes/1073741824).toFixed(2) + ' GB';
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) el.classList.remove('open');
+  });
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+populateUI(storedUser);   // instant render from cache
+loadUser();               // then refresh from API
+</script>
+</body>
+</html>
