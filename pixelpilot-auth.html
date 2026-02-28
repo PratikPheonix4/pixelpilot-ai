@@ -765,6 +765,40 @@ input.error { border-color: var(--error); }
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
+
+/* ── Global error banner ── */
+.auth-global-error {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  background: rgba(255,69,96,0.1);
+  border: 1px solid rgba(255,69,96,0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #ff4560;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.auth-global-error::before { content: '⚠  '; }
+/* ── Button spinner ── */
+.btn-spinner {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-spinner::after {
+  content: '';
+  width: 15px; height: 15px;
+  border: 2.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: _spin 0.7s linear infinite;
+}
+@keyframes _spin { to { transform: rotate(360deg); } }
+.auth-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
 </style>
 </head>
 <body>
@@ -924,6 +958,7 @@ input.error { border-color: var(--error); }
             </span>
             <input type="text" id="firstName" placeholder="Alex">
           </div>
+        <div class="field-error" id="firstNameErr"></div>
         </div>
         <div class="field">
           <label for="lastName">Last name</label>
@@ -958,6 +993,7 @@ input.error { border-color: var(--error); }
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
+        <div class="field-error" id="signupPassErr"></div>
         <div class="strength-bar">
           <div class="strength-seg" id="seg1"></div>
           <div class="strength-seg" id="seg2"></div>
@@ -990,6 +1026,7 @@ input.error { border-color: var(--error); }
         <div class="custom-check checked" id="termsCheck" onclick="toggleCheck('termsCheck')">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
+        <div class="field-error" id="termsErr"></div>
         <div class="check-label" onclick="toggleCheck('termsCheck')">
           I agree to PixelPilot's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
         </div>
@@ -1025,15 +1062,14 @@ input.error { border-color: var(--error); }
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════
 const API = 'https://pixel-pilot-ai-backend-production.up.railway.app';
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let activeTab    = 'login';
-let selectedPlan = 'free';
-let _loading     = false;
-
-// ── Token storage ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  TOKEN STORAGE
+// ═══════════════════════════════════════════════════════
 const Auth = {
   save(access, refresh, user) {
     localStorage.setItem('pp_access',  access);
@@ -1043,80 +1079,190 @@ const Auth = {
   clear() {
     ['pp_access','pp_refresh','pp_user'].forEach(k => localStorage.removeItem(k));
   },
-  getAccess()  { return localStorage.getItem('pp_access'); },
-  getRefresh() { return localStorage.getItem('pp_refresh'); },
-  getUser()    { try { return JSON.parse(localStorage.getItem('pp_user')||'null'); } catch { return null; } },
-  isLoggedIn() { return !!this.getAccess(); },
+  isLoggedIn() { return !!localStorage.getItem('pp_access'); }
 };
 
-// ── On load: redirect if already logged in ────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+// ═══════════════════════════════════════════════════════
+//  ON LOAD
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Redirect if already logged in
   if (Auth.isLoggedIn()) {
     window.location.href = 'pixelpilot-projects.html';
     return;
   }
-  // Pre-fill email if remembered
+  // Pre-fill remembered email
   const rem = localStorage.getItem('pp_remember_email');
   if (rem) {
     const el = document.getElementById('loginEmail');
-    if (el) { el.value = rem; document.getElementById('rememberMe').checked = true; }
+    if (el) el.value = rem;
+    const cb = document.getElementById('rememberCheck');
+    if (cb) cb.checked = true;
   }
-  initPasswordStrength();
 });
 
-// ── Tab switching ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+let activeTab = 'signup';  // page loads on signup
+
 function switchTab(tab) {
   activeTab = tab;
-  ['login','signup'].forEach(t => {
-    document.getElementById(t+'Tab').classList.toggle('active', t===tab);
-    document.getElementById(t+'Form').style.display = t===tab ? 'block' : 'none';
-  });
+  document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+  document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+  document.getElementById('loginForm').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
   const ss = document.getElementById('successScreen');
-  const fp = document.getElementById('forgotScreen');
   if (ss) ss.style.display = 'none';
-  if (fp) fp.style.display = 'none';
   clearErrors();
 }
 
-// ── Plan selection ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  PLAN SELECTION
+// ═══════════════════════════════════════════════════════
+let selectedPlan = 'free';
+
 function selectPlan(plan) {
   selectedPlan = plan;
-  document.querySelectorAll('.plan-card').forEach(c =>
-    c.classList.toggle('selected', c.dataset.plan === plan)
-  );
-}
-
-// ── Loading state ──────────────────────────────────────────────────────────────
-function setLoading(formId, loading) {
-  _loading = loading;
-  const btn = document.querySelector(`#${formId} .auth-btn`);
-  if (!btn) return;
-  btn.disabled = loading;
-  const span = btn.querySelector('.btn-text');
-  const spinner = btn.querySelector('.btn-spinner');
-  if (span)    span.style.display = loading ? 'none' : '';
-  if (spinner) spinner.style.display = loading ? 'flex' : 'none';
-}
-
-// ── Error display ──────────────────────────────────────────────────────────────
-function showError(fieldId, msg) {
-  const el = document.getElementById(fieldId + 'Error');
-  if (el) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
-}
-function clearErrors() {
-  document.querySelectorAll('.field-error').forEach(e => {
-    e.textContent = ''; e.style.display = 'none';
+  ['planFree','planPro','planStudio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('selected');
   });
-  document.querySelectorAll('.auth-global-error').forEach(e => {
-    e.style.display = 'none'; e.textContent = '';
-  });
-}
-function showGlobalError(formId, msg) {
-  const el = document.querySelector(`#${formId} .auth-global-error`);
-  if (el) { el.textContent = msg; el.style.display = 'flex'; }
+  const map = { free:'planFree', pro:'planPro', studio:'planStudio' };
+  const sel = document.getElementById(map[plan]);
+  if (sel) sel.classList.add('selected');
 }
 
-// ── API helper ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  PASSWORD VISIBILITY TOGGLE  (matches: togglePass)
+// ═══════════════════════════════════════════════════════
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  // swap icon
+  btn.innerHTML = show
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHECKBOX TOGGLE  (matches: toggleCheck)
+// ═══════════════════════════════════════════════════════
+function toggleCheck(id) {
+  const el = document.getElementById(id);
+  if (el) el.checked = !el.checked;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PASSWORD STRENGTH  (matches: checkStrength)
+// ═══════════════════════════════════════════════════════
+function checkStrength(val) {
+  const segs  = [
+    document.getElementById('seg1'),
+    document.getElementById('seg2'),
+    document.getElementById('seg3'),
+    document.getElementById('seg4'),
+  ];
+  const label = document.getElementById('strengthLabel');
+
+  let score = 0;
+  if (val.length >= 8)            score++;
+  if (val.length >= 12)           score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+  if (/[0-9]/.test(val))          score++;
+  if (/[^A-Za-z0-9]/.test(val))  score++;
+  score = Math.min(score, 4);
+
+  const colors = ['','#ff4560','#ff5e2c','#f0be3c','#22d47a'];
+  const labels = ['','Weak','Fair','Good','Strong'];
+
+  segs.forEach((s, i) => {
+    if (!s) return;
+    s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.08)';
+  });
+  if (label) {
+    label.textContent = val.length === 0 ? '' : labels[score];
+    label.style.color = colors[score];
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  FORGOT PASSWORD  (matches: showForgot)
+// ═══════════════════════════════════════════════════════
+function showForgot() {
+  document.getElementById('loginForm').style.display  = 'none';
+  document.getElementById('signupForm').style.display = 'none';
+  // Inject forgot screen if it doesn't exist yet
+  if (!document.getElementById('forgotScreen')) {
+    const div = document.createElement('div');
+    div.id = 'forgotScreen';
+    div.className = 'form-section';
+    div.innerHTML = `
+      <div class="form-heading">
+        <div class="form-title">Reset password</div>
+        <div class="form-sub">We'll send a reset link to your email</div>
+      </div>
+      <div id="forgotGlobalErr" class="auth-global-error" style="display:none"></div>
+      <div class="field-group">
+        <label class="field-label">Email address</label>
+        <div class="field-wrap">
+          <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <input id="forgotEmail" class="field-input" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field-error" id="forgotEmailErr"></div>
+      </div>
+      <div id="forgotSuccess" style="display:none;align-items:center;gap:10px;padding:14px;background:rgba(0,232,184,0.08);border:1px solid rgba(0,232,184,0.25);border-radius:8px;font-size:13px;color:var(--teal);font-weight:600;">
+        ✓ Check your inbox — reset link sent!
+      </div>
+      <button class="auth-btn" id="forgotBtn" onclick="handleForgot()">
+        <span class="btn-text">Send reset link</span>
+        <span class="btn-spinner" style="display:none"></span>
+      </button>
+      <div style="text-align:center;margin-top:16px">
+        <a href="#" class="forgot-link" onclick="hideForgot()">← Back to sign in</a>
+      </div>
+    `;
+    document.getElementById('loginForm').parentNode.appendChild(div);
+  } else {
+    document.getElementById('forgotScreen').style.display = 'block';
+  }
+  clearErrors();
+}
+
+function hideForgot() {
+  const fs = document.getElementById('forgotScreen');
+  if (fs) fs.style.display = 'none';
+  switchTab(activeTab);
+}
+
+async function handleForgot() {
+  const email = (document.getElementById('forgotEmail')?.value || '').trim();
+  const errEl = document.getElementById('forgotEmailErr');
+  const sucEl = document.getElementById('forgotSuccess');
+  const btn   = document.getElementById('forgotBtn');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+  if (sucEl) sucEl.style.display = 'none';
+
+  if (!email) {
+    if (errEl) { errEl.textContent = 'Email is required'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (btn) btn.disabled = true;
+  try {
+    await apiCall('/auth/forgot-password', 'POST', { email });
+    if (sucEl) sucEl.style.display = 'flex';
+  } catch {
+    if (errEl) { errEl.textContent = 'Could not send — please try again'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  API HELPER
+// ═══════════════════════════════════════════════════════
 async function apiCall(path, method = 'GET', body = null, token = null) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -1130,196 +1276,160 @@ async function apiCall(path, method = 'GET', body = null, token = null) {
   return data;
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  ERROR HELPERS
+// ═══════════════════════════════════════════════════════
+function showFieldErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
+}
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(e => {
+    e.textContent = ''; e.style.display = 'none';
+  });
+  ['loginGlobalErr','signupGlobalErr'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.style.display = 'none'; }
+  });
+}
+function showGlobalErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = 'flex'; }
+}
+function ensureGlobalErr(formId) {
+  const form = document.getElementById(formId);
+  if (!form) return null;
+  const errId = formId === 'loginForm' ? 'loginGlobalErr' : 'signupGlobalErr';
+  let el = document.getElementById(errId);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = errId;
+    el.className = 'auth-global-error';
+    el.style.display = 'none';
+    form.insertBefore(el, form.querySelector('.field-group') || form.firstChild);
+  }
+  return errId;
+}
+
+function setBtn(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  const text    = btn.querySelector('.btn-text');
+  const spinner = btn.querySelector('.btn-spinner');
+  if (text)    text.style.display    = loading ? 'none' : '';
+  if (spinner) spinner.style.display = loading ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOGIN  (matches: handleLogin)
+// ═══════════════════════════════════════════════════════
 async function handleLogin(e) {
-  e.preventDefault();
-  if (_loading) return;
+  if (e && e.preventDefault) e.preventDefault();
   clearErrors();
 
-  const email    = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const remember = document.getElementById('rememberMe')?.checked;
+  const email    = (document.getElementById('loginEmail')?.value    || '').trim();
+  const password =  document.getElementById('loginPass')?.value     || '';
+  const remember =  document.getElementById('rememberCheck')?.checked;
 
-  // Basic validation
   let valid = true;
-  if (!email)    { showError('loginEmail',    'Email is required'); valid = false; }
-  if (!password) { showError('loginPassword', 'Password is required'); valid = false; }
+  if (!email)    { showFieldErr('loginEmailErr',  'Email is required');    valid = false; }
+  if (!password) { showFieldErr('loginPassErr',   'Password is required'); valid = false; }
   if (!valid) return;
 
-  setLoading('loginForm', true);
+  const errKey = ensureGlobalErr('loginForm');
+  setBtn('loginBtn', true);
+
   try {
     const data = await apiCall('/auth/login', 'POST', { email, password });
     Auth.save(data.access_token, data.refresh_token, data.user);
     if (remember) localStorage.setItem('pp_remember_email', email);
     else          localStorage.removeItem('pp_remember_email');
-    showSuccessAndRedirect(data.user, 'pixelpilot-projects.html');
+    showSuccess(data.user, 'pixelpilot-projects.html');
   } catch (err) {
-    if (err.status === 401) {
-      showGlobalError('loginForm', 'Incorrect email or password');
-    } else if (err.status === 429) {
-      showGlobalError('loginForm', 'Too many attempts — please wait a moment');
-    } else {
-      showGlobalError('loginForm', err.detail || 'Login failed — please try again');
-    }
+    const msg = err.status === 401 ? 'Incorrect email or password'
+              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.detail || 'Login failed — please try again';
+    showGlobalErr(errKey, msg);
   } finally {
-    setLoading('loginForm', false);
+    setBtn('loginBtn', false);
   }
 }
 
-// ── SIGNUP ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  SIGNUP  (matches: handleSignup)
+// ═══════════════════════════════════════════════════════
 async function handleSignup(e) {
-  e.preventDefault();
-  if (_loading) return;
+  if (e && e.preventDefault) e.preventDefault();
   clearErrors();
 
-  const name     = document.getElementById('signupName').value.trim();
-  const email    = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirm  = document.getElementById('signupConfirm').value;
-  const terms    = document.getElementById('agreeTerms')?.checked;
+  const firstName = (document.getElementById('firstName')?.value  || '').trim();
+  const lastName  = (document.getElementById('lastName')?.value   || '').trim();
+  const email     = (document.getElementById('signupEmail')?.value || '').trim();
+  const password  =  document.getElementById('signupPass')?.value  || '';
+  const terms     =  document.getElementById('termsCheck')?.checked;
 
   let valid = true;
-  if (!name)     { showError('signupName',     'Full name is required'); valid = false; }
-  if (!email)    { showError('signupEmail',    'Email is required'); valid = false; }
-  if (!password) { showError('signupPassword', 'Password is required'); valid = false; }
-  if (password && password.length < 8) { showError('signupPassword', 'At least 8 characters'); valid = false; }
-  if (password && !/[A-Z]/.test(password)) { showError('signupPassword', 'Include at least one uppercase letter'); valid = false; }
-  if (password && !/[0-9]/.test(password)) { showError('signupPassword', 'Include at least one number'); valid = false; }
-  if (password !== confirm) { showError('signupConfirm', 'Passwords do not match'); valid = false; }
-  if (!terms) { showError('agreeTerms', 'You must agree to the terms'); valid = false; }
+  if (!firstName)      { showFieldErr('firstNameErr',  'First name required'); valid = false; }
+  if (!email)          { showFieldErr('signupEmailErr', 'Email is required');   valid = false; }
+  if (!password)       { showFieldErr('signupPassErr',  'Password is required'); valid = false; }
+  else if (password.length < 8) { showFieldErr('signupPassErr', 'Min 8 characters'); valid = false; }
+  else if (!/[A-Z]/.test(password)) { showFieldErr('signupPassErr', 'Add an uppercase letter'); valid = false; }
+  else if (!/[0-9]/.test(password)) { showFieldErr('signupPassErr', 'Add a number'); valid = false; }
+  if (!terms)          { showFieldErr('termsErr', 'Please agree to the terms'); valid = false; }
   if (!valid) return;
 
-  setLoading('signupForm', true);
+  const full_name = [firstName, lastName].filter(Boolean).join(' ');
+  const errKey = ensureGlobalErr('signupForm');
+  setBtn('signupBtn', true);
+
   try {
-    const data = await apiCall('/auth/signup', 'POST', {
-      email, password, full_name: name, plan: selectedPlan
-    });
+    const data = await apiCall('/auth/signup', 'POST', { email, password, full_name, plan: selectedPlan });
     Auth.save(data.access_token, data.refresh_token, data.user);
-    showSuccessAndRedirect(data.user, 'pixelpilot-onboarding.html');
+    showSuccess(data.user, 'pixelpilot-onboarding.html');
   } catch (err) {
-    if (err.status === 409) {
-      showError('signupEmail', 'An account with this email already exists');
-    } else if (err.status === 422) {
-      // Validation error from server
-      showGlobalError('signupForm', err.detail || 'Please check your details');
-    } else {
-      showGlobalError('signupForm', err.detail || 'Signup failed — please try again');
-    }
+    const msg = err.status === 409 ? 'An account with this email already exists'
+              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.detail || 'Signup failed — please try again';
+    if (err.status === 409) showFieldErr('signupEmailErr', msg);
+    else showGlobalErr(errKey, msg);
   } finally {
-    setLoading('signupForm', false);
+    setBtn('signupBtn', false);
   }
 }
 
-// ── FORGOT PASSWORD ───────────────────────────────────────────────────────────
-function showForgotScreen() {
+// ═══════════════════════════════════════════════════════
+//  SUCCESS SCREEN
+// ═══════════════════════════════════════════════════════
+function showSuccess(user, redirectUrl) {
   document.getElementById('loginForm').style.display  = 'none';
   document.getElementById('signupForm').style.display = 'none';
-  document.getElementById('forgotScreen').style.display = 'block';
-  clearErrors();
-}
-function hideForgotScreen() {
-  document.getElementById('forgotScreen').style.display = 'none';
-  document.getElementById('loginForm').style.display = activeTab === 'login' ? 'block' : 'none';
-}
-
-async function handleForgotPassword(e) {
-  e.preventDefault();
-  clearErrors();
-  const email = document.getElementById('forgotEmail').value.trim();
-  if (!email) { showError('forgotEmail', 'Email is required'); return; }
-
-  const btn = document.querySelector('#forgotForm .auth-btn');
-  if (btn) btn.disabled = true;
-
-  try {
-    await apiCall('/auth/forgot-password', 'POST', { email });
-    document.getElementById('forgotForm').style.display   = 'none';
-    document.getElementById('forgotSuccess').style.display = 'flex';
-  } catch {
-    showError('forgotEmail', 'Something went wrong — please try again');
-  } finally {
-    if (btn) btn.disabled = false;
-  }
-}
-
-// ── SUCCESS REDIRECT ──────────────────────────────────────────────────────────
-function showSuccessAndRedirect(user, url) {
   const ss = document.getElementById('successScreen');
-  if (!ss) { window.location.href = url; return; }
-
-  // Hide all forms
-  document.getElementById('loginForm').style.display  = 'none';
-  document.getElementById('signupForm').style.display = 'none';
-  const fp = document.getElementById('forgotScreen');
-  if (fp) fp.style.display = 'none';
-
-  // Update success screen content
-  const nm = ss.querySelector('.success-name');
-  const av = ss.querySelector('.success-avatar');
-  if (nm) nm.textContent = user.full_name || user.email;
-  if (av) av.textContent = (user.full_name || user.email).charAt(0).toUpperCase();
-
+  if (!ss) { window.location.href = redirectUrl; return; }
+  const sub = document.getElementById('successSub');
+  if (sub) sub.textContent = `Welcome, ${user.full_name || user.email}! Taking you in…`;
   ss.style.display = 'flex';
-
-  // Auto-redirect after 1.5s
-  setTimeout(() => { window.location.href = url; }, 1500);
+  setTimeout(() => { window.location.href = redirectUrl; }, 1600);
 }
 
-// ── Social login placeholders ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  SOCIAL LOGIN (placeholder)
+// ═══════════════════════════════════════════════════════
 function socialLogin(provider) {
   showToast(`${provider} login coming soon!`);
 }
 
-// ── Password strength meter ───────────────────────────────────────────────────
-function initPasswordStrength() {
-  const input = document.getElementById('signupPassword');
-  const bar   = document.getElementById('strengthBar');
-  const label = document.getElementById('strengthLabel');
-  if (!input || !bar) return;
-
-  input.addEventListener('input', () => {
-    const v = input.value;
-    let score = 0;
-    if (v.length >= 8)           score++;
-    if (v.length >= 12)          score++;
-    if (/[A-Z]/.test(v))         score++;
-    if (/[0-9]/.test(v))         score++;
-    if (/[^A-Za-z0-9]/.test(v)) score++;
-
-    const levels = [
-      { pct: 0,   color: 'transparent', text: '' },
-      { pct: 20,  color: '#ff4560',     text: 'Very weak' },
-      { pct: 40,  color: '#ff5e2c',     text: 'Weak' },
-      { pct: 60,  color: '#f0be3c',     text: 'Fair' },
-      { pct: 80,  color: '#00dfb2',     text: 'Strong' },
-      { pct: 100, color: '#22d47a',     text: 'Very strong' },
-    ];
-    const lvl = levels[score] || levels[0];
-    bar.style.width      = lvl.pct + '%';
-    bar.style.background = lvl.color;
-    if (label) { label.textContent = lvl.text; label.style.color = lvl.color; }
-  });
-}
-
-// ── Password toggle visibility ────────────────────────────────────────────────
-function togglePasswordVis(inputId, btn) {
-  const input = document.getElementById(inputId);
-  if (!input) return;
-  const show = input.type === 'password';
-  input.type = show ? 'text' : 'password';
-  btn.innerHTML = show
-    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-}
-
-// ── Toast ──────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
 let _tTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
   if (!t) return;
-  t.textContent = msg; t.classList.add('show');
+  t.textContent = msg;
+  t.classList.add('show');
   clearTimeout(_tTimer);
-  _tTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  _tTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 </script>
 </body>
