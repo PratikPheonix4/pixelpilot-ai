@@ -1107,10 +1107,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (oauthAccess && oauthRefresh && oauthUser) {
     try {
-      const user = JSON.parse(decodeURIComponent(oauthUser));
+      const user    = JSON.parse(decodeURIComponent(oauthUser));
+      const isNew   = params.get('is_new') === '1';
+      const redirect = isNew ? 'pixelpilot-onboarding.html' : 'pixelpilot-projects.html';
       Auth.save(oauthAccess, oauthRefresh, user);
       window.history.replaceState({}, '', window.location.pathname);
-      showSuccess(user, 'pixelpilot-projects.html');
+      showSuccess(user, redirect);
       return;
     } catch(e) {
       console.error('OAuth parse error:', e);
@@ -1640,7 +1642,7 @@ async function handleLogin(e) {
     Auth.save(data.access_token, data.refresh_token, data.user);
     if (remember) localStorage.setItem('pp_remember_email', email);
     else localStorage.removeItem('pp_remember_email');
-    showSuccess(data.user, 'pixelpilot-projects.html');
+    showSuccess(data.user, 'pixelpilot-projects.html')  // existing user;
   } catch (err) {
     const msg = err.status === 401 ? 'Incorrect email or password'
               : err.status === 429 ? 'Too many attempts — please wait'
