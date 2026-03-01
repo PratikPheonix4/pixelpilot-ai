@@ -839,29 +839,34 @@ body {
     <div class="stats-row">
       <div class="stat-card c1">
         <div class="stat-icon">📁</div>
-        <div class="stat-num">12</div>
+        <div class="stat-num" id="statTotal">—</div>
         <div class="stat-label">Total Projects</div>
-        <div class="stat-trend">↑ 3 this week</div>
+        <div class="stat-trend" id="statTotalTrend"></div>
       </div>
       <div class="stat-card c2">
         <div class="stat-icon">🤖</div>
-        <div class="stat-num">8</div>
+        <div class="stat-num" id="statAI">—</div>
         <div class="stat-label">AI-Edited</div>
-        <div class="stat-trend">↑ 2 new</div>
+        <div class="stat-trend" id="statAITrend"></div>
       </div>
       <div class="stat-card c3">
         <div class="stat-icon">⏱</div>
-        <div class="stat-num">4h</div>
+        <div class="stat-num" id="statTime">—</div>
         <div class="stat-label">Time Saved</div>
-        <div class="stat-trend">↑ this month</div>
+        <div class="stat-trend" id="statTimeTrend"></div>
       </div>
       <div class="stat-card c4">
         <div class="stat-icon">📤</div>
-        <div class="stat-num">47</div>
+        <div class="stat-num" id="statExports">—</div>
         <div class="stat-label">Total Exports</div>
-        <div class="stat-trend">↑ 12 this week</div>
+        <div class="stat-trend" id="statExportsTrend"></div>
       </div>
+      <div id="emptyState" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:var(--muted2);text-align:center;gap:12px;">
+      <div style="font-size:48px;opacity:0.3;">📂</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text);">No projects here yet</div>
+      <div style="font-size:13px;">Upload a video to create your first project</div>
     </div>
+  </div>
 
     <!-- Upload zone -->
     <div class="upload-zone" onclick="showToast('📁 File picker opened')">
@@ -880,7 +885,7 @@ body {
     <div class="projects-grid" id="projectsGrid">
 
       <!-- Card 1: AI editing -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="proj-card" data-status="editing"d" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#1a0800,#3d1500)"></div>
           <div class="thumb-icon">🌅</div>
@@ -911,8 +916,7 @@ body {
         </div>
       </div>
 
-      <!-- Card 2 -->
-      <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
+    <div class="proj-card" data-status="ready"    <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#001514,#003328)"></div>
           <div class="thumb-icon">🏔</div>
@@ -933,9 +937,7 @@ body {
             <div class="proj-menu-btn" onclick="event.stopPropagation();showToast('⋯ Context menu')">•••</div>
           </div>
         </div>
-      </div>
-
-      <!-- Card 3: AI editing -->
+      </<div class="proj-card" data-status="editing"d 3: AI editing -->
       <div class="proj-card" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="proj-thumb">
           <div class="thumb-gradient" style="background:linear-gradient(135deg,#0a001a,#1a0033)"></div>
@@ -956,8 +958,7 @@ body {
           <div class="proj-footer">
             <div class="proj-status s-edit">Editing</div>
             <div class="proj-menu-btn" onclick="event.stopPropagation();showToast('⋯ Context menu')">•••</div>
-          </div>
-        </div>
+    <div class="proj-card" data-status="all" </div>
       </div>
 
       <!-- Card 4 -->
@@ -979,8 +980,7 @@ body {
           <div class="proj-meta">18:55 <span class="meta-sep"></span> 1080p <span class="meta-sep"></span> 1.2 GB <span class="meta-sep"></span> 5 days ago</div>
           <div class="proj-footer">
             <div class="proj-status s-exported">Exported</div>
-            <div class="proj-menu-btn" onclick="event.stopPropagation();showToast('⋯ Context menu')">•••</div>
-          </div>
+            <div class="proj-menu-btn" onclick="event.stopPropagation();showToast('⋯ Context me<div class="proj-card" data-status="all"      </div>
         </div>
       </div>
 
@@ -1003,7 +1003,7 @@ body {
           <div class="proj-meta">2:05 <span class="meta-sep"></span> 4K <span class="meta-sep"></span> 4.6 GB <span class="meta-sep"></span> 1 week ago</div>
           <div class="proj-footer">
             <div class="proj-status s-exported">Exported</div>
-            <div class="proj-menu-btn" onclick="event.stopPropagation();showToast('⋯ Context menu')">•••</div>
+            <div class="proj-menu-btn" onclick="event.stopPropagation();sho<div class="proj-card" data-status="all"nu')">•••</div>
           </div>
         </div>
       </div>
@@ -1036,42 +1036,42 @@ body {
 
     <!-- List view (hidden by default) -->
     <div class="proj-list" id="projectsList">
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" data-status="editing" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="list-thumb" style="background:linear-gradient(135deg,#1a0800,#3d1500)">🌅</div>
         <div class="list-name">sunset_campaign_v3.mp4</div>
         <div class="list-meta">1:12 · 4K · 2.4 GB</div>
         <div class="proj-status s-ai" style="margin-right:8px">AI editing</div>
         <div class="list-date">2 hours ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" data-status="editing" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="list-thumb" style="background:linear-gradient(135deg,#001514,#003328)">🏔</div>
         <div class="list-name">drone_footage_final.mp4</div>
         <div class="list-meta">3:40 · 4K · 5.1 GB</div>
         <div class="proj-status s-ready" style="margin-right:8px">Ready</div>
         <div class="list-date">Yesterday</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" data-status="editing" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="list-thumb" style="background:linear-gradient(135deg,#0a001a,#1a0033)">🎙</div>
         <div class="list-name">podcast_ep14_edit.mp4</div>
         <div class="list-meta">42:18 · 1080p · 3.8 GB</div>
         <div class="proj-status s-edit" style="margin-right:8px">Editing</div>
         <div class="list-date">2 days ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" data-status="exported" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="list-thumb" style="background:linear-gradient(135deg,#1a1400,#2b2200)">🎓</div>
         <div class="list-name">tutorial_react_hooks.mp4</div>
         <div class="list-meta">18:55 · 1080p · 1.2 GB</div>
         <div class="proj-status s-exported" style="margin-right:8px">Exported</div>
         <div class="list-date">5 days ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" data-status="exported" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="list-thumb" style="background:linear-gradient(135deg,#001400,#002800)">🌿</div>
         <div class="list-name">brand_video_final.mp4</div>
         <div class="list-meta">2:05 · 4K · 4.6 GB</div>
         <div class="proj-status s-exported" style="margin-right:8px">Exported</div>
         <div class="list-date">1 week ago</div>
       </div>
-      <div class="list-row" onclick="window.location.href='pixelpilot-dashboard.html'">
+      <div class="list-row" data-status="draft" onclick="window.location.href='pixelpilot-dashboard.html'">
         <div class="list-thumb" style="background:linear-gradient(135deg,#001a1a,#003344)">💻</div>
         <div class="list-name">product_demo_v2.mp4</div>
         <div class="list-meta">4:30 · 1080p · 2.1 GB</div>
@@ -1167,79 +1167,226 @@ function showToast(msg) {
 </script>
 
 <script>
-// ── Populate user info from localStorage ──────────────────────────────────────
-(function() {
-  const user = (() => { try { return JSON.parse(localStorage.getItem('pp_user')||'null'); } catch { return null; } })();
+const API = 'https://pixel-pilot-ai-backend-production.up.railway.app';
+
+// ── Auth guard ────────────────────────────────────────────────────────────────
+const _token = localStorage.getItem('pp_access');
+const _user  = (() => { try { return JSON.parse(localStorage.getItem('pp_user')||'null'); } catch { return null; } })();
+if (!_token || !_user) { window.location.replace('pixelpilot-auth.html'); }
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allProjects  = [];   // full list from API (or demo)
+let currentFilter = 'all';
+let currentView   = 'grid';
+
+// ── Populate sidebar/topbar from stored user ──────────────────────────────────
+function populateSidebar(user) {
   if (!user) return;
-  
-  // Topbar avatar
   const av = document.getElementById('topbarAvatar');
   if (av) av.textContent = (user.full_name || user.email || '?').charAt(0).toUpperCase();
-
-  // Workspace pill
   const wsName = document.getElementById('wsName');
   if (wsName) wsName.textContent = (user.full_name || 'My Workspace') + "'s Studio";
   const wsPlan = document.getElementById('wsPlan');
-  if (wsPlan) wsPlan.textContent = (user.plan || 'free').charAt(0).toUpperCase() + (user.plan||'free').slice(1) + ' Plan';
-})();
-</script>
+  if (wsPlan) wsPlan.textContent = (user.plan||'free').charAt(0).toUpperCase() + (user.plan||'free').slice(1) + ' Plan';
+  const sn = document.getElementById('sidebarName');
+  if (sn) sn.textContent = user.full_name || user.email;
+}
+populateSidebar(_user);
 
+// ── Fetch projects from backend ───────────────────────────────────────────────
+async function loadProjects() {
+  try {
+    const res = await fetch(`${API}/projects`, {
+      headers: { 'Authorization': `Bearer ${_token}` }
+    });
+    if (res.status === 401) { localStorage.clear(); window.location.replace('pixelpilot-auth.html'); return; }
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    allProjects = data.projects || data || [];
+    renderProjects(allProjects);
+    updateStats(allProjects);
+    updateTabCounts(allProjects);
+  } catch(e) {
+    // Backend not ready — keep demo cards, update stats from user object
+    console.warn('Projects API:', e.message);
+    updateStatsFromUser(_user);
+    // Read demo cards' data-status for tab counts
+    const demoCards = [...document.querySelectorAll('.proj-card[data-status]')];
+    const demoCounts = countByStatus(demoCards.map(c => c.dataset.status));
+    updateTabCounts(null, demoCounts);
+  }
+}
+
+// ── Render project cards ──────────────────────────────────────────────────────
+function renderProjects(projects) {
+  if (!projects.length) return; // keep demo cards
+  const grid = document.getElementById('projectsGrid');
+  const list = document.getElementById('projectsList');
+  if (!grid) return;
+
+  const statusClass = { draft:'s-draft', editing:'s-edit', processing:'s-edit', ready:'s-ready', exported:'s-exported' };
+  const statusLabel = { draft:'Draft', editing:'AI editing', processing:'AI editing', ready:'Ready', exported:'Exported' };
+  const emojis = ['🎬','🌅','🏔','🌊','🎭','🚀','🎵','🌆'];
+
+  grid.innerHTML = '';
+  if (list) list.innerHTML = '';
+
+  projects.forEach((p, i) => {
+    const sc  = statusClass[p.status] || 's-draft';
+    const sl  = statusLabel[p.status] || p.status;
+    const dur = p.duration_seconds ? new Date(p.duration_seconds*1000).toISOString().slice(14,19) : '—';
+    const mb  = p.file_size_bytes   ? (p.file_size_bytes/1048576).toFixed(0)+' MB' : '—';
+    const dt  = new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const em  = emojis[i % emojis.length];
+    const st  = p.status === 'editing' || p.status === 'processing' ? 'editing' : p.status;
+
+    grid.innerHTML += `
+      <div class="proj-card" data-status="${st}" onclick="openProject('${p.id}')">
+        <div class="proj-thumb">
+          <div class="thumb-gradient" style="background:linear-gradient(135deg,#0d0d1a,#001a14)"></div>
+          <div class="thumb-icon">${em}</div>
+          <div class="thumb-overlay"></div>
+          <div class="thumb-duration">${dur}</div>
+          <div class="thumb-res">${p.resolution||'HD'}</div>
+          <div class="thumb-actions">
+            <div class="thumb-action-btn play" onclick="event.stopPropagation();openProject('${p.id}')">▶</div>
+            <div class="thumb-action-btn" onclick="event.stopPropagation();openProject('${p.id}')">✏</div>
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="proj-name">${p.name}</div>
+          <div class="proj-meta">${dur} <span class="meta-sep"></span> ${mb} <span class="meta-sep"></span> ${dt}</div>
+          <div class="proj-footer"><div class="proj-status ${sc}">${sl}</div></div>
+        </div>
+      </div>`;
+
+    if (list) list.innerHTML += `
+      <div class="list-row" data-status="${st}" onclick="openProject('${p.id}')">
+        <div class="list-thumb" style="background:linear-gradient(135deg,#0d0d1a,#001a14)">${em}</div>
+        <div class="list-name">${p.name}</div>
+        <div class="list-meta">${dur} · ${mb}</div>
+        <div class="proj-status ${sc}" style="margin-right:8px">${sl}</div>
+        <div class="list-date">${dt}</div>
+      </div>`;
+  });
+}
+
+function openProject(id) {
+  localStorage.setItem('currentProjectId', id);
+  window.location.href = 'pixelpilot-dashboard.html';
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats(projects) {
+  const total   = projects.length;
+  const exports = projects.filter(p => p.status === 'exported').length;
+  const ai      = projects.filter(p => ['editing','processing','exported','ready'].includes(p.status)).length;
+  const timeSaved = Math.round(projects.reduce((s,p) => s + (p.duration_seconds||0)*0.4, 0) / 60);
+
+  const s = id => document.getElementById(id);
+  if (s('statTotal'))   s('statTotal').textContent   = total;
+  if (s('statAI'))      s('statAI').textContent      = ai;
+  if (s('statTime'))    s('statTime').textContent     = timeSaved > 59 ? Math.round(timeSaved/60)+'h' : timeSaved+'m';
+  if (s('statExports')) s('statExports').textContent = exports;
+  if (s('statTotalTrend'))   s('statTotalTrend').textContent   = total   ? `↑ ${total} total`   : '';
+  if (s('statExportsTrend')) s('statExportsTrend').textContent = exports ? `↑ ${exports} exported` : '';
+}
+
+function updateStatsFromUser(user) {
+  if (!user) return;
+  const s = id => document.getElementById(id);
+  if (s('statTotal'))   s('statTotal').textContent   = user.projects_count ?? '—';
+  if (s('statExports')) s('statExports').textContent = user.exports_count  ?? '—';
+  if (s('statAI'))      s('statAI').textContent      = '—';
+  if (s('statTime'))    s('statTime').textContent     = '—';
+}
+
+// ── Tab counts ────────────────────────────────────────────────────────────────
+function countByStatus(statuses) {
+  const c = { all:0, draft:0, editing:0, ready:0, exported:0 };
+  statuses.forEach(s => {
+    c.all++;
+    if (c[s] !== undefined) c[s]++;
+  });
+  return c;
+}
+
+function updateTabCounts(projects, demoCounts) {
+  const counts = demoCounts || countByStatus(
+    (projects||[]).map(p => p.status === 'processing' ? 'editing' : p.status)
+  );
+  const tabs = document.querySelectorAll('.filter-tab');
+  const filterMap = ['all','draft','editing','ready','exported'];
+  tabs.forEach((tab, i) => {
+    const key = filterMap[i];
+    const span = tab.querySelector('.tab-count');
+    if (span && counts[key] !== undefined) span.textContent = counts[key];
+  });
+}
+
+// ── Filter (tabs) ─────────────────────────────────────────────────────────────
+function setFilter(el, filter) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = filter;
+
+  const cards = document.querySelectorAll('.proj-card');
+  const rows  = document.querySelectorAll('.list-row');
+
+  cards.forEach(c => {
+    const st = c.dataset.status || 'all';
+    c.style.display = (filter === 'all' || st === filter) ? '' : 'none';
+  });
+  rows.forEach(r => {
+    const st = r.dataset.status || 'all';
+    r.style.display = (filter === 'all' || st === filter) ? '' : 'none';
+  });
+
+  // Show empty state if nothing visible
+  const visibleCards = [...cards].filter(c => c.style.display !== 'none');
+  const emptyEl = document.getElementById('emptyState');
+  if (emptyEl) emptyEl.style.display = visibleCards.length === 0 ? 'flex' : 'none';
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+function filterProjects(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.proj-card').forEach(c => {
+    const name = c.querySelector('.proj-name')?.textContent.toLowerCase() || '';
+    const st   = c.dataset.status || 'all';
+    const matchFilter = currentFilter === 'all' || st === currentFilter;
+    c.style.display = matchFilter && name.includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.list-row').forEach(r => {
+    const name = r.querySelector('.list-name')?.textContent.toLowerCase() || '';
+    const st   = r.dataset.status || 'all';
+    const matchFilter = currentFilter === 'all' || st === currentFilter;
+    r.style.display = matchFilter && name.includes(q) ? '' : 'none';
+  });
+}
+
+// ── View toggle ───────────────────────────────────────────────────────────────
+function setView(view) {
+  currentView = view;
+  document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+  document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+  document.getElementById('projectsGrid').classList.toggle('hide', view === 'list');
+  document.getElementById('projectsList').classList.toggle('show', view === 'list');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadProjects();
+</script>
 </body>
 </html>
-<script src="pixelpilot-api-client.js"></script>
-<script>
-// ── API integration with safe fallback ──
-// If backend isn't ready yet, demo cards stay visible (non-fatal)
-(async () => {
-  try {
-    const api = new PixelPilotAPI();
-    const userId = localStorage.getItem("ppUserId") || "guest";
-    const res = await api.listProjects(userId);
-
-    if (!res.projects || !res.projects.length) return; // keep demo cards
-
-    const grid = document.getElementById("projectsGrid");
-    const list = document.getElementById("projectsList");
-    if (!grid) return;
-
-    grid.innerHTML = "";
-    if (list) list.innerHTML = "";
-
-    res.projects.forEach(p => {
-      const statusClass = { draft:"s-draft", processing:"s-edit", ready:"s-ready", exported:"s-exported" }[p.status] || "s-draft";
-      const statusLabel = { draft:"Draft", processing:"AI editing", ready:"Ready", exported:"Exported" }[p.status] || p.status;
-      const sizeMB  = p.file_size_bytes ? (p.file_size_bytes/1024/1024).toFixed(0)+" MB" : "—";
-      const dur     = p.duration_seconds ? new Date(p.duration_seconds*1000).toISOString().slice(14,19) : "—";
-      const dateStr = new Date(p.created_at).toLocaleDateString();
-
-      grid.innerHTML += `
-        <div class="proj-card" onclick="localStorage.setItem('currentProjectId','${p.id}');window.location.href='pixelpilot-dashboard.html'">
-          <div class="proj-thumb">
-            <div class="thumb-gradient" style="background:linear-gradient(135deg,#0d0d1a,#001a14)"></div>
-            <div class="thumb-icon">🎬</div>
-            <div class="thumb-overlay"></div>
-            <div class="thumb-duration">${dur}</div>
-            <div class="thumb-res">${p.resolution||'HD'}</div>
-          </div>
-          <div class="proj-body">
-            <div class="proj-name">${p.name}</div>
-            <div class="proj-meta">${dur} <span class="meta-sep"></span> ${sizeMB} <span class="meta-sep"></span> ${dateStr}</div>
-            <div class="proj-footer"><div class="proj-status ${statusClass}">${statusLabel}</div></div>
-          </div>
-        </div>`;
-
-      if (list) list.innerHTML += `
-        <div class="list-row" onclick="localStorage.setItem('currentProjectId','${p.id}');window.location.href='pixelpilot-dashboard.html'">
-          <div class="list-thumb" style="background:linear-gradient(135deg,#0d0d1a,#001a14)">🎬</div>
-          <div class="list-name">${p.name}</div>
-          <div class="list-meta">${dur} · ${sizeMB}</div>
-          <div class="proj-status ${statusClass}" style="margin-right:8px">${statusLabel}</div>
-          <div class="list-date">${dateStr}</div>
-        </div>`;
-    });
-  } catch(e) {
-    // Backend not ready or no projects yet — demo cards stay, no crash
-    console.warn("API not ready yet:", e.message);
-  }
-})();
-</script>
