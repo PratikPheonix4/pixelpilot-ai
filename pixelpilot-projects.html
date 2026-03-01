@@ -920,50 +920,6 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-let currentView = 'grid';
-let currentFilter = 'all';
-
-function setView(view) {
-  currentView = view;
-  document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
-  document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
-  document.getElementById('projectsGrid').classList.toggle('hide', view === 'list');
-  document.getElementById('projectsList').classList.toggle('show', view === 'list');
-  showToast(view === 'grid' ? '⊞ Grid view' : '☰ List view');
-}
-
-function setFilter(el, filter) {
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  currentFilter = filter;
-  showToast('Showing: ' + el.textContent.split(' ')[0]);
-}
-
-function filterProjects(query) {
-  const cards = document.querySelectorAll('.proj-card');
-  const rows = document.querySelectorAll('.list-row');
-  const q = query.toLowerCase();
-  cards.forEach(c => {
-    const name = c.querySelector('.proj-name')?.textContent.toLowerCase() || '';
-    c.style.display = name.includes(q) ? '' : 'none';
-  });
-  rows.forEach(r => {
-    const name = r.querySelector('.list-name')?.textContent.toLowerCase() || '';
-    r.style.display = name.includes(q) ? '' : 'none';
-  });
-}
-
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
-}
-</script>
-
-<script>
 const API = 'https://pixel-pilot-ai-backend-production.up.railway.app';
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
