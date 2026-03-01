@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+// ── Onboarding guard ──────────────────────────────────────────────────────────
+(function() {
+  const token = localStorage.getItem('pp_access');
+  // Not logged in at all → go to auth
+  if (!token) { window.location.replace('pixelpilot-auth.html'); return; }
+  // Already completed onboarding → skip to projects
+  if (localStorage.getItem('pp_onboarding_done') === '1') {
+    window.location.replace('pixelpilot-projects.html');
+  }
+})();
+
+function completeOnboarding() {
+  localStorage.setItem('pp_onboarding_done', '1');
+  window.location.href = 'pixelpilot-projects.html';
+}
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PixelPilot AI — Let's get you set up</title>
@@ -750,7 +768,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
     </div>
   </div>
 
-  <button class="skip-btn" onclick="window.location.href='pixelpilot-projects.html'">Skip setup →</button>
+  <button class="skip-btn" onclick="completeOnboarding()">Skip setup →</button>
 </div>
 
 <!-- MAIN -->
@@ -1070,7 +1088,7 @@ function updateNav() {
     nextBtn.textContent = '';
     nextBtn.innerHTML = '🚀 Open the Editor';
     nextBtn.classList.add('final');
-    nextBtn.onclick = () => { window.location.href = 'pixelpilot-projects.html'; };
+    nextBtn.onclick = () => { completeOnboarding(); };
   } else {
     nextBtn.innerHTML = `Continue <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
     nextBtn.classList.remove('final');
@@ -1109,6 +1127,9 @@ function nextStep() {
     };
     showToast(toasts[currentStep] || '');
     goToStep(currentStep + 1);
+  } else {
+    // Last step — mark onboarding complete and go to projects
+    completeOnboarding();
   }
 }
 
@@ -1184,6 +1205,5 @@ document.addEventListener('keydown', e => {
 
 updateNav();
 </script>
-<script src="pixelpilot-api-client.js"></script>
 </body>
 </html>
