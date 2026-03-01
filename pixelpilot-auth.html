@@ -1168,12 +1168,22 @@ async function sendOTP() {
   if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
 
   try {
-    await apiCall('/auth/send-otp', 'POST', { email, name: firstName });
+    const res = await apiCall('/auth/send-otp', 'POST', { email, name: firstName });
     _otpEmail = email;
     _otpVerified = false;
     showOTPBox(email);
     startOTPTimer();
-    showToast('Code sent! Check your inbox', 'success');
+    // Dev mode: backend returns OTP in message
+    if (res.message && res.message.startsWith('DEV: OTP is ')) {
+      const devOtp = res.message.split('DEV: OTP is ')[1].split(' ')[0];
+      showToast(`Dev mode — your OTP is: ${devOtp}`, 'success');
+      setTimeout(() => {
+        const input = document.getElementById('otpInput');
+        if (input) { input.value = devOtp; verifyOTP(); }
+      }, 800);
+    } else {
+      showToast('Code sent! Check your inbox', 'success');
+    }
   } catch (err) {
     showFieldErr('signupEmailErr', err.detail || 'Failed to send — try again');
   } finally {
