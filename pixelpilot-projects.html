@@ -717,6 +717,180 @@ body {
 .stat-card:nth-child(2) { animation-delay: 0.06s; }
 .stat-card:nth-child(3) { animation-delay: 0.12s; }
 .stat-card:nth-child(4) { animation-delay: 0.18s; }
+
+/* ── Slide panels ── */
+.side-panel-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}
+.side-panel-overlay.open { display: block; }
+.side-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(560px, 100vw);
+  background: #0f0f16;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+.side-panel.open { transform: translateX(0); }
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+.panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.panel-close {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: none;
+  color: var(--muted2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: all 0.15s;
+}
+.panel-close:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--muted2);
+  text-align: center;
+}
+.panel-empty-icon { font-size: 48px; opacity: 0.3; }
+.panel-empty-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.panel-empty-sub { font-size: 13px; max-width: 260px; line-height: 1.5; }
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.media-item {
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  background: #16161f;
+  border: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s;
+}
+.media-item:hover { border-color: var(--teal); }
+.media-item-thumb {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+.media-item-name {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.7);
+  font-size: 9px;
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.export-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.export-row:hover { background: rgba(255,255,255,0.02); border-radius: 8px; padding-left: 8px; }
+.export-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: rgba(0,232,184,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.export-info { flex: 1; min-width: 0; }
+.export-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.export-meta { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+.export-dl {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: none;
+  color: var(--muted2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.export-dl:hover { background: rgba(0,232,184,0.1); color: var(--teal); border-color: var(--teal); }
+.trash-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 8px;
+  background: #13131c;
+}
+.trash-thumb {
+  width: 56px; height: 36px;
+  border-radius: 6px;
+  background: #1a1a28;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.trash-info { flex: 1; min-width: 0; }
+.trash-name { font-size: 13px; font-weight: 600; color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trash-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.trash-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.trash-btn {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: none;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.trash-btn.restore { color: var(--teal); }
+.trash-btn.restore:hover { background: rgba(0,232,184,0.1); border-color: var(--teal); }
+.trash-btn.delete { color: var(--error, #ff4560); }
+.trash-btn.delete:hover { background: rgba(255,69,96,0.1); border-color: var(--error, #ff4560); }
+.trash-notice {
+  font-size: 12px; color: var(--muted2);
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px; padding: 10px 14px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
 </style>
 </head>
 <body>
@@ -760,15 +934,15 @@ body {
 
   <div class="sidebar-section">
     <div class="sidebar-label">Library</div>
-    <div class="nav-item" onclick="showToast('🎞 Media library')">
+    <div class="nav-item" onclick="openPanel('media')" id="navMedia">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
       Media
     </div>
-    <div class="nav-item" onclick="showToast('📤 Exports history')">
+    <div class="nav-item" onclick="openPanel('exports')" id="navExports">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Exports
     </div>
-    <div class="nav-item" onclick="showToast('🗑 Trash')">
+    <div class="nav-item" onclick="openPanel('trash')" id="navTrash">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       Trash
     </div>
@@ -776,7 +950,7 @@ body {
 
   <div class="sidebar-section" style="margin-top:auto">
     <div class="sidebar-label">Account</div>
-    <div class="nav-item" onclick="showToast('⚙ Settings')">
+    <div class="nav-item" onclick="window.location.href='pixelpilot-profile.html'" id="navSettings">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
       Settings
     </div>
@@ -1251,6 +1425,198 @@ async function uploadFile(file) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadProjects();
+
+// ── Side Panels ──────────────────────────────────────────────────────────────
+const PANEL_DEFS = {
+  media: {
+    title: 'MEDIA LIBRARY',
+    render: renderMediaPanel,
+  },
+  exports: {
+    title: 'EXPORTS',
+    render: renderExportsPanel,
+  },
+  trash: {
+    title: 'TRASH',
+    render: renderTrashPanel,
+  },
+};
+
+let _currentPanel = null;
+
+function openPanel(name) {
+  _currentPanel = name;
+  const def = PANEL_DEFS[name];
+  if (!def) return;
+  document.getElementById('panelTitle').textContent = def.title;
+  const body = document.getElementById('panelBody');
+  body.innerHTML = '<div style="color:var(--muted2);font-size:13px;padding:20px 0;">Loading…</div>';
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('sidePanel').classList.add('open');
+  // Update active nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.getElementById('nav' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (navEl) navEl.classList.add('active');
+  def.render(body);
+  // Close on Escape
+  document.onkeydown = e => { if (e.key === 'Escape') closePanel(); };
+}
+
+function closePanel() {
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('sidePanel').classList.remove('open');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  _currentPanel = null;
+  document.onkeydown = null;
+}
+
+// ── Media Panel ──────────────────────────────────────────────────────────────
+async function renderMediaPanel(body) {
+  try {
+    const res = await fetch(`${API}/projects`, {
+      headers: { 'Authorization': `Bearer ${_token}` }
+    });
+    const data = await res.json();
+    const projects = data.projects || [];
+    if (!projects.length) {
+      body.innerHTML = `
+        <div class="panel-empty">
+          <div class="panel-empty-icon">🎞</div>
+          <div class="panel-empty-title">No media yet</div>
+          <div class="panel-empty-sub">Upload a video from the projects page to see your media files here.</div>
+        </div>`;
+      return;
+    }
+    const emojis = ['🎬','🌅','🏔','🎭','🚀','🎵','🌊','💻'];
+    body.innerHTML = `
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:16px;">${projects.length} file${projects.length!==1?'s':''}</div>
+      <div class="media-grid">
+        ${projects.map((p,i) => `
+          <div class="media-item" onclick="openProject('${p.id}')">
+            <div class="media-item-thumb">${emojis[i%emojis.length]}</div>
+            <div class="media-item-name">${p.name}</div>
+          </div>`).join('')}
+      </div>`;
+  } catch(e) {
+    body.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">⚠️</div><div class="panel-empty-title">Couldn't load media</div><div class="panel-empty-sub">${e.message}</div></div>`;
+  }
+}
+
+// ── Exports Panel ─────────────────────────────────────────────────────────────
+async function renderExportsPanel(body) {
+  try {
+    const res = await fetch(`${API}/projects`, {
+      headers: { 'Authorization': `Bearer ${_token}` }
+    });
+    const data = await res.json();
+    const exported = (data.projects || []).filter(p => p.status === 'exported');
+    if (!exported.length) {
+      body.innerHTML = `
+        <div class="panel-empty">
+          <div class="panel-empty-icon">📤</div>
+          <div class="panel-empty-title">No exports yet</div>
+          <div class="panel-empty-sub">Finished projects will appear here once you export them.</div>
+        </div>`;
+      return;
+    }
+    body.innerHTML = `
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:16px;">${exported.length} export${exported.length!==1?'s':''}</div>
+      ${exported.map(p => {
+        const mb  = p.file_size_bytes ? (p.file_size_bytes/1048576).toFixed(0)+' MB' : '—';
+        const dt  = new Date(p.updated_at||p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        const dur = p.duration_seconds ? new Date(p.duration_seconds*1000).toISOString().slice(14,19) : '—';
+        return `
+          <div class="export-row" onclick="openProject('${p.id}')">
+            <div class="export-icon">📤</div>
+            <div class="export-info">
+              <div class="export-name">${p.name}</div>
+              <div class="export-meta">${dur} · ${mb} · ${p.resolution||'HD'} · ${dt}</div>
+            </div>
+            ${p.export_url ? `<button class="export-dl" onclick="event.stopPropagation();window.open('${p.export_url}','_blank')" title="Download">↓</button>` : ''}
+          </div>`;
+      }).join('')}`;
+  } catch(e) {
+    body.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">⚠️</div><div class="panel-empty-title">Couldn't load exports</div></div>`;
+  }
+}
+
+// ── Trash Panel ───────────────────────────────────────────────────────────────
+async function renderTrashPanel(body) {
+  try {
+    const res = await fetch(`${API}/projects?status=deleted`, {
+      headers: { 'Authorization': `Bearer ${_token}` }
+    });
+    const data = await res.json();
+    const trashed = (data.projects || []).filter(p => p.status === 'deleted' || p.deleted_at);
+    if (!trashed.length) {
+      body.innerHTML = `
+        <div class="panel-empty">
+          <div class="panel-empty-icon">🗑</div>
+          <div class="panel-empty-title">Trash is empty</div>
+          <div class="panel-empty-sub">Deleted projects will appear here for 30 days before being permanently removed.</div>
+        </div>`;
+      return;
+    }
+    const emojis = ['🎬','🌅','🏔','🎭','🚀'];
+    body.innerHTML = `
+      <div class="trash-notice">⚠ Items are permanently deleted after 30 days.</div>
+      ${trashed.map((p,i) => {
+        const dt = p.deleted_at ? new Date(p.deleted_at).toLocaleDateString() : '—';
+        return `
+          <div class="trash-row">
+            <div class="trash-thumb">${emojis[i%emojis.length]}</div>
+            <div class="trash-info">
+              <div class="trash-name">${p.name}</div>
+              <div class="trash-meta">Deleted ${dt}</div>
+            </div>
+            <div class="trash-actions">
+              <button class="trash-btn restore" onclick="restoreProject('${p.id}')">Restore</button>
+              <button class="trash-btn delete" onclick="permDeleteProject('${p.id}', this)">Delete</button>
+            </div>
+          </div>`;
+      }).join('')}`;
+  } catch(e) {
+    body.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">🗑</div><div class="panel-empty-title">Trash is empty</div><div class="panel-empty-sub">Deleted projects will appear here.</div></div>`;
+  }
+}
+
+async function restoreProject(id) {
+  try {
+    await fetch(`${API}/projects/${id}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'draft' })
+    });
+    showToast('✓ Project restored');
+    renderTrashPanel(document.getElementById('panelBody'));
+    loadProjects();
+  } catch(e) { showToast('Failed to restore'); }
+}
+
+async function permDeleteProject(id, btn) {
+  if (!confirm('Permanently delete this project? This cannot be undone.')) return;
+  btn.textContent = '…'; btn.disabled = true;
+  try {
+    await fetch(`${API}/projects/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${_token}` }
+    });
+    showToast('Project permanently deleted');
+    renderTrashPanel(document.getElementById('panelBody'));
+    loadProjects();
+  } catch(e) { showToast('Failed to delete'); btn.textContent = 'Delete'; btn.disabled = false; }
+}
+
 </script>
+
+<!-- ── Side Panels ── -->
+<div class="side-panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="panel-header">
+    <div class="panel-title" id="panelTitle">Media</div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
 </body>
 </html>
