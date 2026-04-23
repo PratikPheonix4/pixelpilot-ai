@@ -1062,7 +1062,7 @@ input.error { border-color: var(--error); }
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://pixel-pilot-ai-backend-production.up.railway.app';
+const API = 'https://pixel-pilot-ai-backend.onrender.com';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 const Auth = {
@@ -1720,7 +1720,7 @@ function showSuccess(user, redirectUrl) {
 
 // ── Social login ──────────────────────────────────────────────────────────────
 function socialLogin(provider) {
-  const base = 'https://pixel-pilot-ai-backend-production.up.railway.app';
+  const base = 'https://pixel-pilot-ai-backend.onrender.com';
   if (provider === 'Google') {
     window.location.href = `${base}/auth/oauth/google`;
   } else if (provider === 'GitHub') {
