@@ -1108,11 +1108,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (oauthAccess && oauthRefresh && oauthUser) {
     try {
       const user    = JSON.parse(decodeURIComponent(oauthUser));
-      const isNew   = params.get('is_new') === '1';
-      const redirect = isNew ? 'pixelpilot-onboarding.html' : 'pixelpilot-projects.html';
+      const isNew = params.get('is_new') === '1';
       Auth.save(oauthAccess, oauthRefresh, user);
       window.history.replaceState({}, '', window.location.pathname);
-      showSuccess(user, redirect);
+      if (isNew) {
+        // Show profile confirmation before entering app
+        showOAuthWelcome(user);
+      } else {
+        showSuccess(user, 'pixelpilot-projects.html');
+      }
       return;
     } catch(e) {
       console.error('OAuth parse error:', e);
@@ -1704,6 +1708,149 @@ async function handleSignup(e) {
 }
 
 // ── Success screen ────────────────────────────────────────────────────────────
+function showOAuthWelcome(user) {
+  // Hide all forms
+  ['loginForm','signupForm'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+
+  // Build welcome confirmation screen
+  let ws = document.getElementById('oauthWelcomeScreen');
+  if (!ws) {
+    ws = document.createElement('div');
+    ws.id = 'oauthWelcomeScreen';
+    ws.className = 'form-section';
+    document.getElementById('loginForm').parentNode.appendChild(ws);
+  }
+
+  const nameParts  = (user.full_name || '').split(' ');
+  const firstName  = nameParts[0] || '';
+  const lastName   = nameParts.slice(1).join(' ') || '';
+  const avatar     = user.avatar_url
+    ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : `<span style="font-size:28px;font-weight:900;color:var(--teal);">${(user.full_name||user.email||'?')[0].toUpperCase()}</span>`;
+
+  ws.style.display = 'block';
+  ws.innerHTML = `
+    <div class="form-heading">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div style="width:60px;height:60px;border-radius:50%;border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">${avatar}</div>
+        <div>
+          <div class="form-title" style="font-size:20px;">Almost there!</div>
+          <div class="form-sub">Confirm your details to finish setup</div>
+        </div>
+      </div>
+    </div>
+    <div id="oauthErrBox" class="auth-global-error" style="display:none"></div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div class="field-group" style="flex:1;margin-bottom:0;">
+        <label class="field-label">First name</label>
+        <div class="field-wrap">
+          <input id="oaFirstName" class="field-input" type="text" value="${firstName}" placeholder="First name">
+        </div>
+        <div class="field-error" id="oaFirstNameErr"></div>
+      </div>
+      <div class="field-group" style="flex:1;margin-bottom:0;">
+        <label class="field-label">Last name</label>
+        <div class="field-wrap">
+          <input id="oaLastName" class="field-input" type="text" value="${lastName}" placeholder="Last name">
+        </div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Email address</label>
+      <div class="field-wrap">
+        <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input class="field-input" type="email" value="${user.email}" disabled style="opacity:0.5;cursor:not-allowed;">
+      </div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:4px;">Verified via Google · cannot be changed</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div id="oaPlanFree"    onclick="selectOAPlan('free')"    style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,232,184,0.08);border-color:var(--teal);cursor:pointer;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--teal);">STARTER</div>
+        <div style="font-size:18px;font-weight:900;color:var(--text);">$0</div>
+        <div style="font-size:10px;color:var(--muted2);">Free forever</div>
+      </div>
+      <div id="oaPlanPro"     onclick="selectOAPlan('pro')"     style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);cursor:pointer;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--muted2);">PRO</div>
+        <div style="font-size:18px;font-weight:900;color:var(--text);">$29</div>
+        <div style="font-size:10px;color:var(--muted2);">/mo yearly</div>
+      </div>
+      <div id="oaPlanStudio"  onclick="selectOAPlan('studio')"  style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);cursor:pointer;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--muted2);">STUDIO</div>
+        <div style="font-size:18px;font-weight:900;color:var(--text);">$49</div>
+        <div style="font-size:10px;color:var(--muted2);">/mo yearly</div>
+      </div>
+    </div>
+    <button class="auth-btn" id="oaConfirmBtn" onclick="confirmOAuthProfile()">
+      <span class="btn-text">Create my account →</span>
+      <span class="btn-spinner" style="display:none;justify-content:center;align-items:center;gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+        Setting up…
+      </span>
+    </button>
+  `;
+  window._oaUser    = user;
+  window._oaSelPlan = 'free';
+}
+
+function selectOAPlan(plan) {
+  window._oaSelPlan = plan;
+  ['free','pro','studio'].forEach(p => {
+    const el = document.getElementById('oaPlan' + p.charAt(0).toUpperCase() + p.slice(1));
+    if (!el) return;
+    if (p === plan) {
+      el.style.borderColor = 'var(--teal)';
+      el.style.background  = 'rgba(0,232,184,0.08)';
+      el.querySelector('div').style.color = 'var(--teal)';
+    } else {
+      el.style.borderColor = 'rgba(255,255,255,0.08)';
+      el.style.background  = 'rgba(255,255,255,0.02)';
+      el.querySelector('div').style.color = 'var(--muted2)';
+    }
+  });
+}
+
+async function confirmOAuthProfile() {
+  const firstName = (document.getElementById('oaFirstName')?.value || '').trim();
+  const lastName  = (document.getElementById('oaLastName')?.value  || '').trim();
+  const errBox    = document.getElementById('oauthErrBox');
+  if (errBox) { errBox.style.display = 'none'; errBox.textContent = ''; }
+
+  if (!firstName) {
+    const e = document.getElementById('oaFirstNameErr');
+    if (e) { e.textContent = 'First name is required'; e.style.display = 'block'; }
+    return;
+  }
+
+  const full_name = [firstName, lastName].filter(Boolean).join(' ');
+  const token     = localStorage.getItem('pp_access');
+  const plan      = window._oaSelPlan || 'free';
+
+  setBtn('oaConfirmBtn', true);
+  try {
+    // Update profile with confirmed name + plan
+    const res = await fetch(`${API}/auth/me`, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+      body: JSON.stringify({ full_name, plan })
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      localStorage.setItem('pp_user', JSON.stringify(updated));
+    }
+    // If pro/studio selected, go to checkout after onboarding
+    if (plan !== 'free') {
+      localStorage.setItem('pp_post_login_action', JSON.stringify({ action:'checkout', plan, interval:'yearly' }));
+    }
+    showSuccess(window._oaUser, 'pixelpilot-onboarding.html');
+  } catch(e) {
+    if (errBox) { errBox.textContent = 'Failed to save — please try again'; errBox.style.display = 'flex'; }
+  } finally {
+    setBtn('oaConfirmBtn', false);
+  }
+}
+
 function showSuccess(user, redirectUrl) {
   ['loginForm','signupForm'].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = 'none';
