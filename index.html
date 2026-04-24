@@ -696,6 +696,68 @@
   .reveal-delay-1 { transition-delay: 0.1s; }
   .reveal-delay-2 { transition-delay: 0.2s; }
   .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ── Pricing toggle ── */
+  .pricing-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 52px;
+  }
+  .toggle-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted, #888);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .toggle-label.active { color: var(--fg, #f0ece4); }
+  .toggle-track {
+    width: 52px;
+    height: 28px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.12);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  .toggle-track.yearly { background: rgba(255,115,60,0.25); border-color: rgba(255,115,60,0.4); }
+  .toggle-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle-track.yearly .toggle-thumb { transform: translateX(24px); }
+  .save-badge {
+    background: rgba(255,115,60,0.15);
+    border: 1px solid rgba(255,115,60,0.35);
+    color: var(--orange, #ff733c);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+  }
+  .plan-price-wrap { min-height: 68px; }
+  .plan-price sup { font-size: 22px; font-weight: 700; vertical-align: super; margin-right: 2px; }
+  .plan-price sub { font-size: 14px; color: var(--muted, #888); font-weight: 500; }
+  .plan-price-annual {
+    display: none;
+    font-size: 12px;
+    color: var(--muted, #888);
+    margin-top: 2px;
+  }
+  .plan-price-annual.show { display: block; }
+  .plan-price-annual span { color: var(--orange, #ff733c); font-weight: 700; }
+
 </style>
 </head>
 <body>
@@ -710,7 +772,7 @@
     <li><a href="#features">Features</a></li>
     <li><a href="#how">How it works</a></li>
     <li><a href="#pricing">Pricing</a></li>
-    <li><a href="pixelpilot-auth.html" class="nav-cta">Start Free</a></li>
+    <li><a href="#" class="nav-cta">Start Free</a></li>
   </ul>
 </nav>
 
@@ -733,11 +795,11 @@
   </p>
 
   <div class="hero-actions">
-    <a href="pixelpilot-auth.html" class="btn-primary">
+    <a href="#" class="btn-primary">
       Start editing free
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a href="#demo" class="btn-ghost">
+    <a href="#" class="btn-ghost">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       Watch demo
     </a>
@@ -892,10 +954,25 @@
   <div class="section-eyebrow">Pricing</div>
   <h2 class="section-title reveal">Simple,<br><em style="color:var(--orange);font-style:normal">honest</em> pricing</h2>
 
+  <!-- Toggle -->
+  <div class="pricing-toggle">
+    <span class="toggle-label active" id="labelMonthly" onclick="setPricing('monthly')">Monthly</span>
+    <div class="toggle-track" id="pricingToggle" onclick="togglePricing()">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="toggle-label" id="labelYearly" onclick="setPricing('yearly')">Yearly</span>
+    <span class="save-badge">Save 17%</span>
+  </div>
+
   <div class="pricing-grid">
+
+    <!-- Starter -->
     <div class="plan reveal">
       <div class="plan-name">Starter</div>
-      <div class="plan-price"><sup>$</sup>0<sub>/mo</sub></div>
+      <div class="plan-price-wrap">
+        <div class="plan-price"><sup>$</sup>0<sub>/mo</sub></div>
+        <div class="plan-price-annual" id="starterAnnual">Always free</div>
+      </div>
       <div class="plan-desc">Perfect for trying PixelPilot out.</div>
       <hr class="plan-divider">
       <ul class="plan-features">
@@ -903,30 +980,40 @@
         <li class="plan-feature">720p export resolution</li>
         <li class="plan-feature">Auto-captions (3 videos)</li>
         <li class="plan-feature">Basic AI edits</li>
+        <li class="plan-feature">5 GB storage</li>
       </ul>
       <a href="pixelpilot-auth.html" class="plan-btn plan-btn-outline">Get started free</a>
     </div>
 
+    <!-- Pro -->
     <div class="plan featured reveal reveal-delay-1">
       <div class="plan-badge">Most popular</div>
       <div class="plan-name">Pro</div>
-      <div class="plan-price"><sup>$</sup>29<sub>/mo</sub></div>
+      <div class="plan-price-wrap">
+        <div class="plan-price" id="proPrice"><sup>$</sup><span id="proAmt">35</span><sub>/mo</sub></div>
+        <div class="plan-price-annual" id="proAnnual">Billed as <span>$348/yr</span> — save $72</div>
+      </div>
       <div class="plan-desc">For creators who ship every week.</div>
       <hr class="plan-divider">
       <ul class="plan-features">
         <li class="plan-feature">Unlimited exports</li>
         <li class="plan-feature">4K export resolution</li>
         <li class="plan-feature">Unlimited captions</li>
-        <li class="plan-feature">Beat sync & color grade</li>
+        <li class="plan-feature">Beat sync &amp; color grade</li>
         <li class="plan-feature">Multi-platform reframe</li>
         <li class="plan-feature">Priority rendering</li>
+        <li class="plan-feature">100 GB storage</li>
       </ul>
-      <a href="pixelpilot-auth.html" class="plan-btn plan-btn-solid">Start Pro — $29/mo</a>
+      <a href="#" class="plan-btn plan-btn-solid" id="proCta" onclick="startCheckout('pro')">Start Pro — $35/mo</a>
     </div>
 
+    <!-- Studio -->
     <div class="plan reveal reveal-delay-2">
       <div class="plan-name">Studio</div>
-      <div class="plan-price"><sup>$</sup>99<sub>/mo</sub></div>
+      <div class="plan-price-wrap">
+        <div class="plan-price" id="studioPrice"><sup>$</sup><span id="studioAmt">55</span><sub>/mo</sub></div>
+        <div class="plan-price-annual" id="studioAnnual">Billed as <span>$588/yr</span> — save $72</div>
+      </div>
       <div class="plan-desc">For agencies and production teams.</div>
       <hr class="plan-divider">
       <ul class="plan-features">
@@ -936,9 +1023,11 @@
         <li class="plan-feature">Custom AI fine-tuning</li>
         <li class="plan-feature">API access</li>
         <li class="plan-feature">Dedicated support</li>
+        <li class="plan-feature">1 TB storage</li>
       </ul>
-      <a href="pixelpilot-auth.html" class="plan-btn plan-btn-outline">Talk to sales</a>
+      <a href="#" class="plan-btn plan-btn-outline" id="studioCta" onclick="startCheckout('studio')">Start Studio — $55/mo</a>
     </div>
+
   </div>
 </section>
 
@@ -957,7 +1046,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <a href="index.html" class="footer-logo">Pixel<span>Pilot</span> AI</a>
+  <a href="#" class="footer-logo">Pixel<span>Pilot</span> AI</a>
   <ul class="footer-links">
     <li><a href="#">Features</a></li>
     <li><a href="#">Pricing</a></li>
@@ -1025,7 +1114,109 @@
     idx = (idx + 1) % responses.length;
     typingEl.textContent = responses[idx];
   }, 3000);
+
+  // ── Pricing toggle ────────────────────────────────────────────────────────
+  let _pricingMode = 'monthly';
+  window.addEventListener('DOMContentLoaded', () => setPricing('yearly'));
+
+  const PRICES = {
+    monthly: { pro: 35,  studio: 55  },
+    yearly:  { pro: 29,  studio: 49  },
+  };
+
+  function togglePricing() {
+    setPricing(_pricingMode === 'monthly' ? 'yearly' : 'monthly');
+  }
+
+  function setPricing(mode) {
+    _pricingMode = mode;
+    const yearly = mode === 'yearly';
+    const p = PRICES[mode];
+
+    // Toggle UI
+    document.getElementById('pricingToggle').classList.toggle('yearly', yearly);
+    document.getElementById('labelMonthly').classList.toggle('active', !yearly);
+    document.getElementById('labelYearly').classList.toggle('active', yearly);
+
+    // Update prices
+    document.getElementById('proAmt').textContent    = p.pro;
+    document.getElementById('studioAmt').textContent = p.studio;
+
+    // Annual sub-labels
+    document.getElementById('proAnnual').classList.toggle('show', yearly);
+    document.getElementById('studioAnnual').classList.toggle('show', yearly);
+    document.getElementById('starterAnnual').classList.toggle('show', yearly);
+
+    // CTA buttons
+    document.getElementById('proCta').textContent    = yearly
+      ? `Start Pro — $${p.pro}/mo`
+      : `Start Pro — $${p.pro}/mo`;
+    document.getElementById('studioCta').textContent = yearly
+      ? `Start Studio — $${p.studio}/mo`
+      : `Start Studio — $${p.studio}/mo`;
+  }
+
+
+  // ── Stripe Checkout ───────────────────────────────────────────────────────
+  const _API = 'https://pixel-pilot-ai-backend.onrender.com';
+
+  async function startCheckout(plan) {
+    const token = localStorage.getItem('pp_access');
+    // Not logged in — send to auth first, then redirect back
+    if (!token) {
+      localStorage.setItem('pp_post_login_action', JSON.stringify({ action: 'checkout', plan, interval: _pricingMode }));
+      window.location.href = 'pixelpilot-auth.html?next=pricing';
+      return;
+    }
+    const btn = document.getElementById(plan + 'Cta');
+    const orig = btn.textContent;
+    btn.textContent = 'Loading…';
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+    try {
+      const res = await fetch(`${_API}/billing/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ plan, interval: _pricingMode })
+      });
+      if (res.status === 401) {
+        localStorage.clear();
+        localStorage.setItem('pp_post_login_action', JSON.stringify({ action: 'checkout', plan, interval: _pricingMode }));
+        window.location.href = 'pixelpilot-auth.html?next=pricing';
+        return;
+      }
+      const data = await res.json();
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.detail || 'Failed to start checkout');
+        btn.textContent = orig;
+        btn.style.opacity = '';
+        btn.style.pointerEvents = '';
+      }
+    } catch(e) {
+      alert('Network error — please try again');
+      btn.textContent = orig;
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }
+  }
+
+  // Handle post-login checkout redirect
+  window.addEventListener('DOMContentLoaded', () => {
+    const action = localStorage.getItem('pp_post_login_action');
+    if (action) {
+      try {
+        const { action: act, plan, interval } = JSON.parse(action);
+        if (act === 'checkout' && localStorage.getItem('pp_access')) {
+          localStorage.removeItem('pp_post_login_action');
+          _pricingMode = interval || 'yearly';
+          startCheckout(plan);
+        }
+      } catch(e) {}
+    }
+  });
+
 </script>
-<script src="pixelpilot-api-client.js"></script>
 </body>
 </html>
