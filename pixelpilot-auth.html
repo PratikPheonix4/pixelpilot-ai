@@ -8,6 +8,7 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
+body { overflow: hidden; }
 
 :root {
   --bg:     #06060a;
@@ -38,6 +39,8 @@ body {
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
+  z-index: 1;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -223,6 +226,8 @@ body {
 .right-panel {
   flex: 1;
   overflow-y: auto;
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -554,22 +559,12 @@ body {
   background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
   pointer-events: none;
 }
-.auth-btn::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--teal), #00b8ff);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.2s;
-  filter: blur(8px);
-}
+/* auth-btn::after removed - was causing z-index stacking issues */
 .auth-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(0,232,184,0.35);
 }
-.auth-btn:hover::after { opacity: 0.6; }
+
 .auth-btn:active { transform: translateY(0); }
 .auth-btn:disabled {
   opacity: 0.6;
