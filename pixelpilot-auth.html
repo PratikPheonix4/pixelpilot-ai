@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PixelPilot AI — Welcome</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { overflow: hidden; }
+
+:root {
+  --bg:     #06060a;
+  --panel:  #0f0f16;
+  --panel2: #13131c;
+  --border: rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --text:   #eceaf5;
+  --muted:  #62607a;
+  --muted2: #908eaa;
+  --teal:   #00e8b8;
+  --error:  #ff4560;
+  --teal-glow: rgba(0,232,184,0.15);
+}
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Left panel: brand / social proof ───────────────────────────────────────── */
+.left-panel {
+  width: 44%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 48px;
+  background: #08080f;
+}
+
+/* Animated gradient orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb1 { width: 400px; height: 400px; background: rgba(0,232,184,0.08); top: -100px; left: -80px; animation-delay: 0s; }
+.orb2 { width: 300px; height: 300px; background: rgba(80,60,200,0.06); bottom: 100px; right: -60px; animation-delay: -3s; }
+.orb3 { width: 200px; height: 200px; background: rgba(0,232,184,0.05); bottom: -50px; left: 100px; animation-delay: -5s; }
+@keyframes orbFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-30px) scale(1.05); }
+}
+
+/* Grid texture */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,232,184,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,232,184,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.left-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.left-logo-mark {
+  width: 36px; height: 36px;
+  background: var(--teal);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.left-logo-mark svg { color: #06060a; }
+.left-logo-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+.left-logo-name span { color: var(--teal); }
+
+.left-hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.left-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(42px, 4.5vw, 58px);
+  line-height: 0.95;
+  letter-spacing: 1px;
+  color: var(--text);
+}
+.left-headline em {
+  font-style: normal;
+  color: var(--teal);
+  display: block;
+}
+
+.left-sub {
+  font-size: 15px;
+  color: var(--muted2);
+  line-height: 1.6;
+  max-width: 340px;
+}
+
+/* Feature list */
+.left-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.left-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted2);
+  font-weight: 500;
+}
+.left-feature-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(0,232,184,0.08);
+  border: 1px solid rgba(0,232,184,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* Social proof */
+.left-proof {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.proof-avatars {
+  display: flex;
+  align-items: center;
+  gap: -6px;
+}
+.proof-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--panel2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: -8px;
+  color: var(--teal);
+}
+.proof-avatar:first-child { margin-left: 0; }
+.proof-text {
+  font-size: 12px;
+  color: var(--muted2);
+}
+.proof-text strong { color: var(--text); }
+.stars { color: #f5c518; font-size: 12px; letter-spacing: 1px; }
+
+/* Testimonial card */
+.testimonial-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  position: relative;
+}
+.testimonial-card::before {
+  content: '"'';
+  position: absolute;
+  top: -2px; left: 14px;
+  font-size: 48px;
+  color: var(--teal);
+  opacity: 0.3;
+  line-height: 1;
+  font-family: Georgia, serif;
+}
+.testimonial-text {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.6;
+  padding-top: 8px;
+  font-style: italic;
+}
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.testimonial-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), #00a8ff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #000;
+}
+.testimonial-name { font-size: 11px; font-weight: 700; color: var(--text); }
+.testimonial-role { font-size: 10px; color: var(--muted); }
+
+/* ── Right panel: forms ──────────────────────────────────────────────────────── */
+.right-panel {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Tab switcher */
+.tab-bar {
+  display: flex;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 2px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 9px;
+  border: none;
+  background: none;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.2px;
+}
+.tab-btn.active {
+  background: rgba(255,255,255,0.07);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* Heading */
+.form-heading { margin-bottom: 24px; }
+.form-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.form-sub { font-size: 13px; color: var(--muted2); }
+
+/* Social buttons */
+.social-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-decoration: none;
+}
+.social-btn:hover {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-1px);
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.or-divider::before, .or-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Fields */
+.field-group { margin-bottom: 14px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 6px;
+}
+.field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.field-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.field-input {
+  width: 100%;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 11px 12px 11px 36px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.field-input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,232,184,0.08);
+}
+.field-input::placeholder { color: var(--muted); }
+.field-input.no-icon { padding-left: 12px; }
+.pw-wrap .field-input { padding-right: 40px; }
+.pw-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.pw-toggle:hover { color: var(--muted2); }
+.field-error {
+  font-size: 11px;
+  color: var(--error);
+  margin-top: 4px;
+  display: none;
+}
+.auth-global-error {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  background: rgba(255,69,96,0.08);
+  border: 1px solid rgba(255,69,96,0.25);
+  border-radius: 10px;
+  font-size: 12px;
+  color: #ff7a8a;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* Strength meter */
+.strength-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.seg {
+  flex: 1; height: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+  transition: background 0.4s ease;
+}
+.strength-label {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 5px;
+  height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+/* OTP box */
+.otp-box {
+  margin-top: 10px;
+  padding: 14px 16px;
+  background: rgba(0,232,184,0.04);
+  border: 1px solid rgba(0,232,184,0.18);
+  border-radius: 10px;
+}
+
+/* Plan cards */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.plan-card {
+  padding: 12px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.plan-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,232,184,0.08) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.plan-card.selected {
+  border-color: var(--teal);
+  background: rgba(0,232,184,0.05);
+}
+.plan-card.selected::after { opacity: 1; }
+.plan-card-check {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--teal);
+  display: none;
+  align-items: center; justify-content: center;
+}
+.plan-card.selected .plan-card-check { display: flex; }
+.plan-card-name {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 4px;
+}
+.plan-card.selected .plan-card-name { color: var(--teal); }
+.plan-card-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: var(--text);
+  line-height: 1;
+}
+.plan-card-sub {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Checkbox */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.check-box {
+  width: 18px; height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border2);
+  background: var(--panel2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: all 0.15s;
+}
+.check-box.checked {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+.check-label {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.5;
+}
+.check-label a { color: var(--teal); text-decoration: none; }
+.check-label a:hover { text-decoration: underline; }
+.field-error { font-size: 11px; color: var(--error); margin-top: 4px; display: none; }
+
+/* CTA Button — the money button */
+.auth-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--teal);
+  color: #06060a;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.auth-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+/* auth-btn::after removed - was causing z-index stacking issues */
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,232,184,0.35);
+}
+
+.auth-btn:active { transform: translateY(0); }
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.btn-spinner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Trust badges under button */
+.trust-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Footer links */
+.form-footer {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--muted2);
+}
+.form-footer a, .forgot-link {
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+.form-footer a:hover, .forgot-link:hover { text-decoration: underline; }
+
+/* Remember me */
+.remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+/* Success screen */
+.success-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  padding: 20px 0;
+}
+.success-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(0,232,184,0.1);
+  border: 2px solid var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.success-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.success-sub { font-size: 13px; color: var(--muted2); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { border-color: rgba(0,232,184,0.3); color: var(--teal); }
+.toast.error   { border-color: rgba(255,69,96,0.3);  color: #ff7a8a; }
+
+/* Save indicator */
+.save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.3s;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.save-indicator.show { opacity: 1; }
+.save-indicator.saved { background: rgba(0,232,184,0.1); color: var(--teal); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  body { overflow: auto; }
+  .left-panel { display: none; }
+  .right-panel { padding: 32px 20px; justify-content: flex-start; padding-top: 48px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Left brand panel -->
+<div class="left-panel">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- Logo -->
+  <div class="left-logo">
+    <div class="left-logo-mark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="left-logo-name">PIXEL<span>PILOT</span> AI</div>
+  </div>
+
+  <!-- Hero copy -->
+  <div class="left-hero">
+    <div class="left-headline">
+      Edit video<br>at the speed<br><em>of thought.</em>
+    </div>
+    <div class="left-sub">
+      AI that cuts silences, syncs to music, auto-captions in 30 languages, and exports to every platform — in minutes, not hours.
+    </div>
+    <div class="left-features">
+      <div class="left-feature">
+        <div class="left-feature-icon">✂️</div>
+        <span>Auto-remove silences & filler words</span>
+      </div>
+      <div class="left-feature">
+        <div class="left-feature-icon">🎬</div>
+        <span>Cinematic color grading in one click</span>
+      </div>
+      <div class="left-feature">
+        <div class="left-feature-icon">📱</div>
+        <span>Reframe for TikTok, Reels & YouTube</span>
+      </div>
+      <div class="left-feature">
+        <div class="left-feature-icon">⚡</div>
+        <span>4K export in under 2 minutes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social proof -->
+  <div class="left-proof">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="proof-avatars">
+        <div class="proof-avatar">M</div>
+        <div class="proof-avatar">S</div>
+        <div class="proof-avatar">R</div>
+        <div class="proof-avatar">A</div>
+        <div class="proof-avatar">+</div>
+      </div>
+      <div>
+        <div class="stars">★★★★★</div>
+        <div class="proof-text"><strong>2,400+</strong> creators already editing faster</div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-text">
+        I used to spend 6 hours editing a YouTube video. With PixelPilot it's under 40 minutes. The AI just gets what I want.
+      </div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">M</div>
+        <div>
+          <div class="testimonial-name">Marcus T.</div>
+          <div class="testimonial-role">YouTube Creator · 280K subscribers</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Right form panel -->
+<div class="right-panel">
+  <div class="form-card">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="signupTab" onclick="switchTab('signup')">Create account</button>
+      <button class="tab-btn" id="loginTab" onclick="switchTab('login')">Sign in</button>
+    </div>
+
+    <!-- ── SIGNUP FORM ── -->
+    <div id="signupForm">
+      <div class="form-heading">
+        <div class="form-title">START FOR FREE</div>
+        <div class="form-sub">No credit card required · Cancel anytime</div>
+      </div>
+
+      <!-- Social -->
+      <div class="social-row">
+        <button class="social-btn" onclick="socialLogin('Google')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <button class="social-btn" onclick="socialLogin('GitHub')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          Continue with GitHub
+        </button>
+      </div>
+
+      <div class="or-divider">or</div>
+
+      <div id="signupErrBox" class="auth-global-error">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="signupErrMsg"></span>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">First name</label>
+          <div class="field-wrap">
+            <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input id="firstName" class="field-input" type="text" placeholder="Alex">
+          </div>
+          <div class="field-error" id="firstNameErr"></div>
+        </div>
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">Last name</label>
+          <div class="field-wrap">
+            <input id="lastName" class="field-input field-input no-icon" type="text" placeholder="Rivera" style="padding-left:12px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:14px;">
+        <label class="field-label">Work email</label>
+        <div style="display:flex;gap:8px;">
+          <div class="field-wrap" style="flex:1;">
+            <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input id="signupEmail" class="field-input" type="email" placeholder="you@company.com">
+          </div>
+          <button id="sendOtpBtn" onclick="sendOTP()" type="button" style="flex-shrink:0;background:rgba(0,232,184,0.1);border:1px solid rgba(0,232,184,0.25);color:var(--teal);border-radius:10px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s;">
+            Send code
+          </button>
+        </div>
+        <div class="field-error" id="signupEmailErr"></div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <div class="field-wrap pw-wrap">
+          <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input id="signupPass" class="field-input" type="password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)">
+          <button class="pw-toggle" onclick="togglePass('signupPass',this)" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-row">
+          <div class="seg" id="seg1"></div><div class="seg" id="seg2"></div>
+          <div class="seg" id="seg3"></div><div class="seg" id="seg4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel" style="color:var(--muted2);font-size:10px;font-weight:700;margin-top:4px;letter-spacing:0.5px;text-transform:uppercase;"></div>
+        <div class="field-error" id="signupPassErr"></div>
+      </div>
+
+      <!-- Plan picker -->
+      <div style="margin-bottom:14px;">
+        <label class="field-label">Choose your plan</label>
+        <div class="plan-grid">
+          <div class="plan-card selected" id="planFree" onclick="selectPlan('free')">
+            <div class="plan-card-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="plan-card-name">Starter</div>
+            <div class="plan-card-price">$0</div>
+            <div class="plan-card-sub">Free forever</div>
+          </div>
+          <div class="plan-card" id="planPro" onclick="selectPlan('pro')">
+            <div class="plan-card-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="plan-card-name">Pro</div>
+            <div class="plan-card-price">$29</div>
+            <div class="plan-card-sub">/mo yearly</div>
+          </div>
+          <div class="plan-card" id="planStudio" onclick="selectPlan('studio')">
+            <div class="plan-card-check"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="plan-card-name">Studio</div>
+            <div class="plan-card-price">$49</div>
+            <div class="plan-card-sub">/mo yearly</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="check-row">
+        <div class="check-box checked" id="termsCheck" onclick="toggleCheck('termsCheck')">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="check-label">
+          I agree to PixelPilot's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+      <div class="field-error" id="termsErr" style="margin-top:-10px;margin-bottom:12px;"></div>
+
+      <button class="auth-btn" id="signupBtn" onclick="handleSignup(event)">
+        <span class="btn-text">Create free account →</span>
+        <span class="btn-spinner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+          Creating your account…
+        </span>
+      </button>
+
+      <div class="trust-row">
+        <div class="trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          SSL encrypted
+        </div>
+        <div class="trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          No credit card
+        </div>
+        <div class="trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Cancel anytime
+        </div>
+      </div>
+
+      <div class="form-footer">Already have an account? <a onclick="switchTab('login')">Sign in →</a></div>
+    </div>
+
+    <!-- ── LOGIN FORM ── -->
+    <div id="loginForm" style="display:none;">
+      <div class="form-heading">
+        <div class="form-title">WELCOME BACK</div>
+        <div class="form-sub">Sign in to continue editing</div>
+      </div>
+
+      <div class="social-row">
+        <button class="social-btn" onclick="socialLogin('Google')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </button>
+        <button class="social-btn" onclick="socialLogin('GitHub')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </button>
+      </div>
+
+      <div class="or-divider">or</div>
+
+      <div id="loginErrBox" class="auth-global-error">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="loginErrMsg"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Email address</label>
+        <div class="field-wrap">
+          <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <input id="loginEmail" class="field-input" type="email" placeholder="you@example.com">
+        </div>
+        <div class="field-error" id="loginEmailErr"></div>
+      </div>
+
+      <div class="field-group">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label class="field-label" style="margin-bottom:0;">Password</label>
+          <button class="forgot-link" style="font-size:11px;" onclick="showForgot()">Forgot password?</button>
+        </div>
+        <div class="field-wrap pw-wrap">
+          <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input id="loginPass" class="field-input" type="password" placeholder="Enter your password">
+          <button class="pw-toggle" onclick="togglePass('loginPass',this)" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-error" id="loginPassErr"></div>
+      </div>
+
+      <div class="remember-row">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="check-box" id="rememberCheck" onclick="toggleCheck('rememberCheck')">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span style="font-size:12px;color:var(--muted2);">Keep me signed in for 30 days</span>
+        </div>
+      </div>
+
+      <button class="auth-btn" id="loginBtn" onclick="handleLogin(event)">
+        <span class="btn-text">Sign in to PixelPilot →</span>
+        <span class="btn-spinner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+          Signing in…
+        </span>
+      </button>
+
+      <div class="trust-row">
+        <div class="trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          SSL encrypted
+        </div>
+        <div class="trust-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Secure login
+        </div>
+      </div>
+
+      <div class="form-footer">No account? <a onclick="switchTab('signup')">Create one free →</a></div>
+    </div>
+
+    <!-- Success screen -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="success-title">YOU'RE IN! 🎬</div>
+      <div class="success-sub" id="successSub">Taking you to your workspace…</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+const API = 'https://pixel-pilot-ai-backend.onrender.com';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const Auth = {
+  save(access, refresh, user) {
+    localStorage.setItem('pp_access', access);
+    localStorage.setItem('pp_refresh', refresh);
+    localStorage.setItem('pp_user', JSON.stringify(user));
+  },
+  clear() { ['pp_access','pp_refresh','pp_user'].forEach(k => localStorage.removeItem(k)); },
+  isLoggedIn() { return !!localStorage.getItem('pp_access'); }
+};
+
+// OTP state
+let _otpEmail  = '';
+let _otpVerified = false;
+let _otpTimer  = null;
+let _otpSecs   = 0;
+let selectedPlan = 'free';
+let activeTab    = 'signup';
+
+// ── On load ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Handle OAuth callback (Google/GitHub redirect back with tokens in URL)
+  const params = new URLSearchParams(window.location.search);
+  const oauthAccess  = params.get('oauth_access');
+  const oauthRefresh = params.get('oauth_refresh');
+  const oauthUser    = params.get('oauth_user');
+  const oauthError   = params.get('error');
+
+  if (oauthError) {
+    const msgs = {
+      google_denied: 'Google sign-in was cancelled',
+      github_denied: 'GitHub sign-in was cancelled',
+      google_failed: 'Google sign-in failed — try again',
+      github_failed: 'GitHub sign-in failed — try again',
+      no_email: 'Could not get email from your account',
+    };
+    showToast(msgs[oauthError] || 'OAuth error — try again', 'error');
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+
+  if (oauthAccess && oauthRefresh && oauthUser) {
+    try {
+      const user    = JSON.parse(decodeURIComponent(oauthUser));
+      const isNew = params.get('is_new') === '1';
+      Auth.save(oauthAccess, oauthRefresh, user);
+      window.history.replaceState({}, '', window.location.pathname);
+      if (isNew) {
+        // Show profile confirmation before entering app
+        showOAuthWelcome(user);
+      } else {
+        showSuccess(user, 'pixelpilot-projects.html');
+      }
+      return;
+    } catch(e) {
+      console.error('OAuth parse error:', e);
+    }
+  }
+
+  if (Auth.isLoggedIn()) { window.location.href = 'pixelpilot-projects.html'; return; }
+  const rem = localStorage.getItem('pp_remember_email');
+  if (rem) {
+    const el = document.getElementById('loginEmail');
+    if (el) el.value = rem;
+    const cb = document.getElementById('rememberCheck');
+    if (cb) cb.classList.add('checked');
+  }
+});
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+  document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+  document.getElementById('loginForm').style.display  = tab === 'login'  ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+  const ss = document.getElementById('successScreen');
+  if (ss) ss.style.display = 'none';
+  const fs = document.getElementById('forgotScreen');
+  if (fs) fs.style.display = 'none';
+  const oa = document.getElementById('oauthWelcomeScreen');
+  if (oa) oa.style.display = 'none';
+  clearErrors();
+}
+
+// ── Plan selection ────────────────────────────────────────────────────────────
+function selectPlan(plan) {
+  selectedPlan = plan;
+  ['planFree','planPro','planStudio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('selected');
+  });
+  const map = { free:'planFree', pro:'planPro', studio:'planStudio' };
+  const sel = document.getElementById(map[plan]);
+  if (sel) sel.classList.add('selected');
+}
+
+// ── Password toggle ───────────────────────────────────────────────────────────
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.innerHTML = show
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+
+// ── Checkbox toggle ───────────────────────────────────────────────────────────
+function toggleCheck(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('checked');
+}
+
+// ── Password strength ─────────────────────────────────────────────────────────
+function checkStrength(val) {
+  const segs  = ['seg1','seg2','seg3','seg4'].map(id => document.getElementById(id));
+  const label = document.getElementById('strengthLabel');
+  if (!val.length) {
+    segs.forEach(s => { if(s) s.style.background = 'rgba(255,255,255,0.07)'; });
+    if (label) { label.textContent = ''; }
+    return;
+  }
+  let score = 0;
+  if (val.length >= 8)                           score++;
+  if (val.length >= 12)                          score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val))   score++;
+  if (/[0-9]/.test(val))                         score++;
+  if (/[^A-Za-z0-9]/.test(val))                 score++;
+  score = Math.min(score, 4);
+  const colors = ['','#ff4560','#ff8c00','#f0be3c','#00e8b8'];
+  const labels = ['','Weak — add uppercase & numbers','Fair — add a number or symbol','Good — almost there!','Strong ✓'];
+  segs.forEach((s, i) => {
+    if (!s) return;
+    s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.07)';
+    s.style.boxShadow  = i < score ? '0 0 6px ' + colors[score] + '66' : 'none';
+  });
+  if (label) {
+    label.textContent = labels[score];
+    label.style.color = colors[score];
+  }
+}
+
+// ── OTP: Send ─────────────────────────────────────────────────────────────────
+const _DISPOSABLE = new Set([
+  'mailinator.com','guerrillamail.com','trashmail.com','tempmail.com',
+  'temp-mail.org','temp-mail.io','yopmail.com','maildrop.cc','discard.email',
+  'sharklasers.com','grr.la','spam4.me','throwam.com','10minutemail.com',
+  '20minutemail.com','tempr.email','mohmal.com','filzmail.com','getairmail.com',
+  'mailnull.com','spamgourmet.com','dispostable.com','fakeinbox.com',
+  'mailboxy.fun','tmpmail.net','tmpmail.org','guerrillamail.info',
+]);
+
+async function sendOTP() {
+  const email     = (document.getElementById('signupEmail')?.value || '').trim();
+  const firstName = (document.getElementById('firstName')?.value   || '').trim();
+  if (!email) { showFieldErr('signupEmailErr', 'Enter your email first'); return; }
+  
+  // Block disposable emails instantly
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (domain && _DISPOSABLE.has(domain)) {
+    showFieldErr('signupEmailErr', 'Disposable emails are not allowed — use a real email address');
+    return;
+  }
+
+  const btn = document.getElementById('sendOtpBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  try {
+    const res = await apiCall('/auth/send-otp', 'POST', { email, name: firstName });
+    _otpEmail = email;
+    _otpVerified = false;
+    showOTPBox(email);
+    startOTPTimer();
+    // Dev mode: backend returns OTP in message
+    if (res.message && res.message.startsWith('DEV: OTP is ')) {
+      const devOtp = res.message.split('DEV: OTP is ')[1].split(' ')[0];
+      showToast(`Dev mode — your OTP is: ${devOtp}`, 'success');
+      setTimeout(() => {
+        const input = document.getElementById('otpInput');
+        if (input) { input.value = devOtp; verifyOTP(); }
+      }, 800);
+    } else {
+      showToast('Code sent! Check your inbox', 'success');
+    }
+  } catch (err) {
+    showFieldErr('signupEmailErr', err.detail || 'Failed to send — try again');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send code'; }
+  }
+}
+
+function showOTPBox(email) {
+  let box = document.getElementById('otpBox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'otpBox';
+    box.style.cssText = 'margin-top:16px;padding:20px;background:rgba(0,232,184,0.05);border:1px solid rgba(0,232,184,0.2);border-radius:12px;';
+    // Insert after the email field group
+    const emailGroup = document.getElementById('signupEmail')?.closest('.field-group');
+    if (emailGroup) emailGroup.parentNode.insertBefore(box, emailGroup.nextSibling);
+    else document.getElementById('signupForm').appendChild(box);
+  }
+  box.style.display = 'block';
+  box.innerHTML = `
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:10px;">
+      Enter the 6-digit code sent to <strong style="color:var(--text);">${email}</strong>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+      <input id="otpInput" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+        style="flex:1;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:18px;letter-spacing:8px;color:var(--text);font-family:'DM Mono',monospace;outline:none;text-align:center;"
+        placeholder="______" oninput="this.value=this.value.replace(/[^0-9]/g,'');if(this.value.length===6)verifyOTP()">
+      <button onclick="verifyOTP()" id="verifyOtpBtn"
+        style="background:var(--teal);color:#06060a;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">
+        Verify
+      </button>
+    </div>
+    <div id="otpStatus" style="font-size:12px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+      <span id="otpTimerLabel" style="font-size:11px;color:var(--muted2);">Resend in <strong id="otpCountdown">10:00</strong></span>
+      <button id="resendOtpBtn" onclick="sendOTP()" disabled
+        style="font-size:11px;color:var(--teal);background:none;border:none;cursor:pointer;opacity:0.4;">
+        Resend code
+      </button>
+    </div>
+  `;
+}
+
+function startOTPTimer() {
+  clearInterval(_otpTimer);
+  _otpSecs = 60;
+  const updateTimer = () => {
+    const el = document.getElementById('otpCountdown');
+    const resendBtn = document.getElementById('resendOtpBtn');
+    if (!el) { clearInterval(_otpTimer); return; }
+    const m = Math.floor(_otpSecs / 60);
+    const s = _otpSecs % 60;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    if (_otpSecs <= 0) {
+      clearInterval(_otpTimer);
+      el.textContent = 'expired';
+      if (resendBtn) { resendBtn.disabled = false; resendBtn.style.opacity = '1'; }
+    }
+    _otpSecs--;
+  };
+  updateTimer();
+  _otpTimer = setInterval(updateTimer, 1000);
+}
+
+async function verifyOTP() {
+  const otp   = (document.getElementById('otpInput')?.value || '').trim();
+  const email = _otpEmail;
+  const status = document.getElementById('otpStatus');
+  const btn    = document.getElementById('verifyOtpBtn');
+
+  if (otp.length !== 6) {
+    if (status) { status.textContent = 'Enter the 6-digit code'; status.style.color = 'var(--error)'; }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (status) { status.textContent = 'Verifying…'; status.style.color = 'var(--muted2)'; }
+
+  try {
+    await apiCall('/auth/verify-otp', 'POST', { email, otp });
+    _otpVerified = true;
+    clearInterval(_otpTimer);
+
+    // Show verified state
+    const box = document.getElementById('otpBox');
+    if (box) box.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--teal);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Email verified — ${email}
+      </div>
+    `;
+    showToast('Email verified!', 'success');
+  } catch (err) {
+    _otpVerified = false;
+    const msg = err.detail || 'Invalid code';
+    if (status) { status.textContent = msg; status.style.color = 'var(--error)'; }
+    if (btn) btn.disabled = false;
+    // Shake the input
+    const input = document.getElementById('otpInput');
+    if (input) { input.style.borderColor = 'var(--error)'; setTimeout(() => input.style.borderColor = '', 1500); }
+  }
+}
+
+// ── Forgot password ───────────────────────────────────────────────────────────
+function showForgot() {
+  document.getElementById('loginForm').style.display  = 'none';
+  document.getElementById('signupForm').style.display = 'none';
+  let fs = document.getElementById('forgotScreen');
+  if (!fs) {
+    fs = document.createElement('div');
+    fs.id = 'forgotScreen';
+    fs.className = 'form-section';
+    fs.innerHTML = `
+      <div class="form-heading">
+        <div class="form-title">Reset password</div>
+        <div class="form-sub" id="resetSubText">Enter your email — we'll send a 6-digit code</div>
+      </div>
+      <div id="forgotErrBox" class="auth-global-error" style="display:none"></div>
+
+      <!-- Step 1: Email + send OTP -->
+      <div id="resetStep1">
+        <div class="field-group" style="margin-bottom:14px;">
+          <label class="field-label">Email address</label>
+          <div style="display:flex;gap:8px;">
+            <div class="field-wrap" style="flex:1;">
+              <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <input id="resetEmail" class="field-input" type="email" placeholder="you@example.com">
+            </div>
+            <button id="resetSendOtpBtn" onclick="resetSendOTP()" type="button"
+              style="flex-shrink:0;background:rgba(0,232,184,0.1);border:1px solid rgba(0,232,184,0.3);color:var(--teal);border-radius:9px;padding:10px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">
+              Send code
+            </button>
+          </div>
+          <div class="field-error" id="resetEmailErr"></div>
+        </div>
+        <!-- OTP box (hidden until sent) -->
+        <div id="resetOtpBox" style="display:none;margin-bottom:14px;padding:16px;background:rgba(0,232,184,0.05);border:1px solid rgba(0,232,184,0.2);border-radius:10px;">
+          <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;">Enter the code sent to your inbox</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="resetOtpInput" maxlength="6" inputmode="numeric"
+              style="flex:1;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;padding:10px;font-size:20px;letter-spacing:8px;color:var(--text);font-family:'DM Mono',monospace;outline:none;text-align:center;"
+              placeholder="______" oninput="this.value=this.value.replace(/[^0-9]/g,'');if(this.value.length===6)resetVerifyOTP()">
+            <button onclick="resetVerifyOTP()" id="resetVerifyBtn"
+              style="background:var(--teal);color:#06060a;border:none;border-radius:8px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer;">
+              Verify
+            </button>
+          </div>
+          <div id="resetOtpStatus" style="font-size:12px;margin-top:6px;"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;">
+            <span style="font-size:11px;color:var(--muted2);">Resend in <strong id="resetCountdown">1:00</strong></span>
+            <button id="resetResendBtn" onclick="resetSendOTP()" disabled style="font-size:11px;color:var(--teal);background:none;border:none;cursor:pointer;opacity:0.4;">Resend</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: New password (hidden until OTP verified) -->
+      <div id="resetStep2" style="display:none;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:13px;font-weight:700;color:var(--teal);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Email verified
+        </div>
+        <div class="field-group" style="margin-bottom:12px;">
+          <label class="field-label">New password</label>
+          <div class="field-wrap pw-wrap">
+            <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input id="resetNewPw" class="field-input" type="password" placeholder="Min 8 chars, 1 uppercase, 1 number" style="padding-right:40px;" oninput="checkStrength(this.value)">
+            <button class="pw-toggle" onclick="togglePass('resetNewPw',this)" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+            <div style="flex:1;display:flex;gap:3px;">
+              <div id="rs1" style="flex:1;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;"></div>
+              <div id="rs2" style="flex:1;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;"></div>
+              <div id="rs3" style="flex:1;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;"></div>
+              <div id="rs4" style="flex:1;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;"></div>
+            </div>
+          </div>
+          <div class="field-error" id="resetNewPwErr"></div>
+        </div>
+        <div class="field-group" style="margin-bottom:16px;">
+          <label class="field-label">Confirm new password</label>
+          <div class="field-wrap pw-wrap">
+            <svg class="field-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input id="resetConfirmPw" class="field-input" type="password" placeholder="Repeat new password" style="padding-right:40px;">
+            <button class="pw-toggle" onclick="togglePass('resetConfirmPw',this)" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="resetConfirmPwErr"></div>
+        </div>
+        <button class="auth-btn" id="resetPwBtn" onclick="handleResetPassword()">Set new password</button>
+      </div>
+
+      <div style="text-align:center;margin-top:16px;">
+        <a href="#" class="forgot-link" onclick="hideForgot()">← Back to sign in</a>
+      </div>
+    `;
+    document.getElementById('loginForm').parentNode.appendChild(fs);
+  } else { fs.style.display = 'block'; }
+  clearErrors();
+}
+
+function hideForgot() {
+  const fs = document.getElementById('forgotScreen');
+  if (fs) fs.style.display = 'none';
+  switchTab('login');
+}
+
+// ── Reset password flow (OTP-based) ──────────────────────────────────────────
+let _resetEmail = '';
+let _resetVerified = false;
+let _resetTimer = null;
+let _resetSecs = 0;
+
+async function resetSendOTP() {
+  const email = (document.getElementById('resetEmail')?.value || '').trim();
+  const errBox = document.getElementById('forgotErrBox');
+  if (errBox) { errBox.textContent = ''; errBox.style.display = 'none'; }
+  if (!email) { if (errBox) { errBox.textContent = 'Enter your email first'; errBox.style.display = 'flex'; } return; }
+
+  // Check email exists
+  const btn = document.getElementById('resetSendOtpBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    const res = await apiCall('/auth/send-otp', 'POST', { email, name: '' });
+    _resetEmail = email;
+    _resetVerified = false;
+    // Show OTP box
+    const box = document.getElementById('resetOtpBox');
+    if (box) box.style.display = 'block';
+    // Dev mode autofill
+    if (res.message && res.message.startsWith('DEV: OTP is ')) {
+      const devOtp = res.message.split('DEV: OTP is ')[1].split(' ')[0];
+      showToast(`Dev OTP: ${devOtp}`, 'success');
+      setTimeout(() => {
+        const inp = document.getElementById('resetOtpInput');
+        if (inp) { inp.value = devOtp; resetVerifyOTP(); }
+      }, 600);
+    } else {
+      showToast('Code sent! Check your inbox', 'success');
+    }
+    // Start timer
+    clearInterval(_resetTimer);
+    _resetSecs = 60;
+    const tick = () => {
+      const el = document.getElementById('resetCountdown');
+      const rb  = document.getElementById('resetResendBtn');
+      if (!el) { clearInterval(_resetTimer); return; }
+      const m = Math.floor(_resetSecs/60), s = _resetSecs%60;
+      el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if (_resetSecs <= 0) { clearInterval(_resetTimer); if (rb) { rb.disabled=false; rb.style.opacity='1'; } }
+      _resetSecs--;
+    };
+    tick();
+    _resetTimer = setInterval(tick, 1000);
+  } catch(err) {
+    if (errBox) { errBox.textContent = err.detail || 'Failed to send code'; errBox.style.display = 'flex'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send code'; }
+  }
+}
+
+async function resetVerifyOTP() {
+  const otp    = (document.getElementById('resetOtpInput')?.value || '').trim();
+  const status = document.getElementById('resetOtpStatus');
+  const btn    = document.getElementById('resetVerifyBtn');
+  if (otp.length !== 6) { if(status){status.textContent='Enter 6-digit code';status.style.color='var(--error)';} return; }
+  if (btn) btn.disabled = true;
+  if (status) { status.textContent = 'Verifying…'; status.style.color = 'var(--muted2)'; }
+  try {
+    await apiCall('/auth/verify-otp', 'POST', { email: _resetEmail, otp });
+    _resetVerified = true;
+    clearInterval(_resetTimer);
+    // Show step 2
+    document.getElementById('resetStep2').style.display = 'block';
+    document.getElementById('resetOtpBox').style.display = 'none';
+    document.getElementById('resetSendOtpBtn').style.display = 'none';
+    document.getElementById('resetEmail').disabled = true;
+    const sub = document.getElementById('resetSubText');
+    if (sub) sub.textContent = 'Set your new password';
+    showToast('Email verified!', 'success');
+  } catch(err) {
+    _resetVerified = false;
+    if (status) { status.textContent = err.detail || 'Invalid code'; status.style.color = 'var(--error)'; }
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleResetPassword() {
+  const newPw     = document.getElementById('resetNewPw')?.value || '';
+  const confirmPw = document.getElementById('resetConfirmPw')?.value || '';
+  const errBox    = document.getElementById('forgotErrBox');
+  if (errBox) { errBox.textContent = ''; errBox.style.display = 'none'; }
+
+  const showErr = (id, msg) => { const e=document.getElementById(id); if(e){e.textContent=msg;e.style.display='block';} };
+  document.querySelectorAll('#resetNewPwErr,#resetConfirmPwErr').forEach(e=>{e.textContent='';e.style.display='none';});
+
+  if (!newPw)              { showErr('resetNewPwErr', 'Enter a new password'); return; }
+  if (newPw.length < 8)   { showErr('resetNewPwErr', 'At least 8 characters'); return; }
+  if (!/[A-Z]/.test(newPw)) { showErr('resetNewPwErr', 'Include an uppercase letter'); return; }
+  if (!/[0-9]/.test(newPw)) { showErr('resetNewPwErr', 'Include a number'); return; }
+  if (newPw !== confirmPw) { showErr('resetConfirmPwErr', 'Passwords do not match'); return; }
+  if (!_resetVerified)     { if(errBox){errBox.textContent='Verify your email first';errBox.style.display='flex';} return; }
+
+  const btn = document.getElementById('resetPwBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  try {
+    await apiCall('/auth/reset-password-otp', 'POST', { email: _resetEmail, new_password: newPw });
+    // Success — show toast and redirect to login
+    showToast('Password updated! Please sign in.', 'success');
+    setTimeout(() => {
+      _resetEmail = ''; _resetVerified = false;
+      hideForgot();
+      switchTab('login');
+      const loginEmail = document.getElementById('loginEmail');
+      if (loginEmail) loginEmail.value = _resetEmail;
+    }, 1500);
+  } catch(err) {
+    if (errBox) { errBox.textContent = err.detail || 'Failed to reset password'; errBox.style.display = 'flex'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Set new password'; }
+  }
+}
+
+async function handleForgot() { /* replaced by resetSendOTP */ }
+
+// ── API helper ────────────────────────────────────────────────────────────────
+async function apiCall(path, method = 'GET', body = null, token = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API}${path}`, {
+    method, headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    let msg = 'Something went wrong';
+    if (typeof data.detail === 'string') msg = data.detail;
+    else if (Array.isArray(data.detail)) {
+      const f = data.detail[0];
+      msg = f.msg || JSON.stringify(f);
+      if (msg.includes('value is not a valid email')) msg = 'Please enter a valid email';
+      else if (msg.includes('string_too_short')) msg = 'Password too short';
+    }
+    throw { status: res.status, detail: msg };
+  }
+  return data;
+}
+
+// ── Error helpers ─────────────────────────────────────────────────────────────
+function showFieldErr(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; e.style.display = 'none'; });
+  ['loginErrBox','signupErrBox'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = ''; el.style.display = 'none'; }
+  });
+}
+function showGlobalErr(boxId, msg) {
+  const text = typeof msg === 'string' ? msg : JSON.stringify(msg);
+  const el   = document.getElementById(boxId);
+  if (!el) return;
+  // Try to find a span child for the message, else set textContent
+  const span = el.querySelector('span:last-child') || el.querySelector('span');
+  if (span) span.textContent = text;
+  else el.textContent = text;
+  el.style.display = 'flex';
+}
+function setBtn(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  const text    = btn.querySelector('.btn-text');
+  const spinner = btn.querySelector('.btn-spinner');
+  if (text)    text.style.display    = loading ? 'none' : '';
+  if (spinner) spinner.style.display = loading ? 'flex' : 'none';
+  if (!text && !spinner) btn.style.opacity = loading ? '0.65' : '1';
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+async function handleLogin(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  clearErrors();
+  const email    = (document.getElementById('loginEmail')?.value  || '').trim();
+  const password =  document.getElementById('loginPass')?.value   || '';
+  const remember =  document.getElementById('rememberCheck')?.classList.contains('checked');
+  let valid = true;
+  if (!email)    { showFieldErr('loginEmailErr', 'Email is required'); valid = false; }
+  if (!password) { showFieldErr('loginPassErr',  'Password is required'); valid = false; }
+  if (!valid) return;
+  setBtn('loginBtn', true);
+  try {
+    const data = await apiCall('/auth/login', 'POST', { email, password });
+    Auth.save(data.access_token, data.refresh_token, data.user);
+    if (remember) localStorage.setItem('pp_remember_email', email);
+    else localStorage.removeItem('pp_remember_email');
+    showSuccess(data.user, 'pixelpilot-projects.html')  // existing user;
+  } catch (err) {
+    const msg = err.status === 401 ? 'Incorrect email or password'
+              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.detail || 'Login failed';
+    showGlobalErr('loginErrBox', msg);
+  } finally {
+    setBtn('loginBtn', false);
+  }
+}
+
+// ── Signup ────────────────────────────────────────────────────────────────────
+async function handleSignup(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  clearErrors();
+  const firstName = (document.getElementById('firstName')?.value   || '').trim();
+  const lastName  = (document.getElementById('lastName')?.value    || '').trim();
+  const email     = (document.getElementById('signupEmail')?.value || '').trim();
+  const password  =  document.getElementById('signupPass')?.value  || '';
+  const terms     =  document.getElementById('termsCheck')?.classList.contains('checked');
+
+  let valid = true;
+  if (!firstName)              { showFieldErr('firstNameErr',   'First name required'); valid = false; }
+  if (!email)                  { showFieldErr('signupEmailErr', 'Email required'); valid = false; }
+  if (!password)               { showFieldErr('signupPassErr',  'Password required'); valid = false; }
+  else if (password.length<8)  { showFieldErr('signupPassErr',  'At least 8 characters'); valid = false; }
+  else if (!/[A-Z]/.test(password)) { showFieldErr('signupPassErr', 'Include an uppercase letter'); valid = false; }
+  else if (!/[0-9]/.test(password)) { showFieldErr('signupPassErr', 'Include a number'); valid = false; }
+  if (!terms)                  { showFieldErr('termsErr', 'Please agree to the terms'); valid = false; }
+  if (!valid) return;
+
+  // Must have verified OTP
+  if (!_otpVerified || _otpEmail !== email) {
+    showGlobalErr('signupErrBox', 'Please verify your email first — check the code sent to your inbox');
+    // Auto-show OTP box if not visible
+    if (!document.getElementById('otpBox')) {
+      await sendOTP();
+    } else {
+      document.getElementById('otpBox').scrollIntoView({ behavior: 'smooth' });
+    }
+    return;
+  }
+
+  const full_name = [firstName, lastName].filter(Boolean).join(' ');
+  setBtn('signupBtn', true);
+  try {
+    const data = await apiCall('/auth/signup', 'POST', { email, password, full_name, plan: selectedPlan });
+    Auth.save(data.access_token, data.refresh_token, data.user);
+    showSuccess(data.user, 'pixelpilot-onboarding.html');
+  } catch (err) {
+    const msg = err.status === 409 ? 'An account with this email already exists'
+              : err.status === 403 ? 'Please verify your email first'
+              : err.status === 429 ? 'Too many attempts — please wait'
+              : err.detail || 'Signup failed';
+    if (err.status === 409) showFieldErr('signupEmailErr', msg);
+    else showGlobalErr('signupErrBox', msg);
+  } finally {
+    setBtn('signupBtn', false);
+  }
+}
+
+// ── Success screen ────────────────────────────────────────────────────────────
+function showOAuthWelcome(user) {
+  // Hide all forms
+  ['loginForm','signupForm'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+
+  // Build welcome confirmation screen
+  let ws = document.getElementById('oauthWelcomeScreen');
+  if (!ws) {
+    ws = document.createElement('div');
+    ws.id = 'oauthWelcomeScreen';
+    ws.className = 'form-section';
+    document.getElementById('loginForm').parentNode.appendChild(ws);
+  }
+
+  const nameParts  = (user.full_name || '').split(' ');
+  const firstName  = nameParts[0] || '';
+  const lastName   = nameParts.slice(1).join(' ') || '';
+  const avatar     = user.avatar_url
+    ? `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : `<span style="font-size:28px;font-weight:900;color:var(--teal);">${(user.full_name||user.email||'?')[0].toUpperCase()}</span>`;
+
+  ws.style.display = 'block';
+  ws.innerHTML = `
+    <!-- Welcome hero -->
+    <div style="text-align:center;margin-bottom:28px;position:relative;">
+      <div style="position:relative;display:inline-block;margin-bottom:14px;">
+        <div style="width:72px;height:72px;border-radius:50%;border:2.5px solid var(--teal);display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto;box-shadow:0 0 32px rgba(0,232,184,0.25);">${avatar}</div>
+        <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;border:2px solid var(--bg,#06060a);">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--text);line-height:1;">YOU'RE IN.</div>
+      <div style="font-size:13px;color:var(--muted2);margin-top:4px;">Choose a plan and start creating</div>
+    </div>
+
+    <div id="oauthErrBox" class="auth-global-error" style="display:none"></div>
+
+    <!-- Name row -->
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <div style="flex:1;">
+        <label class="field-label">First name</label>
+        <div class="field-wrap">
+          <input id="oaFirstName" class="field-input" type="text" value="${firstName}" placeholder="First">
+        </div>
+        <div class="field-error" id="oaFirstNameErr"></div>
+      </div>
+      <div style="flex:1;">
+        <label class="field-label">Last name</label>
+        <div class="field-wrap">
+          <input id="oaLastName" class="field-input" type="text" value="${lastName}" placeholder="Last">
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan cards -->
+    <div style="margin-bottom:6px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:var(--muted2);text-transform:uppercase;margin-bottom:12px;">Select your plan</div>
+
+      <!-- Free -->
+      <div id="oaPlanFree" onclick="selectOAPlan('free')" style="
+        display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;
+        border:1.5px solid var(--teal);background:rgba(0,232,184,0.05);
+        cursor:pointer;margin-bottom:8px;transition:all 0.2s;position:relative;overflow:hidden;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(0,232,184,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🚀</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:800;color:var(--text);">Starter <span style="font-size:11px;color:var(--teal);font-weight:700;margin-left:4px;">FREE</span></div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:1px;">5 exports · 720p · Basic AI edits</div>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--teal);">$0</div>
+        <div id="oaCheckFree" style="position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+
+      <!-- Pro -->
+      <div id="oaPlanPro" onclick="selectOAPlan('pro')" style="
+        display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;
+        border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);
+        cursor:pointer;margin-bottom:8px;transition:all 0.2s;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,168,0,0.6),transparent);"></div>
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,168,0,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">⚡</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:13px;font-weight:800;color:var(--text);">Pro</span>
+            <span style="font-size:9px;font-weight:800;letter-spacing:1px;padding:2px 7px;border-radius:4px;background:rgba(255,168,0,0.15);color:#ffa800;text-transform:uppercase;">Most Popular</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:1px;">Unlimited exports · 4K · Beat sync</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);">$29<span style="font-size:11px;font-family:inherit;color:var(--muted2);font-weight:500;">/mo</span></div>
+          <div style="font-size:9px;color:var(--muted2);">billed yearly</div>
+        </div>
+        <div id="oaCheckPro" style="position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);display:none;"></div>
+      </div>
+
+      <!-- Studio -->
+      <div id="oaPlanStudio" onclick="selectOAPlan('studio')" style="
+        display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;
+        border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);
+        cursor:pointer;margin-bottom:20px;transition:all 0.2s;position:relative;overflow:hidden;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(139,92,246,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🎬</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:800;color:var(--text);">Studio</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:1px;">8K · 10 seats · Custom AI · API access</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);">$49<span style="font-size:11px;font-family:inherit;color:var(--muted2);font-weight:500;">/mo</span></div>
+          <div style="font-size:9px;color:var(--muted2);">billed yearly</div>
+        </div>
+        <div id="oaCheckStudio" style="position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);display:none;"></div>
+      </div>
+    </div>
+
+    <!-- CTA button -->
+    <button id="oaConfirmBtn" onclick="confirmOAuthProfile()" style="
+      width:100%;padding:16px;border-radius:12px;border:none;cursor:pointer;
+      background:linear-gradient(135deg,var(--teal) 0%,#00c4a0 100%);
+      font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;
+      color:#06060a;font-weight:900;
+      box-shadow:0 8px 32px rgba(0,232,184,0.3);
+      transition:all 0.2s;position:relative;overflow:hidden;">
+      <span id="oaConfirmText">START CREATING FREE →</span>
+      <span id="oaConfirmSpinner" style="display:none;align-items:center;justify-content:center;gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+        SETTING UP YOUR WORKSPACE…
+      </span>
+    </button>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted2);">
+      🔒 No credit card required &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Free plan forever
+    </div>
+  `;
+  window._oaUser    = user;
+  window._oaSelPlan = 'free';
+}
+
+function selectOAPlan(plan) {
+  window._oaSelPlan = plan;
+  var plans = ['free','pro','studio'];
+  for (var i = 0; i < plans.length; i++) {
+    var p = plans[i];
+    var id = 'oaPlan' + p.charAt(0).toUpperCase() + p.slice(1);
+    var card = document.getElementById(id);
+    if (!card) continue;
+    if (p === plan) {
+      card.style.borderColor = 'var(--teal)';
+      card.style.background  = 'rgba(0,232,184,0.06)';
+    } else {
+      card.style.borderColor = 'rgba(255,255,255,0.08)';
+      card.style.background  = 'rgba(255,255,255,0.02)';
+    }
+  }
+  var cta = document.getElementById('oaConfirmText');
+  if (cta) {
+    if (plan === 'free') {
+      cta.textContent = 'Start creating free';
+    } else if (plan === 'pro') {
+      cta.textContent = 'Continue with Pro';
+    } else {
+      cta.textContent = 'Continue with Studio';
+    }
+  }
+}
+
+async function confirmOAuthProfile() {
+  var firstName = (document.getElementById('oaFirstName') ? document.getElementById('oaFirstName').value : '').trim();
+  var lastName  = (document.getElementById('oaLastName')  ? document.getElementById('oaLastName').value  : '').trim();
+  var errBox    = document.getElementById('oauthErrBox');
+  if (errBox) { errBox.style.display = 'none'; errBox.textContent = ''; }
+
+  if (!firstName) {
+    var e = document.getElementById('oaFirstNameErr');
+    if (e) { e.textContent = 'First name is required'; e.style.display = 'block'; }
+    return;
+  }
+
+  var full_name = firstName + (lastName ? ' ' + lastName : '');
+  var token     = localStorage.getItem('pp_access');
+  var plan      = window._oaSelPlan || 'free';
+
+  setBtn('oaConfirmBtn', true);
+  try {
+    var res = await fetch(API + '/auth/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ full_name: full_name, plan: plan })
+    });
+    if (res.ok) {
+      var updated = await res.json();
+      localStorage.setItem('pp_user', JSON.stringify(updated));
+    }
+    if (plan !== 'free') {
+      localStorage.setItem('pp_post_login_action', JSON.stringify({ action: 'checkout', plan: plan, interval: 'yearly' }));
+    }
+    showSuccess(window._oaUser, 'pixelpilot-onboarding.html');
+  } catch(err) {
+    if (errBox) { errBox.textContent = 'Failed to save — please try again'; errBox.style.display = 'flex'; }
+  } finally {
+    setBtn('oaConfirmBtn', false);
+  }
+}
+
+function showSuccess(user, redirectUrl) {
+  ['loginForm','signupForm'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  const fs = document.getElementById('forgotScreen');
+  if (fs) fs.style.display = 'none';
+  const ss = document.getElementById('successScreen');
+  if (!ss) { window.location.href = redirectUrl; return; }
+  const sub = document.getElementById('successSub');
+  if (sub) sub.textContent = `Welcome, ${user.full_name || user.email}! Taking you in…`;
+  ss.style.display = 'flex';
+  setTimeout(() => { window.location.href = redirectUrl; }, 1600);
+}
+
+// ── Social login ──────────────────────────────────────────────────────────────
+function socialLogin(provider) {
+  const base = 'https://pixel-pilot-ai-backend.onrender.com';
+  if (provider === 'Google') {
+    window.location.href = `${base}/auth/oauth/google`;
+  } else if (provider === 'GitHub') {
+    window.location.href = `${base}/auth/oauth/github`;
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let _tTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(_tTimer);
+  _tTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
