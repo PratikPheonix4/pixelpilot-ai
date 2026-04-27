@@ -411,21 +411,22 @@ body {
 .strength-row {
   display: flex;
   gap: 4px;
-  margin-top: 7px;
+  margin-top: 8px;
 }
 .seg {
-  flex: 1; height: 3px;
+  flex: 1; height: 4px;
   background: rgba(255,255,255,0.07);
   border-radius: 2px;
-  transition: background 0.3s;
+  transition: background 0.4s ease;
 }
 .strength-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  margin-top: 3px;
-  height: 14px;
-  letter-spacing: 0.5px;
+  margin-top: 5px;
+  height: 16px;
+  letter-spacing: 1px;
   text-transform: uppercase;
+  transition: color 0.3s;
 }
 
 /* OTP box */
@@ -1134,20 +1135,29 @@ function toggleCheck(id) {
 function checkStrength(val) {
   const segs  = ['seg1','seg2','seg3','seg4'].map(id => document.getElementById(id));
   const label = document.getElementById('strengthLabel');
+  if (!val.length) {
+    segs.forEach(s => { if(s) s.style.background = 'rgba(255,255,255,0.07)'; });
+    if (label) { label.textContent = ''; }
+    return;
+  }
   let score = 0;
-  if (val.length >= 8)                             score++;
-  if (val.length >= 12)                            score++;
-  if (/[A-Z]/.test(val) && /[a-z]/.test(val))     score++;
-  if (/[0-9]/.test(val))                           score++;
-  if (/[^A-Za-z0-9]/.test(val))                   score++;
+  if (val.length >= 8)                           score++;
+  if (val.length >= 12)                          score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val))   score++;
+  if (/[0-9]/.test(val))                         score++;
+  if (/[^A-Za-z0-9]/.test(val))                 score++;
   score = Math.min(score, 4);
-  const colors = ['','#ff4560','#ff5e2c','#f0be3c','#22d47a'];
-  const labels = ['','Weak','Fair','Good','Strong'];
+  const colors = ['','#ff4560','#ff8c00','#f0be3c','#00e8b8'];
+  const labels = ['','Weak — add uppercase & numbers','Fair — add a number or symbol','Good — almost there!','Strong ✓'];
   segs.forEach((s, i) => {
     if (!s) return;
-    s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.08)';
+    s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.07)';
+    s.style.boxShadow  = i < score ? '0 0 6px ' + colors[score] + '66' : 'none';
   });
-  if (label) { label.textContent = val.length ? labels[score] : ''; label.style.color = colors[score]; }
+  if (label) {
+    label.textContent = labels[score];
+    label.style.color = colors[score];
+  }
 }
 
 // ── OTP: Send ─────────────────────────────────────────────────────────────────
@@ -1825,13 +1835,13 @@ function selectOAPlan(plan) {
   if (cta) {
     cta.textContent = plan === 'free'
       ? 'START CREATING FREE →'
-      : \`START WITH \${plan.toUpperCase()} →\`;
+      : `START WITH ${plan.toUpperCase()} →`;
   }
   // Update button glow color
   const btn = document.getElementById('oaConfirmBtn');
   if (btn) {
     const glows = { free:'rgba(0,232,184,0.3)', pro:'rgba(255,168,0,0.3)', studio:'rgba(139,92,246,0.3)' };
-    btn.style.boxShadow = \`0 8px 32px \${glows[plan]}\`;
+    btn.style.boxShadow = `0 8px 32px ${glows[plan]}`;
     const grads = {
       free:   'linear-gradient(135deg,var(--teal) 0%,#00c4a0 100%)',
       pro:    'linear-gradient(135deg,#ffa800 0%,#ff7b00 100%)',
