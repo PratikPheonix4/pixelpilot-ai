@@ -1650,7 +1650,8 @@ async function handleSignup(e) {
   const full_name = [firstName, lastName].filter(Boolean).join(' ');
   setBtn('signupBtn', true);
   try {
-    const data = await apiCall('/auth/signup', 'POST', { email, password, full_name, plan: selectedPlan });
+    const _plan = selectedPlan === 'studio' ? 'team' : selectedPlan;
+    const data = await apiCall('/auth/signup', 'POST', { email, password, full_name, plan: _plan });
     Auth.save(data.access_token, data.refresh_token, data.user);
     showSuccess(data.user, 'pixelpilot-onboarding.html');
   } catch (err) {
@@ -1869,6 +1870,10 @@ async function confirmOAuthProfile() {
 }
 
 function showSuccess(user, redirectUrl) {
+  // If going to onboarding, clear the done flag so it doesn't skip
+  if (redirectUrl && redirectUrl.includes('onboarding')) {
+    localStorage.removeItem('pp_onboarding_done');
+  }
   ['loginForm','signupForm'].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = 'none';
   });
