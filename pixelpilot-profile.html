@@ -542,6 +542,10 @@ body {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
       Editor
     </a>
+    <a href="pixelpilot-templates.html" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Templates
+    </a>
     <div class="nav-section-label">Account</div>
     <a href="pixelpilot-profile.html" class="nav-item active">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -829,6 +833,88 @@ body {
 <script>
 const API = 'https://pixel-pilot-ai-backend.onrender.com';
 
+// ── Auth helper with token refresh ───────────────────────────────────────────────
+let isRefreshing = false;
+let refreshPromise = null;
+
+function isTokenExpired(token) {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+async function refreshAccessToken() {
+  if (isRefreshing) return refreshPromise;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = localStorage.getItem('pp_refresh');
+      if (!refreshToken) throw new Error('No refresh token');
+
+      const res = await fetch(`${API}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
+
+      if (!res.ok) throw new Error('Refresh failed');
+
+      const data = await res.json();
+      localStorage.setItem('pp_access', data.access_token);
+      localStorage.setItem('pp_refresh', data.refresh_token);
+      localStorage.setItem('pp_user', JSON.stringify(data.user));
+      return data.access_token;
+    } catch (e) {
+      console.error('Token refresh failed:', e);
+      localStorage.removeItem('pp_access');
+      localStorage.removeItem('pp_refresh');
+      localStorage.removeItem('pp_user');
+      window.location.href = 'pixelpilot-auth.html?expired=1';
+      throw e;
+    } finally {
+      isRefreshing = false;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+async function authedFetch(url, options = {}) {
+  let token = localStorage.getItem('pp_access');
+
+  if (!token || isTokenExpired(token)) {
+    try {
+      token = await refreshAccessToken();
+    } catch {
+      return null;
+    }
+  }
+
+  const headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${token}`
+  };
+
+  const res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    try {
+      token = await refreshAccessToken();
+      const retryRes = await fetch(url, { ...options, headers: { ...options.headers, 'Authorization': `Bearer ${token}` } });
+      return retryRes;
+    } catch {
+      return null;
+    }
+  }
+
+  return res;
+}
+
 // ── Auth check ────────────────────────────────────────────────────────────────
 const token = localStorage.getItem('pp_access');
 const storedUser = (() => {
@@ -916,10 +1002,8 @@ function highlightCurrentPlan(plan) {
 // ── Load fresh user data from API ─────────────────────────────────────────────
 async function loadUser() {
   try {
-    const res = await fetch(`${API}/auth/me`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.status === 401) { localStorage.clear(); window.location.href = 'pixelpilot-auth.html'; return; }
+    const res = await authedFetch(`${API}/auth/me`);
+    if (!res) return;
     if (!res.ok) throw new Error('Failed');
     const user = await res.json();
     localStorage.setItem('pp_user', JSON.stringify(user));
@@ -943,20 +1027,15 @@ async function saveProfile() {
   btn.innerHTML = '<span class="spin"></span> Saving…';
 
   try {
-    const res = await fetch(`${API}/auth/me`, {
+    const res = await authedFetch(`${API}/auth/me`, {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ full_name, ...(window._pendingAvatar ? { avatar_url: window._pendingAvatar } : {}) })
     });
 
-    if (res.status === 401) {
-      showToast('Session expired — please log in again', 'error');
-      setTimeout(() => { localStorage.clear(); window.location.href = 'pixelpilot-auth.html'; }, 2000);
-      return;
-    }
+    if (!res) return;
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -1040,7 +1119,7 @@ function handleAvatarChange(e) {
 async function handleLogout() {
   const refresh = localStorage.getItem('pp_refresh');
   if (refresh) {
-    fetch(`${API}/auth/logout`, {
+    await authedFetch(`${API}/auth/logout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refresh })

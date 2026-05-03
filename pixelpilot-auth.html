@@ -1044,6 +1044,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const oauthRefresh = params.get('oauth_refresh');
   const oauthUser    = params.get('oauth_user');
   const oauthError   = params.get('error');
+  const expired      = params.get('expired');
+
+  if (expired === '1') {
+    showToast('Your session expired — please log in again', 'error');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 
   if (oauthError) {
     const msgs = {

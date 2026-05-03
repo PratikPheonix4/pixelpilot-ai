@@ -925,6 +925,10 @@ body {
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       Editor
     </div>
+    <div class="nav-item" onclick="window.location.href='pixelpilot-templates.html'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Templates
+    </div>
     <div class="nav-item" onclick="showToast('⚡ AI Pilot panel')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       AI Pilot
@@ -1105,6 +1109,88 @@ body {
 <script>
 const API = 'https://pixel-pilot-ai-backend.onrender.com';
 
+// ── Auth helper with token refresh ───────────────────────────────────────────────
+let isRefreshing = false;
+let refreshPromise = null;
+
+function isTokenExpired(token) {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+async function refreshAccessToken() {
+  if (isRefreshing) return refreshPromise;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = localStorage.getItem('pp_refresh');
+      if (!refreshToken) throw new Error('No refresh token');
+
+      const res = await fetch(`${API}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
+
+      if (!res.ok) throw new Error('Refresh failed');
+
+      const data = await res.json();
+      localStorage.setItem('pp_access', data.access_token);
+      localStorage.setItem('pp_refresh', data.refresh_token);
+      localStorage.setItem('pp_user', JSON.stringify(data.user));
+      return data.access_token;
+    } catch (e) {
+      console.error('Token refresh failed:', e);
+      localStorage.removeItem('pp_access');
+      localStorage.removeItem('pp_refresh');
+      localStorage.removeItem('pp_user');
+      window.location.href = 'pixelpilot-auth.html?expired=1';
+      throw e;
+    } finally {
+      isRefreshing = false;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+async function authedFetch(url, options = {}) {
+  let token = localStorage.getItem('pp_access');
+
+  if (!token || isTokenExpired(token)) {
+    try {
+      token = await refreshAccessToken();
+    } catch {
+      return null;
+    }
+  }
+
+  const headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${token}`
+  };
+
+  const res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    try {
+      token = await refreshAccessToken();
+      const retryRes = await fetch(url, { ...options, headers: { ...options.headers, 'Authorization': `Bearer ${token}` } });
+      return retryRes;
+    } catch {
+      return null;
+    }
+  }
+
+  return res;
+}
+
 // ── Auth guard ────────────────────────────────────────────────────────────────
 const _token = localStorage.getItem('pp_access');
 const _user  = (() => { try { return JSON.parse(localStorage.getItem('pp_user')||'null'); } catch { return null; } })();
@@ -1132,10 +1218,8 @@ populateSidebar(_user);
 // ── Fetch projects from backend ───────────────────────────────────────────────
 async function loadProjects() {
   try {
-    const res = await fetch(`${API}/projects`, {
-      headers: { 'Authorization': `Bearer ${_token}` }
-    });
-    if (res.status === 401) { localStorage.clear(); window.location.replace('pixelpilot-auth.html'); return; }
+    const res = await authedFetch(`${API}/projects`);
+    if (!res) return;
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
     allProjects = data.projects || data || [];
@@ -1364,12 +1448,12 @@ async function uploadFile(file) {
 
   try {
     // Create project record first
-    const createRes = await fetch(`${API}/projects`, {
+    const createRes = await authedFetch(`${API}/projects`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${_token}` },
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ name: file.name, status: 'draft' })
     });
-    if (createRes.status === 401) { localStorage.clear(); window.location.replace('pixelpilot-auth.html'); return; }
+    if (!createRes) return;
     const project = await createRes.json();
     const projectId = project.id || project.project_id;
 
@@ -1473,9 +1557,8 @@ function closePanel() {
 // ── Media Panel ──────────────────────────────────────────────────────────────
 async function renderMediaPanel(body) {
   try {
-    const res = await fetch(`${API}/projects`, {
-      headers: { 'Authorization': `Bearer ${_token}` }
-    });
+    const res = await authedFetch(`${API}/projects`);
+    if (!res) return;
     const data = await res.json();
     const projects = data.projects || [];
     if (!projects.length) {
@@ -1505,9 +1588,8 @@ async function renderMediaPanel(body) {
 // ── Exports Panel ─────────────────────────────────────────────────────────────
 async function renderExportsPanel(body) {
   try {
-    const res = await fetch(`${API}/projects`, {
-      headers: { 'Authorization': `Bearer ${_token}` }
-    });
+    const res = await authedFetch(`${API}/projects`);
+    if (!res) return;
     const data = await res.json();
     const exported = (data.projects || []).filter(p => p.status === 'exported');
     if (!exported.length) {
@@ -1543,9 +1625,8 @@ async function renderExportsPanel(body) {
 // ── Trash Panel ───────────────────────────────────────────────────────────────
 async function renderTrashPanel(body) {
   try {
-    const res = await fetch(`${API}/projects?status=deleted`, {
-      headers: { 'Authorization': `Bearer ${_token}` }
-    });
+    const res = await authedFetch(`${API}/projects?status=deleted`);
+    if (!res) return;
     const data = await res.json();
     const trashed = (data.projects || []).filter(p => p.status === 'deleted' || p.deleted_at);
     if (!trashed.length) {
@@ -1582,9 +1663,9 @@ async function renderTrashPanel(body) {
 
 async function restoreProject(id) {
   try {
-    await fetch(`${API}/projects/${id}`, {
+    await authedFetch(`${API}/projects/${id}`, {
       method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${_token}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'draft' })
     });
     showToast('✓ Project restored');
@@ -1597,9 +1678,8 @@ async function permDeleteProject(id, btn) {
   if (!confirm('Permanently delete this project? This cannot be undone.')) return;
   btn.textContent = '…'; btn.disabled = true;
   try {
-    await fetch(`${API}/projects/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${_token}` }
+    await authedFetch(`${API}/projects/${id}`, {
+      method: 'DELETE'
     });
     showToast('Project permanently deleted');
     renderTrashPanel(document.getElementById('panelBody'));
